@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Dashboard</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+    </h:head>
+
+    <h:body>
+        
+         <h:form styleClass="main"> 
+             <div class="grid-content">
+                 <div >
+                     
+                 </div>
+                 <div class="content-dashboard">
+                     <div class="content-perfil flex space-between">
+                         <div>
+                             <div class="btn-padrao">
+                                 <span>Dashboard</span>
+                             </div>
+                         </div>
+                         <div class="flex">
+                             <p:commandButton class="btn-circle" value=" " />
+                             <div class="icon-circle btn-circle mr8 ml8">
+                                 
+                             </div>
+                             <div class="content-title-perfil">
+                                 <h:outputText class="title-welcome-perfil" value="Olá" />
+                                 <h:outputText class="title-name-perfil" value="Lucas Eduardo Maia" />
+                             </div>
+                             
+                         </div>
+                     </div>
+                     
+                     <div class="flex space-between">
+                         <div>
+                             <p:outputLabel class="title-page" value="Dashboard Geral" />
+                         </div>
+                        <div class="content-filter">
+                            <p:outputLabel class="title-filter" value="Filtrar:"/>
+                            <p:selectOneButton>
+                               <f:selectItem itemLabel="mês" itemValue="m" />
+                               <f:selectItem itemLabel="ano" itemValue="a" />
+                           </p:selectOneButton>
+                        </div>
+                     </div>
+                     
+                     <div class="grid-top-grafico">
+                         <div class="content-faturado">
+                             
+                         </div>
+                         <div class="content-top-func">
+                             
+                         </div>
+                     </div>
+                     <div class="grid-bottom-grafico">
+                         <div class="content-top-visitas">
+                             
+                         </div>
+                         <div class="content-gastos-mes">
+                             
+                         </div>
+                     </div>
+                 </div>
+                 <div style="background-color: blue">
+                     
+                 </div>
+             </div>
+        </h:form>
+        
+    </h:body>
+</html>
+

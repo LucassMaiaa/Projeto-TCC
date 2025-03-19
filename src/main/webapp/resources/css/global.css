@@ -1,0 +1,125 @@
+html, body{
+    margin: 0;
+    height: 100vh !important;
+    background-color: #F1F1F1;
+}
+
+.flex{
+    display: flex;
+}
+
+.space-between{
+    justify-content: space-between;
+}
+
+.grid-content{
+    display: grid;
+    grid-template-columns: 105px 1fr 374px;
+    height: 100vh;
+}
+
+.ml8{
+    margin-left: 8px !important;
+}
+
+.mr8{
+    margin-right: 8px !important;
+}
+
+/* Conteúdo Principal */
+
+.content-dashboard{
+    padding: 30px 30px 30px 0;
+}
+
+.content-title-perfil{
+    width: 200px;
+}
+
+.content-perfil{
+    margin-bottom: 60px;
+}
+
+.content-filter{
+    display: flex;
+    align-items: center;
+}
+
+/* Botões */
+
+.btn-padrao{
+    padding: 13px 20px;
+    background: black;
+    color: white;
+    border-radius: 25px;
+    font-size: 12px;
+}
+
+.btn-circle{
+    border-radius: 25px !important;
+    width: 40px;
+    height: 40px;
+    background: white !important;
+    border: none !important;
+}
+
+/* Icones Circulares */
+
+.icon-circle{
+    background-color: #D9CBFF !important;
+}
+
+/* Titulos */
+
+.title-welcome-perfil{
+    display: block
+}
+
+.title-name-perfil{
+    text-transform: uppercase;
+}
+
+.title-page{
+    font-size: 30px !important;
+    font-weight: bold;
+}
+
+.title-filter{
+    font-size: 12px !important;
+    margin-right: 10px;
+}
+
+.ui-button + .ui-button{
+    margin-left: 3px;
+}
+
+.ui-selectonebutton>.ui-button{
+    border-radius: 30px !important;
+    box-shadow: none !important;
+    height: 40px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    text-transform: uppercase;
+    border: none !important;
+    font-weight: 500;
+}
+
+.ui-selectonebutton>.ui-button.ui-state-active{
+    font-weight: 500;
+    border: none !important;
+}
+
+ .ui-selectonebutton {
+    display: flex;
+    padding: 3px;
+    background-color: #EBEBEB;
+    border-radius: 25px;
+}
+
+.ui-button .ui-button-text{
+    padding: 0 !important;
+}
+
+   
