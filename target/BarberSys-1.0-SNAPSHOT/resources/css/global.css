@@ -122,4 +122,50 @@ html, body{
     padding: 0 !important;
 }
 
-   
+.ui-selectonebutton>.ui-button.ui-state-active{
+    background-color: #E74A46 !important;
+}
+
+.ui-selectonebutton::before{
+    content: "";
+    display: block;
+    width: 40px;
+    height: 40px;
+    background-color: black;
+    border-radius: 25px;
+    margin-right: 3px;
+}
+
+.grid-top-grafico{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 8px;
+    margin-top: 25px;
+}
+
+.content-faturado{
+    background-color: red;
+    height: 281px;
+}
+
+.content-top-func{
+    background-color: blue;
+    height: 281px;
+}
+
+.grid-bottom-grafico{
+    display: grid;
+    grid-template-columns: 2fr 1.5fr;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.content-top-visitas{
+    background-color: yellow;
+    height: 281px;
+}
+
+.content-gastos-mes{
+    background-color: pink;
+    height: 281px;
+}
