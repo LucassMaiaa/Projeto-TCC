@@ -24,7 +24,7 @@ public class UsuarioDAO {
                     usuario = new Usuario();
                     usuario.setId(rs.getInt("usu_codigo"));
                     usuario.setLogin(rs.getString("usu_login"));
-                    usuario.setSenha(rs.getString("usu_senha")); // ⚠️ Senha não deve ser armazenada em texto puro!
+                    usuario.setSenha(rs.getString("usu_senha")); 
                 }
             }
         } catch (SQLException e) {

@@ -1,4 +1,8 @@
-package com.barbersys.service;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.barbersys.dao;
 
 import com.barbersys.model.ControleCaixa;
 import com.barbersys.util.DatabaseConnection; // 👈 Importa normalmente
@@ -17,7 +21,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CaixaService {
+public class GenericDAO {
     
      public static List<Map<String, Object>> buscarCaixasContagem(Date dataSelecionada) {
          Double totalEntradas = 0.0;
@@ -196,3 +200,4 @@ public class CaixaService {
         }
     
 }
+

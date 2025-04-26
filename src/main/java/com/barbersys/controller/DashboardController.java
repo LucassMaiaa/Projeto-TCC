@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @ManagedBean(name = "financeiroController")
 @ViewScoped
-public class FinanceiroController implements Serializable{
+public class DashboardController implements Serializable{
     
     private String dataSelecionada = "m";
     

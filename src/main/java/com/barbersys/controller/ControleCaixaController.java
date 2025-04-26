@@ -1,7 +1,7 @@
 package com.barbersys.controller;
 
+import com.barbersys.dao.GenericDAO;
 import com.barbersys.model.ControleCaixa;
-import com.barbersys.service.CaixaService;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -43,6 +43,8 @@ public class ControleCaixaController implements Serializable {
     private Double totalSaidas;
     private String tipodeValor = "e";
     private String filtroTipoDeValor = "";
+    private DateTimeFormatter horaFormatada = DateTimeFormatter.ofPattern("HH:mm");
+    private SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
 
   @PostConstruct
     public void init() {
@@ -50,12 +52,12 @@ public class ControleCaixaController implements Serializable {
 
             @Override
             public List<ControleCaixa> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
-                return CaixaService.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor); 
+                return GenericDAO.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor); 
             }
             
               @Override
             public int count(Map<String, FilterMeta> filterBy) {
-                return CaixaService.contarTotalCaixas(dataSelecionada, filtroTipoDeValor);
+                return GenericDAO.contarTotalCaixas(dataSelecionada, filtroTipoDeValor);
             }
             
         };
@@ -64,8 +66,8 @@ public class ControleCaixaController implements Serializable {
     }
     
     public void calcularTotal() {
-        List<Map<String, Object>> listaPorDia = CaixaService.buscarCaixasContagem(this.dataSelecionada);
-        List<Map<String, Object>> listaPorMes = CaixaService.buscarCaixasContagemPorMes(dataSelecionada);
+        List<Map<String, Object>> listaPorDia = GenericDAO.buscarCaixasContagem(this.dataSelecionada);
+        List<Map<String, Object>> listaPorMes = GenericDAO.buscarCaixasContagemPorMes(dataSelecionada);
   
         for (Map<String, Object>caixa : listaPorDia) {
             Double tipoValorEntrada = (Double) caixa.get("entrada");
@@ -86,7 +88,6 @@ public class ControleCaixaController implements Serializable {
     }
 
     public void verificaTravaCampo(){
-        SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
         String dataSelecionadaFormatada = dataFormatada.format(this.dataSelecionada);
         Date dataAtual = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         String dataAtualFormatada = dataFormatada.format(dataAtual);
@@ -106,7 +107,6 @@ public class ControleCaixaController implements Serializable {
     }
     
     public void verificaData() {
-        SimpleDateFormat dataFormatada = new SimpleDateFormat("dd/MM/yyyy");
         String dataSelecionadaFormatada = dataFormatada.format(this.dataSelecionada);
         Date dataAtual = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
         String dataAtualFormatada = dataFormatada.format(dataAtual);
@@ -116,7 +116,7 @@ public class ControleCaixaController implements Serializable {
             
             if(verificaCampo.equals("a")){
                 dadosLiberados = false;
-            }else{
+            }else if(verificaCampo.equals("f")){
                 dadosLiberados = true;
             }
             
@@ -129,7 +129,6 @@ public class ControleCaixaController implements Serializable {
     }
     
     public void salvarValores(){
-        DateTimeFormatter horaFormatada = DateTimeFormatter.ofPattern("HH:mm");
         String horaAtualFormatada = LocalTime.now().format(horaFormatada);
         
         controleCaixaModel.setHoraAtual(horaAtualFormatada);
@@ -141,7 +140,7 @@ public class ControleCaixaController implements Serializable {
             controleCaixaModel.setMovimentacao("Saida");
         }
         
-        CaixaService.salvar(controleCaixaModel);
+        GenericDAO.salvar(controleCaixaModel);
         
         controleCaixaModel = new ControleCaixa();
         

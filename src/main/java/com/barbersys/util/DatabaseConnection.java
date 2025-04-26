@@ -14,21 +14,11 @@ public class DatabaseConnection {
     // Método para obter a conexão
     public static Connection getConnection() throws SQLException {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver"); // 🔥 Adicionando essa linha para carregar o driver
+            Class.forName("com.mysql.cj.jdbc.Driver"); 
             return DriverManager.getConnection(URL, USER, PASS);
         } catch (ClassNotFoundException e) {
             throw new SQLException("Driver MySQL não encontrado!", e);
         }
     }
     
-    // Método principal para testar a conexão (opcional)
-    public static void main(String[] args) {
-        try (Connection conn = getConnection()) {
-            if (conn != null) {
-                System.out.println("✅ Conexão estabelecida com sucesso!");
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Erro ao conectar: " + e.getMessage());
-        }
-    }
 }
