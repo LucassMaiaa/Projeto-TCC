@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>BarberSys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+        <h:outputScript library="primefaces" name="locales/locale-pt.js" />
+    </h:head>
+
+    <h:body>
+        
+        <style>          
+            .content-logo-system {
+                height: 75px;
+                background-image: none;
+                padding: 20px;
+            }
+            
+            .content-btns {
+                height: 75px;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 20px;
+                gap: 20px;
+                background: #EBEBEB;
+            }
+            
+            .content-agendamentos{
+                border-radius: 0px;
+                max-height: calc(100vh - 290px);
+                padding: 15px 20px 30px;
+            }
+            
+            /* .content-agendamentos{
+                border-radius: 0px;
+                max-height: calc(100vh - 226px);
+                padding: 15px 20px 30px;
+            }*/
+            
+            .content-info-lateral {
+                background: #FCFCFF;
+            }
+            
+            .content-valores {
+                height: 140px;
+            }
+        </style>    
+        
+        <h:form id="form" styleClass="main"> 
+             <div class="grid-content">
+                 
+                 <div class="content-menu-lateral">
+                     <div class="logo-menu-lateral">
+                         <img src="#{request.contextPath}/resources/images/logo.svg" />
+                    </div>
+                     <div class="content-botoes-lateral">
+                         <p:commandLink immediate="true" class="btn-circle" action="dashboard.html?faces-redirect=true">
+                             <i class="fa-solid fa-house"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle"  >
+                             <i class="fa-solid fa-calendar-days"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle"  >
+                             <i class="fa-solid fa-file-lines"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle btn-circle-active" >
+                             <i class="fa-solid fa-money-bill-transfer"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle">
+                             <i class="fa-solid fa-gear"></i>
+                         </p:commandLink>
+                     </div>
+                     <div>
+                         
+                     </div>
+                 </div>
+                 <div class="content-dashboard">
+                     <div class="content-perfil flex space-between">
+                         <div class="flex align-center">
+                             <div class="avatar-circle btn-circle mr8">
+                                 
+                             </div>
+                             
+                             <div class="content-title-perfil">
+                                 <h:outputText class="title-welcome-perfil" value="Olá" />
+                                 <h:outputText class="title-name-perfil" value="#{usuarioController.login}" />
+                             </div>
+                         </div>
+                         <div class="flex">
+                             <p:commandButton class="btn-circle"  icon="fa-solid fa-bell" />
+                             
+                             <p:commandButton class="btn-sair-header" value="Sair" icon="fa-solid fa-right-from-bracket" />
+                         </div>
+                     </div>
+                     
+                     <div class="flex space-between">
+                             <p:outputLabel class="title-page" value="Extrato do caixa" />
+                     </div>
+                     
+                     <div class="header-filters">
+                           <div class="content-filter ">
+                               <i class="fa-solid fa-filter"></i>
+                               <p:selectOneButton value="#{controleCaixaController.filtroTipoDeValor}" unselectable="false">
+                                    <f:selectItem itemLabel="Todos" itemValue="" />
+                                    <f:selectItem itemLabel="Entradas" itemValue="Entrada" />
+                                    <f:selectItem itemLabel="Saídas" itemValue="Saida" />
+                                    <p:ajax update="@form" process="@this"/>
+                                </p:selectOneButton>
+                            </div>
+                     </div>
+                     
+                     <div>
+                         <p:dataTable id="datatableCaixas" rowIndexVar="row" class="data-table-info" value="#{controleCaixaController.lstControleCaixa}" var="caixa"
+                                      paginator="true" paginatorPosition="bottom" rows="13" lazy="true" emptyMessage="Nenhum dado encontrado">
+                             
+                            <p:column headerText="Código">
+                                  <h:outputText value="#{row + 1}" />
+                            </p:column>
+                             
+                             <p:column headerText="Movimentação">
+                                <h:outputText value="#{caixa.movimentacao}" />
+                            </p:column>
+                             
+                            <p:column headerText="Valor">
+                                <h:outputText value="#{caixa.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR" />
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Hora">
+                                <h:outputText value="#{caixa.horaAtual.substring(0,5)}"/>
+                            </p:column>
+
+                            <p:column headerText="Motivo">
+                                <h:outputText value="#{caixa.motivo}" />
+                            </p:column>
+
+                            
+                             
+                         </p:dataTable>
+                     </div>
+
+                 </div>
+                 <div class="content-info-lateral">
+                     <div class="content-logo-system">
+                         <div class="flex">
+                                <div class="icon-circle">
+                                    <i class="fa-solid fa-money-bills"></i>
+                                </div>
+                                <div class="subtitle-info">
+                                    <label class="title-info">Controle de Caixa</label>
+                                </div>
+                            </div>
+                     </div>
+                     <div class="content-btns">
+                         <p:selectOneButton id="attBtnCaixa" value="#{controleCaixaController.statusSelecionado}" unselectable="false">
+                            <f:selectItem itemLabel="Aberto" itemValue="a" />
+                             <f:selectItem itemLabel="Fechado" itemValue="f" />   
+                             <p:ajax update="@form" process="@this"  listener="#{controleCaixaController.verificaTravaCampo()}"/>
+                         </p:selectOneButton>
+                         
+                         <p:outputPanel id="attCaixa">
+                             <div>
+                                 <p:outputLabel class="title-date" value="#{controleCaixaController.dataSelecionada}">
+                                     <f:convertDateTime pattern="dd/MM/yyyy" />
+                                 </p:outputLabel>
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'f'}" >
+                                     <p:outputLabel class="title-date" style="background: #C52323" 
+                                               value="Fechado" />
+                                 </ui:fragment>
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'a'}" >
+                                     <p:outputLabel class="title-date" style="background: #23C538 " 
+                                               value="Aberto" />
+                                 </ui:fragment>
+                                
+                            </div>
+                         </p:outputPanel>
+                         
+                     </div>
+                     <div class="content-valores">
+                         <div class="input-combined input-valores">
+                             <div class="row">
+                                 <div class="col-md-6">
+                                     <p:outputLabel class="title-input" value="Total de entradas no dia"/>
+                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradas}" readonly="true"/>
+                                 </div>
+                                 <div class="col-md-6">
+                                     <p:outputLabel class="title-input" value="Total de saídas no dia"/>
+                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidas}" readonly="true"/>
+                                 </div>
+                             </div>
+                             
+                             <div class="row">
+                                 <div class="col-md-6">
+                                     <p:outputLabel class="title-input" value="Total de entradas no mês"/>
+                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradasMes}" readonly="true"/>
+                                 </div>
+                                 <div class="col-md-6">
+                                     <p:outputLabel class="title-input" value="Total de saídas no mês"/>
+                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidasMes}" readonly="true"/>
+                                 </div>
+                             </div>
+                            
+                         </div>
+                     </div>
+                     <div class="content-agendamentos flex column space-between">
+                         <div>
+                             <div class="select-segundario no-filter">
+                                <p:selectOneButton value="#{controleCaixaController.tipodeValor}" unselectable="false">
+                                   <f:selectItem itemLabel="Entrada" itemValue="e" />
+                                    <f:selectItem itemLabel="Saída" itemValue="s" />   
+                                    <p:ajax update="@form" process="@this"/>
+                                </p:selectOneButton>
+                            </div>
+                             
+                             <p:growl/>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ui:fragment rendered="#{controleCaixaController.tipodeValor eq 'e'}">
+                                        <div class="input-combined">
+                                           <p:outputLabel class="title-input" value="Valor de entrada" />
+                                           <p:inputNumber symbol="R$ " value="#{controleCaixaController.controleCaixaModel.valor}" 
+                                                          disabled="#{controleCaixaController.dadosLiberados}" required="true" requiredMessage="Preencha o campo de valor"/>
+                                       </div>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{controleCaixaController.tipodeValor eq 's'}" >
+                                        <div class="input-combined">
+                                           <p:outputLabel class="title-input" value="Valor de saída" />
+                                           <p:inputNumber symbol="R$ " value="#{controleCaixaController.controleCaixaModel.valor}" 
+                                                          disabled="#{controleCaixaController.dadosLiberados}" required="true" requiredMessage="Preencha o campo de valor" />
+                                       </div>
+                                    </ui:fragment>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-combined">
+                                         <p:outputLabel class="title-input" value="Data do caixa" />
+                                         <p:datePicker showIcon="true" value="#{controleCaixaController.dataSelecionada}" pattern="dd/MM/yyyy">
+                                             <p:ajax update="@form" process="@this" listener="#{controleCaixaController.verificaData}"/>
+                                         </p:datePicker>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="input-combined">
+                                        <p:outputLabel class="title-input" value="Motivo"/>
+                                        <p:inputTextarea maxlength="100" value="#{controleCaixaController.controleCaixaModel.motivo}" disabled="#{controleCaixaController.dadosLiberados}"/>
+                                    </div>
+                                </div>
+                            </div>
+                         </div>
+                         
+                         
+                         <div class="flex justify-center">
+                             <p:commandButton class="btn btn-blue medium" value="Registrar" update="@form" process="@form" actionListener="#{controleCaixaController.salvarValores()}" />
+                         </div>
+                         
+                     </div>
+                 </div>
+             </div>
+             
+             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
+                 <div class="header-modal">
+                     <div class="icon-circle">
+                         <i class="fa-solid fa-calendar-days"></i>
+                     </div>
+                     <label>Agendamento</label>
+                 </div>
+                 
+                 <div class="content-filter no-filter">
+                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}">
+                        <f:selectItem itemLabel="Com cadastro" itemValue="c" />
+                         <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
+                         <p:ajax update="dlgAttCliente" process="@this"/>
+                     </p:selectOneButton>
+                 </div>
+                 
+                 
+                     <div class="row">
+                         <div class="col-md-8">
+                             <p:outputPanel id="dlgAttCliente">
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 'c'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:selectOneMenu converter="#{countryConverter}"
+                                                    var="c"
+                                                    filter="true" filterMatchMode="startsWith">
+
+                                        <f:selectItems var="country"
+                                                   />
+
+                                        <p:column >
+                                            <span class="flag" />
+                                        </p:column>
+
+                                        <p:column>
+                                            <f:facet name="header">
+                                                <h:outputText value="Name"/>
+                                            </f:facet>
+                                            <h:outputText/>
+                                        </p:column>
+
+                                        <f:facet name="footer">
+                                            <h:outputText
+                                                        />
+                                        </f:facet>
+                                    </p:selectOneMenu>
+                                      </div>
+                                 </ui:fragment>
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 's'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:inputText styleClass="senha-login"/>
+                                      </div>
+                                 </ui:fragment>
+                                
+                            </p:outputPanel>
+                         </div>
+                         <div class="col-md-4">
+                             <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Selecione uma data" />
+                                <p:datePicker showIcon="true"  />
+                              </div>
+                         </div>
+                     </div>
+                 
+                 <div class="row">
+                     <div class="col-md-8">
+                         <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
+                                <p:selectOneMenu >
+                                    <f:selectItem itemLabel="Selecione funcionário" itemValue=""/>
+                                    <f:selectItems/>
+                                    <f:facet name="footer">
+                                        <p:divider styleClass="mt-0" />
+                                        <h:outputText value="3 options" style="font-weight:bold;"/>
+                                    </f:facet>
+                                </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                     
+                     <div class="col-md-4">
+                         <div class="input-combined">
+                            <p:outputLabel styleClass="title-input" value="Horários disponíveis" />
+                            <p:selectOneMenu >
+                                <f:selectItem itemLabel="Selecione horário" itemValue=""/>
+                                <f:selectItems/>
+                                <f:facet name="footer">
+                                    <p:divider styleClass="mt-0" />
+                                    <h:outputText value="3 options" style="font-weight:bold;"/>
+                                </f:facet>
+                            </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                </div>
+                     
+                 
+                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
+            </p:dialog>
+             
+        </h:form>
+        
+    </h:body>
+</html>
+

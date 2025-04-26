@@ -2,75 +2,355 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
       xmlns:p="http://primefaces.org/ui"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
     <h:head>
-        <title>Dashboard</title>
+        <title>BarberSys</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     </h:head>
 
     <h:body>
         
+        <style>          
+            .content-top-visitas{
+                border: 1px solid #DDE3DF;
+                height: 281px;
+                border-radius: 8px;
+                padding: 14px 25px;
+            }
+
+            .content-gastos-mes{
+                background-color: #C5D9BF;
+                height: 281px;
+                border-radius: 8px;
+                padding: 14px 25px;
+            }
+
+            .content-faturado{
+                border-radius: 8px;
+                background: #D8E0E8;
+                padding: 14px 25px;
+            }
+
+            .content-top-func{
+                border: 1px solid #DDE3DF;
+                border-radius: 8px;
+                padding: 14px 25px;
+            }
+        </style>    
+        
          <h:form styleClass="main"> 
              <div class="grid-content">
-                 <div >
-                     
+                 
+                 <div class="content-menu-lateral">
+                     <div class="logo-menu-lateral">
+                         <img src="#{request.contextPath}/resources/images/logo.svg" />
+                    </div>
+                     <div class="content-botoes-lateral">
+                         <p:commandLink class="btn-circle btn-circle-active" >
+                             <i class="fa-solid fa-house"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle" >
+                             <i class="fa-solid fa-calendar-days"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle" >
+                             <i class="fa-solid fa-file-lines"></i>
+                         </p:commandLink>
+                         <p:commandLink  class="btn-circle" action="controle_caixa.html?faces-redirect=true" >
+                             <i class="fa-solid fa-money-bill-transfer"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle" >
+                             <i class="fa-solid fa-gear"></i>
+                         </p:commandLink>
+                     </div>
+                     <div>
+                         
+                     </div>
                  </div>
                  <div class="content-dashboard">
                      <div class="content-perfil flex space-between">
-                         <div>
-                             <div class="btn-padrao">
-                                 <span>Dashboard</span>
+                         <div class="flex align-center">
+                             <div class="avatar-circle btn-circle mr8">
+                                 
+                             </div>
+                             
+                             <div class="content-title-perfil">
+                                 <h:outputText class="title-welcome-perfil" value="Olá" />
+                                 <h:outputText class="title-name-perfil" value="#{usuarioController.login}" />
                              </div>
                          </div>
                          <div class="flex">
-                             <p:commandButton class="btn-circle" value=" " />
-                             <div class="icon-circle btn-circle mr8 ml8">
-                                 
-                             </div>
-                             <div class="content-title-perfil">
-                                 <h:outputText class="title-welcome-perfil" value="Olá" />
-                                 <h:outputText class="title-name-perfil" value="Lucas Eduardo Maia" />
-                             </div>
+                             <p:commandButton class="btn-circle"  icon="fa-solid fa-bell" />
                              
+                             <p:commandButton class="btn-sair-header" value="Sair" icon="fa-solid fa-right-from-bracket" />
                          </div>
                      </div>
                      
                      <div class="flex space-between">
-                         <div>
                              <p:outputLabel class="title-page" value="Dashboard Geral" />
-                         </div>
-                        <div class="content-filter">
-                            <p:outputLabel class="title-filter" value="Filtrar:"/>
-                            <p:selectOneButton>
-                               <f:selectItem itemLabel="mês" itemValue="m" />
-                               <f:selectItem itemLabel="ano" itemValue="a" />
-                           </p:selectOneButton>
-                        </div>
+                     </div>
+                     
+                     <div class="header-filters">
+                           <div class="content-filter ">
+                               <i class="fa-solid fa-filter"></i>
+                               <p:selectOneButton value="#{financeiroController.dataSelecionada}">
+                                    <f:selectItem itemLabel="mês" itemValue="m" />
+                                    <f:selectItem itemLabel="ano" itemValue="a" />
+                                    <p:ajax update="@form" process="@this"/>
+                                </p:selectOneButton>
+                            </div>
                      </div>
                      
                      <div class="grid-top-grafico">
                          <div class="content-faturado">
+                             <div class="flex">
+                                 <div class="icon-circle icon-circle-blue">
+                                     <i class="fa-solid fa-hand-holding-dollar"></i>
+                                 </div>
+                                 <div class="subtitle-info">
+                                     <label class="title-info">Faturado no - #{financeiroController.dataSelecionada == "m" ? "mês" : "ano" }</label>
+                                     <label class="sub-info">R$ 500,00</label>
+                                 </div>
+                             </div>
                              
+                             <div class="content-grafic">
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>jan</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>fev</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>mar</label>
+                                 </div>
+                                 <div class="active">
+                                     <div class="fluxo-grafico"></div>
+                                     <label>abr</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>mai</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>jul</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>jun</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>ago</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>set</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>out</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>nov</label>
+                                 </div>
+                                 <div>
+                                     <div class="fluxo-grafico"></div>
+                                     <label>dez</label>
+                                 </div>
+                             </div>
                          </div>
                          <div class="content-top-func">
+                             <div class="flex">
+                                 <div class="icon-circle">
+                                     <i class="fa-solid fa-medal"></i>
+                                 </div>
+                                 <div class="subtitle-info">
+                                     <label class="title-info">Top Funcionário</label>
+                                 </div>
+                             </div>
                              
+                             <div class="flex align-center column">
+                                 <div class="perfil-top-funcionario">
+                                     
+                                 </div>
+                                 <label class="title-name-top-func">PAULO UBEDA</label>
+                                 
+                                 <div class="content-obj">
+                                     <div class="flex">
+                                         <div class="icon-circle">
+                                             <i class="fa-solid fa-star"></i>
+                                         </div>
+                                         <div>
+                                             <label class="title-obj">Avaliação</label>
+                                            <label class="subtitle-obj">5.0</label>
+                                         </div>
+                                     </div>
+                                     <div class="flex">
+                                          <div class="icon-circle">
+                                             <i class="fa-solid fa-scissors"></i>
+                                         </div>
+                                         <div>
+                                             <label class="title-obj">Total de cortes</label>
+                                              <label class="subtitle-obj">20</label>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
                          </div>
                      </div>
                      <div class="grid-bottom-grafico">
                          <div class="content-top-visitas">
-                             
+                             <div class="flex">
+                                 <div class="icon-circle">
+                                     <i class="fa-solid fa-people-group"></i>
+                                 </div>
+                                 <div class="subtitle-info">
+                                     <label class="title-info">Top Visitas na semana</label>
+                                 </div>
+                             </div>
                          </div>
                          <div class="content-gastos-mes">
-                             
+                             <div class="flex">
+                                 <div class="icon-circle icon-circle-green">
+                                     <i class="fa-solid fa-calendar-plus"></i>
+                                 </div>
+                                 <div class="subtitle-info">
+                                     <label class="title-info">Agendamentos - #{financeiroController.dataSelecionada == "m" ? "mês" : "ano" }</label>
+                                 </div>
+                             </div>
                          </div>
                      </div>
                  </div>
-                 <div style="background-color: #F5F5F7">
-                     
+                 <div class="content-info-lateral">
+                     <div class="content-logo-system">
+                         
+                     </div>
+                     <div class="content-btns">
+                         <p:commandButton class="btn btn-green" value="Agendar Cliente" onclick="PF('dlgAgendar').show()"/>
+                     </div>
+                     <div class="content-agendamentos">
+                         <div class="flex">
+                                <div class="icon-circle">
+                                    <i class="fa-solid fa-clock"></i>
+                                </div>
+                                <div class="subtitle-info">
+                                    <label class="title-info">Últimos Agendamentos</label>
+                                </div>
+                            </div>
+                     </div>
                  </div>
              </div>
+             
+             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
+                 <div class="header-modal">
+                     <div class="icon-circle">
+                         <i class="fa-solid fa-calendar-days"></i>
+                     </div>
+                     <label>Agendamento</label>
+                 </div>
+                 
+                 <div class="content-filter no-filter">
+                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}">
+                        <f:selectItem itemLabel="Com cadastro" itemValue="c" />
+                         <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
+                         <p:ajax update="dlgAttCliente" process="@this"/>
+                     </p:selectOneButton>
+                 </div>
+                 
+                 
+                     <div class="row">
+                         <div class="col-md-8">
+                             <p:outputPanel id="dlgAttCliente">
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 'c'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:selectOneMenu converter="#{countryConverter}"
+                                                    var="c"
+                                                    filter="true" filterMatchMode="startsWith">
+
+                                        <f:selectItems var="country"
+                                                   />
+
+                                        <p:column >
+                                            <span class="flag" />
+                                        </p:column>
+
+                                        <p:column>
+                                            <f:facet name="header">
+                                                <h:outputText value="Name"/>
+                                            </f:facet>
+                                            <h:outputText/>
+                                        </p:column>
+
+                                        <f:facet name="footer">
+                                            <h:outputText
+                                                        />
+                                        </f:facet>
+                                    </p:selectOneMenu>
+                                      </div>
+                                 </ui:fragment>
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 's'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:inputText styleClass="senha-login"/>
+                                      </div>
+                                 </ui:fragment>
+                                
+                            </p:outputPanel>
+                         </div>
+                         <div class="col-md-4">
+                             <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Selecione uma data" />
+                                <p:datePicker showIcon="true"  />
+                              </div>
+                         </div>
+                     </div>
+                 
+                 <div class="row">
+                     <div class="col-md-8">
+                         <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
+                                <p:selectOneMenu >
+                                    <f:selectItem itemLabel="Selecione funcionário" itemValue=""/>
+                                    <f:selectItems/>
+                                    <f:facet name="footer">
+                                        <p:divider styleClass="mt-0" />
+                                        <h:outputText value="3 options" style="font-weight:bold;"/>
+                                    </f:facet>
+                                </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                     
+                     <div class="col-md-4">
+                         <div class="input-combined">
+                            <p:outputLabel styleClass="title-input" value="Horários disponíveis" />
+                            <p:selectOneMenu >
+                                <f:selectItem itemLabel="Selecione horário" itemValue=""/>
+                                <f:selectItems/>
+                                <f:facet name="footer">
+                                    <p:divider styleClass="mt-0" />
+                                    <h:outputText value="3 options" style="font-weight:bold;"/>
+                                </f:facet>
+                            </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                </div>
+                     
+                 
+                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
+            </p:dialog>
+             
         </h:form>
         
     </h:body>

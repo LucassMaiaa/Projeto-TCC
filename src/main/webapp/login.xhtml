@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Dashboard</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+    </h:head>
+
+    <h:body>
+        
+        <style>
+  	
+  		html,body{
+  			margin: 0;
+  			
+  		}
+  		
+  		body .ui-widget{
+  			font-family: 'Barlow', sans-serif;
+  		}
+  		
+  		@font-face {
+		    font-family: 'New Order';
+		    src: url("#{resource['fonts:NewOrder-Regular.otf']}") format('opentype');
+		    font-weight: normal;
+		    font-style: normal;
+		}
+  	
+	 	.main{
+	 		padding: 20px;
+	 		height: 100vh;
+	 		box-sizing: border-box;
+	 		display: flex;
+	 		background-image: linear-gradient(270deg, #fbfbfb, #e7f3f5);
+	 	}
+	 	
+	 	.content-desc{
+            box-shadow: 0 0px 5px #d3d3d3;
+		    border-radius: 8px;
+		    background: #fbfbfb;
+		    height: 100%;
+		    background-image: url(#{request.contextPath}/resources/images/background-login.svg);
+		    background-repeat: no-repeat;
+		    background-position: top right;
+		    background-size: contain;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-between;
+		    padding: 14.5em 5.625em 5.625em;
+		    clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+	 	}
+	 	
+	 	.content-login {
+		    flex-grow: 1;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: center;
+	        padding: 4em;
+		}
+		
+		.content-login img{
+			align-self: center;
+			margin-bottom: 4.375em
+		}
+		
+		.input-combined input{
+			width: 100%;
+		    min-height: 60px;
+		    border: 1px solid #D5D5D5;
+		    border-radius: 4px;
+		    margin-bottom: 1em;
+		    position: relative;
+	        padding: 15px 5px 0 40px;
+		}
+		
+		.input-combined input[type="text"]{
+			background-image: url(#{request.contextPath}/resources/images/icon_login_email.svg);
+			background-repeat: no-repeat;
+    		background-position: 8px center;
+		}	
+		
+		.input-combined input[type="password"]{
+			background-image: url(#{request.contextPath}/resources/images/icon_login_senha.svg);
+			background-repeat: no-repeat;
+    		background-position: 8px center;
+		}
+		
+		.input-combined .title-input{
+			position: absolute;
+			z-index: 1;
+		}
+		
+		.input-combined .ui-outputlabel .ui-outputlabel-label {
+		    overflow: hidden;
+		    position: absolute;
+		    top: 5px;
+		    left: 40px;
+		    font-size: 0.75em;
+		    font-weight: bold;
+		}
+		
+		hr{
+			width: 100%;
+			margin: 1.09375em 0;
+			border-color: #EBEBEB
+		}
+		
+		.flex{
+			display: flex;
+		}
+		
+		.flex-end{
+			justify-content: flex-end;
+		}
+		
+		.flex-center{
+			justify-content: center;
+		}
+		
+		.text-links{
+			font-weight: bold;
+			color: black !important;
+			font-size: 0.75em !important;
+		}
+		
+		.text-desc{
+			font-size: 2.1875em !important;
+		    text-shadow: 0 0px 1px #1C1E39;
+		    width: 22ch;
+		    display: inline-block;
+		    font-family: 'New Order', sans-serif !important;
+		}
+		
+		.btn-login.ui-button{
+		    height: 3.125em;
+		    background: #6367D9;
+		    border-radius: 1.5625em;
+		    margin-top: 2.8125em;
+		    margin-bottom: 4.375em;
+		    font-weight: bold;
+		    font-size: 1.0625em;
+		    border: none;
+		    transition: all .3s;
+		}
+		
+		.btn-login:hover.ui-button {
+		    background: transparent;
+		    color: black;
+		    border: 1px solid #6367D9;
+		}
+		
+		.content-sobre-sistem{
+		    width: 8.9em;
+		    height: 5em;
+		    border: 1px solid #E9E8E8;
+		    border-radius: 8px;
+		    padding: 0.5em;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-between;
+		}
+		
+		.content-sobre-sistem:nth-last-child(2) {
+			margin: 0 30px;
+		}
+		
+		.main-desc{
+			width: 64%;
+		    filter: drop-shadow(0 0px 5px #d3d3d3);
+		}
+		
+  	</style>
+        
+         <h:form styleClass="main">
+      <div class="main-desc">
+        <div class="content-desc">
+          <!-- Conteúdo descritivo, conforme seu design -->
+          <div>
+            <p:outputLabel styleClass="text-desc" value="Agendamentos fáceis, horários organizados e clientes satisfeitos" />
+          </div>
+          <!-- Bloco de imagens e textos -->
+          <div class="flex">
+            <!-- Conteúdo sobre o sistema -->
+            <div class="content-sobre-sistem">
+              <div>
+                <img src="#{request.contextPath}/resources/images/icon-agendamento.svg" />
+              </div>
+              <p:outputLabel styleClass="text-links" value="Controle de agendamentos" />
+            </div>
+            <div class="content-sobre-sistem">
+              <div>
+                <img src="#{request.contextPath}/resources/images/icon-inteligente.svg" />
+              </div>
+              <p:outputLabel styleClass="text-links" value="Sistema inteligente e prático" />
+            </div>
+            <div class="content-sobre-sistem">
+              <div>
+                <img src="#{request.contextPath}/resources/images/icon-faturar.svg" />
+              </div>
+              <p:outputLabel styleClass="text-links" value="Equipe e faturamento em um só lugar" />
+            </div>
+          </div>
+        </div>
+      </div>
+      	
+      <div class="content-login">
+        <img src="#{request.contextPath}/resources/images/logo_grande.svg" />
+            <p:growl id="mensagens" showDetail="true" life="3000" />
+        <div class="input-combined">
+          <p:outputLabel styleClass="title-input" value="Email" />
+          <!-- Vinculando ao atributo 'login' do Managed Bean -->
+          <p:inputText styleClass="user-login" value="#{usuarioController.login}" required="true" requiredMessage="Email é obrigatório"/>
+        </div>	
+      		
+        <div class="input-combined">
+          <p:outputLabel styleClass="title-input" value="Senha" />
+          <!-- Vinculando ao atributo 'senha' do Managed Bean -->
+          <p:password styleClass="senha-login" value="#{usuarioController.senha}" required="true" requiredMessage="Senha é obrigatória"/>
+        </div>	
+      		
+        <div class="flex flex-end">
+          <p:commandLink styleClass="text-links" value="Esqueceu a senha? clique aqui " />
+        </div>
+      		
+        <!-- Botão de login: chama o método efetuarLogin no Managed Bean -->
+        <p:commandButton styleClass="btn-login" value="Entrar" action="#{usuarioController.efetuarLogin()}" update="@form" />
+      		
+        <hr/>
+      		
+        <div class="flex flex-center">
+            <p:commandLink styleClass="text-links" value="É novo? cadastre-se clicando aqui "  />
+        </div>
+        
+        <p:dialog id="dlgErro" header="Erro de Login" widgetVar="dlgErro" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" onShow="fecharDialogo()">
+            <h:outputText value="erro" style="color: red;" />
+            <p:commandButton value="OK" onclick="PF('dlgErro').hide()" />
+        </p:dialog>
+      		
+      </div>
+    </h:form>
+        
+        <script>
+            function fecharDialogo() {
+                setTimeout(function() {
+                    PF('dlgErro').hide();
+                }, 1000); // 3000ms = 3 segundos
+            }
+        </script>
+        
+    </h:body>
+</html>
+
