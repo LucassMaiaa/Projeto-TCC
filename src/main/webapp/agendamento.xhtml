@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>BarberSys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+        <h:outputScript library="primefaces" name="locales/locale-pt.js" />
+    </h:head>
+
+    <h:body>
+        
+        <style>          
+            
+            .content-info-lateral {
+                background: #FCFCFF;
+            }
+            
+            .header-filters{
+                margin-top: 9px;
+            }
+            
+            .perfil-top-funcionario{
+                height: 28px;
+                width: 28px;
+                background-size: cover;
+                margin: 0;
+            }
+            
+            body .ui-datatable thead tr,
+            body .ui-datatable tbody tr{
+                display: grid;
+                grid-template-columns: 62px 1fr 1fr 56px 110px 70px;
+            }
+            
+            body .ui-datatable thead th:first-child,
+            body .ui-datatable tbody td:first-child,
+            body .ui-datatable thead th:nth-child(5),
+            body .ui-datatable tbody td:nth-child(5),
+            body .ui-datatable thead th:nth-child(6),
+            body .ui-datatable tbody td:nth-child(6){
+                text-align: center !important;
+            }
+            
+
+            
+        </style>    
+        
+        <h:form id="form" styleClass="main"> 
+             <div class="grid-content">
+                 
+                 <div class="content-menu-lateral">
+                     <div class="logo-menu-lateral">
+                         <img src="#{request.contextPath}/resources/images/logo.svg" />
+                    </div>
+                     <div class="content-botoes-lateral">
+                         <p:commandLink class="btn-circle" action="dashboard.html?faces-redirect=true" immediate="true">
+                             <i class="fa-solid fa-house"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle btn-circle-active"  >
+                             <i class="fa-solid fa-calendar-days"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle"  >
+                             <i class="fa-solid fa-file-lines"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle" action="controle_caixa.html?faces-redirect=true" immediate="true">
+                             <i class="fa-solid fa-money-bill-transfer"></i>
+                         </p:commandLink>
+                         <p:commandLink class="btn-circle">
+                             <i class="fa-solid fa-gear"></i>
+                         </p:commandLink>
+                     </div>
+                     <div>
+                         
+                     </div>
+                 </div>
+                 <div class="content-dashboard">
+                     <div class="content-perfil flex space-between">
+                         <div class="flex align-center">
+                             <div class="avatar-circle btn-circle mr8">
+                                 
+                             </div>
+                             
+                             <div class="content-title-perfil">
+                                 <h:outputText class="title-welcome-perfil" value="Olá" />
+                                 <h:outputText class="title-name-perfil" value="#{usuarioController.login}" />
+                             </div>
+                         </div>
+                         <div class="flex">
+                             <p:commandButton class="btn-circle"  icon="fa-solid fa-bell" />
+                             
+                             <p:commandButton class="btn-sair-header" value="Sair" icon="fa-solid fa-right-from-bracket" />
+                         </div>
+                     </div>
+                     
+                     <div class="flex space-between">
+                             <p:outputLabel class="title-page" value="Agendamentos" />
+                             <p:commandButton class="btn btn-green" value="Agendar Cliente" onclick="PF('dlgAgendar').show()"/>
+                     </div>
+                     
+                     <div class="header-filters">
+                           <div class="content-filter ">
+                               <i class="fa-solid fa-filter"></i>
+                               <p:selectOneButton value="#{controleCaixaController.filtroTipoDeValor}" unselectable="false">
+                                    <f:selectItem itemLabel="Todos" itemValue="" />
+                                    <f:selectItem itemLabel="Entradas" itemValue="Entrada" />
+                                    <f:selectItem itemLabel="Saídas" itemValue="Saida" />
+                                    <p:ajax update="@form" process="@this"/>
+                                </p:selectOneButton>
+                            </div>
+                     </div>
+                     
+                     <div>
+                         <p:dataTable id="datatableCaixas" rowIndexVar="row" class="data-table-info" value="#{controleCaixaController.lstControleCaixa}" var="caixa"
+                                      paginator="true" paginatorPosition="bottom" rows="13" lazy="true" emptyMessage="Nenhum dado encontrado">
+                             
+                            <p:column headerText="Status">
+                                  <h:outputText value="#{row + 1}" />
+                            </p:column>
+                             
+                             <p:column headerText="Cliente">
+                                <h:outputText value="#{caixa.movimentacao}" />
+                            </p:column>
+                             
+                            <p:column headerText="Funcionário">
+                                <h:outputText value="#{caixa.valor}">
+                                    <f:convertNumber type="currency" currencySymbol="R$" locale="pt_BR" />
+                                </h:outputText>
+                            </p:column>
+
+                            <p:column headerText="Data">
+                                <h:outputText value="#{caixa.horaAtual.substring(0,5)}"/>
+                            </p:column>
+
+                            <p:column headerText="Quant. Serviços">
+                                <h:outputText value="#{caixa.motivo}" />
+                            </p:column>
+                             
+                             <p:column headerText="Horário">
+                                <h:outputText value="#{caixa.motivo}" />
+                            </p:column>
+
+                            
+                             
+                         </p:dataTable>
+                     </div>
+
+                 </div>
+                 <div class="content-info-lateral">
+                     <div class="content-logo-system">
+                         <div class="flex space-between">
+                                <div class="flex">
+                                 <div class="icon-circle">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div class="subtitle-info flex space-between">
+                                    <label class="title-info">Cliente</label>
+                                </div>
+                             </div>
+                             
+                                <div class="flex">
+                                   <p:commandButton class="btn-circle btn-circle-info-lateral"  icon="fa-solid fa-pen" />
+                                   <p:commandButton class="btn-circle btn-circle-info-lateral"  icon="fa-solid fa-x" />
+                               </div>
+                            </div>
+                     </div>
+                     <div class="content-btns">
+                         <div class="flex">
+                             <div class="perfil-top-funcionario mr8"></div>
+                             <div>
+                                 <label class="title-obj">Cliente</label>
+                                 <label class="subtitle-obj">Lucas Eduardo Maia</label>
+                             </div>
+                         </div>
+                         
+                         
+                         <p:outputPanel id="attCaixa">
+                             <div>
+                                 <p:outputLabel class="title-date" value="#{controleCaixaController.dataSelecionada}">
+                                     <f:convertDateTime pattern="dd/MM/yyyy" />
+                                 </p:outputLabel>
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'f'}" >
+                                     <p:outputLabel class="title-date" style="background: #C52323" 
+                                               value="Inativo" />
+                                 </ui:fragment>
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'a'}" >
+                                     <p:outputLabel class="title-date" style="background: #23C538 " 
+                                               value="Ativo" />
+                                 </ui:fragment>
+                                
+                            </div>
+                         </p:outputPanel>
+                         
+                     </div>
+                     <div class="content-valores">
+                            <label class="title-obj">Funcionário a realizar serviços</label>
+                            <label class="subtitle-obj">PAULO UBEDA</label>
+                     </div>
+                     <div class="content-agendamentos flex column space-between">
+
+                        <label class="title-servicos">Serviços contratados</label>       
+
+                        <div>
+                            <div class="fundo-valores-totais">
+                                <label>Total</label>
+                                <label>R$ 90,00</label>
+                            </div>
+                            
+                            <div class="input-combined">
+                                <p:outputLabel class="title-input" value="Método de pagamento" />
+                                <p:selectOneMenu>
+                                    <f:selectItem itemLabel="Selecione forma de pagamento" itemValue=""/>
+                                    <f:selectItem itemLabel="Dinheiro" itemValue="d"/>
+                                    <f:selectItem itemLabel="Cartão - débito" itemValue="cd"/>
+                                    <f:selectItem itemLabel="Cartão - crédito" itemValue="cc"/>
+                                    <f:selectItem itemLabel="Pix" itemValue="p"/>
+                                </p:selectOneMenu>
+                            </div>
+                            
+                            <div class="fundo-btns">
+                               <p:commandButton class="btn btn-green" value="Confirmar pagamento" update="@form" process="@form" />
+                               <p:commandButton class="btn btn-blue medium" value="Finalizar" update="@form" process="@form" />
+                           </div>
+                        </div>
+                  
+                     </div>
+                 </div>
+             </div>
+            
+             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
+                 <div class="header-modal">
+                     <div class="icon-circle">
+                         <i class="fa-solid fa-calendar-days"></i>
+                     </div>
+                     <label>Agendamento</label>
+                 </div>
+                 
+                 <div class="content-filter no-filter">
+                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}">
+                        <f:selectItem itemLabel="Com cadastro" itemValue="c" />
+                         <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
+                         <p:ajax update="dlgAttCliente" process="@this"/>
+                     </p:selectOneButton>
+                 </div>
+                 
+                 
+                     <div class="row">
+                         <div class="col-md-8">
+                             <p:outputPanel id="dlgAttCliente">
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 'c'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:selectOneMenu converter="#{countryConverter}"
+                                                    var="c"
+                                                    filter="true" filterMatchMode="startsWith">
+
+                                        <f:selectItems var="country"
+                                                   />
+
+                                        <p:column >
+                                            <span class="flag" />
+                                        </p:column>
+
+                                        <p:column>
+                                            <f:facet name="header">
+                                                <h:outputText value="Name"/>
+                                            </f:facet>
+                                            <h:outputText/>
+                                        </p:column>
+
+                                        <f:facet name="footer">
+                                            <h:outputText
+                                                        />
+                                        </f:facet>
+                                    </p:selectOneMenu>
+                                      </div>
+                                 </ui:fragment>
+                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 's'}">
+                                     <div class="input-combined">
+                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+                                        <p:inputText styleClass="senha-login"/>
+                                      </div>
+                                 </ui:fragment>
+                                
+                            </p:outputPanel>
+                         </div>
+                         <div class="col-md-4">
+                             <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Selecione uma data" />
+                                <p:datePicker showIcon="true" pattern="dd/MM/yyyy" />
+                              </div>
+                         </div>
+                     </div>
+                 
+                 <div class="row">
+                     <div class="col-md-8">
+                         <div class="input-combined">
+                                <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
+                                <p:selectOneMenu >
+                                    <f:selectItem itemLabel="Selecione funcionário" itemValue=""/>
+                                    <f:selectItems/>
+                                    <f:facet name="footer">
+                                        <p:divider styleClass="mt-0" />
+                                        <h:outputText value="3 options" style="font-weight:bold;"/>
+                                    </f:facet>
+                                </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                     
+                     <div class="col-md-4">
+                         <div class="input-combined">
+                            <p:outputLabel styleClass="title-input" value="Horários disponíveis" />
+                            <p:selectOneMenu >
+                                <f:selectItem itemLabel="Selecione horário" itemValue=""/>
+                                <f:selectItems/>
+                                <f:facet name="footer">
+                                    <p:divider styleClass="mt-0" />
+                                    <h:outputText value="3 options" style="font-weight:bold;"/>
+                                </f:facet>
+                            </p:selectOneMenu>
+                         </div>
+                         
+                     </div>
+                </div>
+                     
+                 
+                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
+            </p:dialog>
+             
+        </h:form>
+        
+    </h:body>
+</html>
+

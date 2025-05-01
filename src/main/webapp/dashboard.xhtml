@@ -41,6 +41,30 @@
                 border-radius: 8px;
                 padding: 14px 25px;
             }
+            
+            .content-logo-system{
+                height: 132px;
+                width: 100%;
+                background: #F5F5F7;
+                background-image: url('resources/images/logo-com-imagem.svg') ;
+                background-repeat: no-repeat;
+                background-position: center top;
+            }
+            
+            .content-btns{
+                width: 100%;
+                height: 54px;
+                display: flex;
+                justify-content: center;
+                padding: 8px;
+            }
+            
+            .content-agendamentos{
+                height: calc(100vh - 186px);
+                background: #FCFCFF;
+                border-radius: 8px 8px 0 0;
+                padding: 20px;
+            }
         </style>    
         
          <h:form styleClass="main"> 
@@ -54,13 +78,13 @@
                          <p:commandLink class="btn-circle btn-circle-active" >
                              <i class="fa-solid fa-house"></i>
                          </p:commandLink>
-                         <p:commandLink class="btn-circle" >
+                         <p:commandLink class="btn-circle" action="agendamento.html?faces-redirect=true">
                              <i class="fa-solid fa-calendar-days"></i>
                          </p:commandLink>
                          <p:commandLink class="btn-circle" >
                              <i class="fa-solid fa-file-lines"></i>
                          </p:commandLink>
-                         <p:commandLink  class="btn-circle" action="controle_caixa.html?faces-redirect=true" >
+                         <p:commandLink  class="btn-circle" action="controle_caixa.html?faces-redirect=true">
                              <i class="fa-solid fa-money-bill-transfer"></i>
                          </p:commandLink>
                          <p:commandLink class="btn-circle" >
@@ -310,7 +334,7 @@
                          <div class="col-md-4">
                              <div class="input-combined">
                                 <p:outputLabel styleClass="title-input" value="Selecione uma data" />
-                                <p:datePicker showIcon="true"  />
+                                <p:datePicker showIcon="true" pattern="dd/MM/yyyy" />
                               </div>
                          </div>
                      </div>

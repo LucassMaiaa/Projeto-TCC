@@ -17,32 +17,12 @@
     <h:body>
         
         <style>          
-            .content-logo-system {
-                height: 75px;
-                background-image: none;
-                padding: 20px;
-            }
-            
-            .content-btns {
-                height: 75px;
-                justify-content: space-between;
-                align-items: center;
-                padding: 8px 20px;
-                gap: 20px;
-                background: #EBEBEB;
-            }
-            
             .content-agendamentos{
                 border-radius: 0px;
+                height: 100vh;
                 max-height: calc(100vh - 290px);
                 padding: 15px 20px 30px;
             }
-            
-            /* .content-agendamentos{
-                border-radius: 0px;
-                max-height: calc(100vh - 226px);
-                padding: 15px 20px 30px;
-            }*/
             
             .content-info-lateral {
                 background: #FCFCFF;
@@ -51,6 +31,18 @@
             .content-valores {
                 height: 140px;
             }
+            
+           body .ui-datatable thead tr,
+           body .ui-datatable tbody tr{
+                display: grid;
+                grid-template-columns: 62px 130px 110px 70px 1fr;
+            }
+            
+            body .ui-datatable thead th:first-child,
+            body .ui-datatable tbody td:first-child{
+                text-align: center !important;
+            }
+            
         </style>    
         
         <h:form id="form" styleClass="main"> 
@@ -61,10 +53,10 @@
                          <img src="#{request.contextPath}/resources/images/logo.svg" />
                     </div>
                      <div class="content-botoes-lateral">
-                         <p:commandLink immediate="true" class="btn-circle" action="dashboard.html?faces-redirect=true">
+                         <p:commandLink class="btn-circle" action="dashboard.html?faces-redirect=true"  immediate="true">
                              <i class="fa-solid fa-house"></i>
                          </p:commandLink>
-                         <p:commandLink class="btn-circle"  >
+                         <p:commandLink class="btn-circle"  action="agendamento.html?faces-redirect=true" immediate="true">
                              <i class="fa-solid fa-calendar-days"></i>
                          </p:commandLink>
                          <p:commandLink class="btn-circle"  >
@@ -266,107 +258,6 @@
                      </div>
                  </div>
              </div>
-             
-             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
-                 <div class="header-modal">
-                     <div class="icon-circle">
-                         <i class="fa-solid fa-calendar-days"></i>
-                     </div>
-                     <label>Agendamento</label>
-                 </div>
-                 
-                 <div class="content-filter no-filter">
-                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}">
-                        <f:selectItem itemLabel="Com cadastro" itemValue="c" />
-                         <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
-                         <p:ajax update="dlgAttCliente" process="@this"/>
-                     </p:selectOneButton>
-                 </div>
-                 
-                 
-                     <div class="row">
-                         <div class="col-md-8">
-                             <p:outputPanel id="dlgAttCliente">
-                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 'c'}">
-                                     <div class="input-combined">
-                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-                                        <p:selectOneMenu converter="#{countryConverter}"
-                                                    var="c"
-                                                    filter="true" filterMatchMode="startsWith">
-
-                                        <f:selectItems var="country"
-                                                   />
-
-                                        <p:column >
-                                            <span class="flag" />
-                                        </p:column>
-
-                                        <p:column>
-                                            <f:facet name="header">
-                                                <h:outputText value="Name"/>
-                                            </f:facet>
-                                            <h:outputText/>
-                                        </p:column>
-
-                                        <f:facet name="footer">
-                                            <h:outputText
-                                                        />
-                                        </f:facet>
-                                    </p:selectOneMenu>
-                                      </div>
-                                 </ui:fragment>
-                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 's'}">
-                                     <div class="input-combined">
-                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-                                        <p:inputText styleClass="senha-login"/>
-                                      </div>
-                                 </ui:fragment>
-                                
-                            </p:outputPanel>
-                         </div>
-                         <div class="col-md-4">
-                             <div class="input-combined">
-                                <p:outputLabel styleClass="title-input" value="Selecione uma data" />
-                                <p:datePicker showIcon="true"  />
-                              </div>
-                         </div>
-                     </div>
-                 
-                 <div class="row">
-                     <div class="col-md-8">
-                         <div class="input-combined">
-                                <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
-                                <p:selectOneMenu >
-                                    <f:selectItem itemLabel="Selecione funcionário" itemValue=""/>
-                                    <f:selectItems/>
-                                    <f:facet name="footer">
-                                        <p:divider styleClass="mt-0" />
-                                        <h:outputText value="3 options" style="font-weight:bold;"/>
-                                    </f:facet>
-                                </p:selectOneMenu>
-                         </div>
-                         
-                     </div>
-                     
-                     <div class="col-md-4">
-                         <div class="input-combined">
-                            <p:outputLabel styleClass="title-input" value="Horários disponíveis" />
-                            <p:selectOneMenu >
-                                <f:selectItem itemLabel="Selecione horário" itemValue=""/>
-                                <f:selectItems/>
-                                <f:facet name="footer">
-                                    <p:divider styleClass="mt-0" />
-                                    <h:outputText value="3 options" style="font-weight:bold;"/>
-                                </f:facet>
-                            </p:selectOneMenu>
-                         </div>
-                         
-                     </div>
-                </div>
-                     
-                 
-                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
-            </p:dialog>
              
         </h:form>
         

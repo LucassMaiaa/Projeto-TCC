@@ -124,28 +124,27 @@ body .ui-widget{
     background: #EBEBEB;
 }
 
-.content-logo-system{
-    height: 132px;
-    width: 100%;
-    background: #F5F5F7;
-    background-image: url('../images/logo-com-imagem.svg');
-    background-repeat: no-repeat;
-    background-position: center;
+.content-logo-system {
+    height: 75px;
+    background-image: none;
+    padding: 20px;
 }
 
-.content-btns{
-    width: 100%;
-    height: 54px;
+.content-btns {
     display: flex;
-    justify-content: center;
-    padding: 8px;
+    height: 75px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    gap: 20px;
+    background: #EBEBEB;
 }
 
 .content-agendamentos{
-    height: calc(100vh - 186px);
-    background: #FCFCFF;
-    border-radius: 8px 8px 0 0;
-    padding: 20px;
+    border-radius: 0px;
+    height: 100vh;
+    height: calc(100vh - 194px);
+    padding: 15px 20px 30px;
 }
 
 .content-grafic{
@@ -194,7 +193,7 @@ body .ui-widget{
 }
 
 .content-valores{
-    height: 76px;
+    height: 44px;
     background: #DFDFDF;
     padding: 8px 20px;
 }
@@ -237,7 +236,7 @@ body .ui-widget{
 
 .btn-circle{
     border-radius: 25px !important;
-    width: 40px;
+    width: 40px !important;
     height: 40px;
     background: #FCFCFF !important;
     border: none !important;
@@ -245,7 +244,11 @@ body .ui-widget{
     align-items: center;
     justify-content: center;
     color: black !important;
-    transition: .5s ease all !important;
+    
+}
+
+.btn-circle-info-lateral{
+    background: #EBEBEB !important;
 }
 
 .btn-circle-active{
@@ -261,6 +264,7 @@ body .ui-widget{
     background: black !important;
     color: white !important;
     text-decoration: none !important;
+    transition: .5s ease all !important;
 }
 
 .btn-sair-header{
@@ -392,6 +396,13 @@ body .ui-widget{
     color: black;
 }
 
+.title-servicos{
+    display: block;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: "New Order";
+}
+
 .title-name-top-func{
     font-size: 17px;
     font-weight: bold;
@@ -404,6 +415,7 @@ body .ui-widget{
     font-size: 12px;
     font-weight: 500;
     color: #8A8A8A;
+    margin-bottom: 3px !important;
 }
 
 .title-date {
@@ -424,8 +436,10 @@ body .ui-widget{
 
 .subtitle-obj{
     display: block;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
+    font-family: 'Barlow';
+    text-transform: uppercase;
 }
 
 .subtitle-info{
@@ -488,6 +502,7 @@ body .ui-widget{
     color: #656464;
     font-weight: 600;
     font-family: "Barlow";
+    border-radius: 8px !important;
 }
 
 .input-combined .ui-inputfield.ui-state-focus,
@@ -669,32 +684,6 @@ body .ui-dialog:has( .header-modal) .ui-dialog-titlebar{
     line-height: 1;
 }
 
-body .ui-datatable thead th:first-child,
-body .ui-datatable tbody td:first-child{
-    width: 50px;
-    text-align: center !important;
-}
-
-body .ui-datatable thead th:nth-child(2),
-body .ui-datatable tbody td:nth-child(2){
-    width: 170px;
-}
-
-body .ui-datatable thead th:nth-child(3),
-body .ui-datatable tbody td:nth-child(3){
-    width: 100px;
-}
-
-body .ui-datatable thead th:nth-child(4),
-body .ui-datatable tbody td:nth-child(4){
-    width: 70px;
-}
-
-body .ui-datatable thead th:nth-child(5),
-body .ui-datatable tbody td:nth-child(5){
-    white-space: wrap;
-}
-
 body .ui-datatable thead th {
     background: none;
     padding: 0 13px 7px;
@@ -760,6 +749,42 @@ body .ui-growl .ui-growl-item-container .ui-growl-item {
     border: 1px solid #ef5350;
     color: #b71c1c;
 
+}
+
+.fundo-valores-totais{
+    background: #EBEBEB;
+    height: 48px;
+    margin: 0 -20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.fundo-valores-totais :first-child{
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.fundo-valores-totais :last-child{
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.fundo-btns{
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    gap: 8px;
+}
+
+.fundo-btns :first-child{
+    flex-grow: 1;
+}
+
+.fundo-btns :last-child{
+    flex-grow: 1;
 }
 
 
