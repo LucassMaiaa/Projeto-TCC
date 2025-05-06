@@ -33,19 +33,24 @@
                 margin: 0;
             }
             
-            body .ui-datatable thead tr,
-            body .ui-datatable tbody tr{
+            body .ui-datatable thead tr:not(.ui-datatable-empty-message),
+            body .ui-datatable tbody tr:not(.ui-datatable-empty-message){
                 display: grid;
                 grid-template-columns: 62px 1fr 1fr 56px 110px 70px;
             }
             
-            body .ui-datatable thead th:first-child,
-            body .ui-datatable tbody td:first-child,
-            body .ui-datatable thead th:nth-child(5),
-            body .ui-datatable tbody td:nth-child(5),
-            body .ui-datatable thead th:nth-child(6),
-            body .ui-datatable tbody td:nth-child(6){
+            body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message),
+            body .ui-datatable thead th:nth-child(5):not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message),
+            body .ui-datatable thead th:nth-child(6):not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:nth-child(6):not(.ui-datatable-empty-message){
                 text-align: center !important;
+            }
+            
+            body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
+                height: 514px;
+                font-size: 17px;
             }
             
 
@@ -72,9 +77,27 @@
                          <p:commandLink class="btn-circle" action="controle_caixa.html?faces-redirect=true" immediate="true">
                              <i class="fa-solid fa-money-bill-transfer"></i>
                          </p:commandLink>
-                         <p:commandLink class="btn-circle">
-                             <i class="fa-solid fa-gear"></i>
-                         </p:commandLink>
+                        <div class="relative">
+                             <div  id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
+                                 <label class="title-name-top-func">Cadastros</label>
+                                 <p:commandLink  action="controle_caixa.html?faces-redirect=true">
+                                     <label class="title-menu-flutuante">Clientes</label>
+                                 </p:commandLink>
+                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
+                                     <label class="title-menu-flutuante">Funcionários</label>
+                                 </p:commandLink>
+                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
+                                     <label class="title-menu-flutuante">Usuários</label>
+                                 </p:commandLink>
+                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
+                                     <label class="title-menu-flutuante">Tipo de pagamento/serviços</label>
+                                 </p:commandLink>
+                                     
+                             </div>
+                             <p:commandLink class="btn-circle" onclick="openDiv(event)">
+                                <i class="fa-solid fa-gear"></i>
+                            </p:commandLink>
+                         </div>
                      </div>
                      <div>
                          
@@ -187,7 +210,7 @@
                                  </p:outputLabel>
                                  <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'f'}" >
                                      <p:outputLabel class="title-date" style="background: #C52323" 
-                                               value="Inativo" />
+                                               value="Cancelado" />
                                  </ui:fragment>
                                  <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'a'}" >
                                      <p:outputLabel class="title-date" style="background: #23C538 " 
