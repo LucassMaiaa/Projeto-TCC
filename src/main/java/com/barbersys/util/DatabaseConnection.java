@@ -8,7 +8,7 @@ public class DatabaseConnection {
     
     // Configurações da conexão: ajuste os valores conforme seu ambiente
     private static final String URL = "jdbc:mysql://localhost:3306/barber_sys_tcc?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC";
-    private static final String USER = "barbersys";
+    private static final String USER = "root";
     private static final String PASS = "1234";
     
     // Método para obter a conexão
