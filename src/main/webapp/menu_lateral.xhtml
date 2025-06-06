@@ -1,0 +1,134 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                 xmlns:h="http://xmlns.jcp.org/jsf/html"
+                 xmlns:p="http://primefaces.org/ui"
+                 xmlns:f="http://xmlns.jcp.org/jsf/core"
+                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <style>
+        #menu-flutuante-cadastro {
+            background: #4A4A4A;
+            width: 354px;
+            position: absolute;
+            left: 42px;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        #menu-flutuante-cadastro .title-name-top-func {
+            border-bottom: 1px solid #707070;
+            padding-bottom: 7.5px;
+            margin: 0 !important;
+            margin-bottom: 7.5px !important;
+            display: block;
+            color: white;
+        }
+
+        .btn-circle-menu-active {
+            border-radius: 50% !important;
+            width: 40px !important;
+            height: 40px;
+            background: black !important;
+            border: none !important;
+            color: white !important;
+            display: flex;
+		    justify-content: center;
+		    align-items: center;
+
+        }
+        
+        .btn-circle-menu{
+		    border-radius: 50% !important;
+		    width: 40px !important;
+		    height: 40px;
+		    background: #FCFCFF !important;
+		    border: none !important;
+		    color: black !important;
+		    display: flex;
+		    justify-content: center;
+		    align-items: center;
+		    
+		}
+		
+		.btn-circle-menu:hover{
+		    background: black !important;
+		    color: white !important;
+		    text-decoration: none !important;
+		    transition: .5s ease all !important;
+		}
+		
+		body .ui-button:nth-child(4).ui-button-icon-only .ui-icon {
+		    left: 45% !important;
+		}
+		
+		body .ui-button:nth-child(3).ui-button-icon-only .ui-icon {
+		    left: 55% !important;
+		}
+				
+    </style>
+
+  
+        <div class="content-menu-lateral #{view.viewId.replace('/', '').replace('.xhtml', '')}">
+            <div class="logo-menu-lateral">
+                <img src="#{request.contextPath}/resources/images/logo.svg" />
+            </div>
+
+            <div class="content-botoes-lateral">
+                <p:commandButton 
+                    icon="fa fa-house" 
+                    styleClass="#{view.viewId.contains('dashboard') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/dashboard?faces-redirect=true"
+                    immediate="true"
+                    ajax="false"/>
+
+                <p:commandButton 
+                    icon="fa fa-calendar-days" 
+                    styleClass="#{view.viewId.contains('agendamento') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/agendamento?faces-redirect=true"
+                    immediate="true"
+                    ajax="false"/>
+
+                <p:commandButton 
+                    icon="fa fa-file-lines" 
+                    styleClass="#{view.viewId.contains('relatorios') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/relatorios?faces-redirect=true"
+                    immediate="true"
+                    ajax="false"/>
+
+                <p:commandButton 
+                    icon="fa fa-money-bill-transfer" 
+                    styleClass="#{view.viewId.contains('controle_caixa') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/controle_caixa?faces-redirect=true"
+                    immediate="true"
+                    ajax="false"/>
+
+                <div class="relative">
+                    <div id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
+                        <label class="title-name-top-func">Cadastros</label>
+
+                        <h:commandLink outcome="/clientes" styleClass="title-menu-flutuante">Clientes</h:commandLink>
+                        <h:commandLink action="/cadastro_funcionario.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Funcionários</h:commandLink>
+                        <h:commandLink outcome="/usuarios" styleClass="title-menu-flutuante">Usuários</h:commandLink>
+                        <h:commandLink outcome="/pagamentos" styleClass="title-menu-flutuante">Tipo de pagamento/serviços</h:commandLink>
+                    </div>
+
+                    <div class="btn-circle-menu" onclick="openDiv(event)">
+                        <i class="fa-solid fa-gear"></i>
+                    </div>
+                </div>
+            </div>
+            <div></div>
+        </div>
+
+
+    <script>
+        const popup = document.getElementById('menu-flutuante-cadastro');
+
+        function openDiv(event) {
+            event.stopPropagation();
+            popup.style.display = 'block';
+        }
+
+        document.addEventListener('click', () => {
+            popup.style.display = 'none';
+        });
+    </script>
+</ui:composition>

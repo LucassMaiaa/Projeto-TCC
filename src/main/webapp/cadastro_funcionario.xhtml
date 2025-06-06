@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>BarberSys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+        <h:outputScript library="primefaces" name="locales/locale-pt.js" />
+    </h:head>
+
+    <h:body>
+        
+        <style>          
+            
+            .content-info-lateral {
+                background: #FCFCFF;
+            }
+            
+            .header-filters{
+                margin-top: 9px;
+            }
+            
+            .perfil-top-funcionario{
+                height: 28px;
+                width: 28px;
+                background-size: cover;
+                margin: 0;
+            }
+            
+            body .ui-datatable thead tr:not(.ui-datatable-empty-message),
+            body .ui-datatable tbody tr:not(.ui-datatable-empty-message){
+                display: grid;
+                grid-template-columns: 62px 1fr 1fr 56px 110px 70px;
+            }
+            
+            body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message),
+            body .ui-datatable thead th:nth-child(5):not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message),
+            body .ui-datatable thead th:nth-child(6):not(.ui-datatable-empty-message),
+            body .ui-datatable tbody td:nth-child(6):not(.ui-datatable-empty-message){
+                text-align: center !important;
+            }
+            
+            body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
+                height: 514px;
+                font-size: 17px;
+            }
+            
+            .grid-content{
+           	    grid-template-columns: 105px 1fr;
+            }
+           
+            
+        </style>    
+        
+        <h:form id="form" styleClass="main"> 
+             <div class="grid-content">
+                 
+                
+               	<ui:include src="menu_lateral.xhtml"></ui:include>
+                 
+                 <div class="content-dashboard">
+                     
+                     
+
+                     <div class="content-perfil flex space-between">
+                         <div class="flex align-center">
+                             <div class="avatar-circle btn-circle mr8">
+                                 
+                             </div>
+                             
+                             <div class="content-title-perfil">
+                                 <h:outputText class="title-welcome-perfil" value="Olá" />
+                                 <h:outputText class="title-name-perfil" value="#{usuarioController.login}" />
+                             </div>
+                         </div>
+                         <div class="flex">
+                             <p:commandButton class="btn-circle"  icon="fa-solid fa-bell" />
+                             
+                             <p:commandButton class="btn-sair-header" value="Sair" icon="fa-solid fa-right-from-bracket" />
+                         </div>
+                     </div>
+                     
+                     <div class="flex space-between">
+                             <p:outputLabel class="title-page" value="Cadastro de funcionários" />
+                     </div>
+                     
+                     <div class="header-filters">
+                           <div class="content-filter ">
+                               <i class="fa-solid fa-filter"></i>
+                               <p:selectOneButton value="#{controleCaixaController.filtroTipoDeValor}" unselectable="false">
+                                    <f:selectItem itemLabel="Todos" itemValue="" />
+                                    <f:selectItem itemLabel="Entradas" itemValue="Entrada" />
+                                    <f:selectItem itemLabel="Saídas" itemValue="Saida" />
+                                    <p:ajax update="@form" process="@this"/>
+                                </p:selectOneButton>
+                            </div>
+                     </div>
+                     
+                     <div class="flex align-center mt15 mb15">
+                     	<p:commandButton class="btn-circle-green" icon="fa fa-plus" onclick="PF('dlgAgendar').show()"/>
+                     	<label class="title-button ml8">Novo funcionário</label>
+                     </div>
+                     
+                     <div>
+                         <p:dataList id="datatableCaixas" rowIndexVar="row" class="dataList-custom" value="#{funcionarioController.lstFuncionario}" var="funcionario"
+                                      paginator="true" paginatorPosition="bottom" rows="16" lazy="true" emptyMessage="Nenhum dado encontrado">
+                               <p:commandLink  actionListener="#{funcionarioController.funcionarioSelecionado(funcionario)}"
+								    update="form:dlgAgendar" process="@this" oncomplete="PF('dlgAgendar').show()">
+                               	<div class="card-list #{funcionario.status == 'I' ? 'inativo' : 'ativo'}" >
+		                         	<div>
+		                         		<label class="title-list" >Funcionário</label>
+		                         		<p:outputLabel styleClass="subtitle-list" value="#{funcionario.nome}" />
+		                         	</div>
+		                         </div>
+                               </p:commandLink>
+                         </p:dataList>
+                     </div>
+
+                 </div>
+                 
+             </div>
+            
+            
+            
+             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
+                 <div class="header-modal">
+                     <div class="icon-circle">
+                         <i class="fa-solid fa-calendar-days"></i>
+                     </div>
+                     <label>Novo Funcionário</label>
+                 </div>
+                 
+                 <div class="content-filter no-filter">
+                     <p:selectOneButton value="#{funcionarioController.funcionarioModel.status}" unselectable="false">
+                        <f:selectItem itemLabel="Ativo" itemValue="A" />
+                         <f:selectItem itemLabel="Inativo" itemValue="I" />   
+                         <p:ajax update="@this" process="@this"/>
+                     </p:selectOneButton>
+                 </div>
+                 
+                 
+                     <div class="row">
+                         <div class="col-md-12">
+                              <div class="input-combined">
+                                 <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
+                                 <p:inputText styleClass="senha-login" value="#{funcionarioController.funcionarioModel.nome}"/>
+                               </div>
+                         </div>
+                     </div>
+                     
+                     <div class="row flex align-center">
+                     	<div class="col-5">
+                     		<div class="input-combined">
+                                 <p:outputLabel styleClass="title-input" value="Ínicio" />
+                                 <p:inputText styleClass="senha-login"/>
+                               </div>
+                     	</div>
+                     	<div class="col-5">
+                     		<div class="input-combined">
+                                 <p:outputLabel styleClass="title-input" value="Fim" />
+                                 <p:inputText styleClass="senha-login"/>
+                               </div>
+                     	</div>
+                     	<div class="col-2">
+                     		 <p:commandButton class="btn btn-green" value="Adicionar" onclick="PF('dlgAgendar').show()"/>
+                     	</div>
+                     </div>
+
+                    <p:dataList id="dttLstHorarios" rowIndexVar="row" class="dataList-dialog-custom" value="#{funcionarioController.lstFuncionario}" var="funcionario"
+                                      paginator="true" paginatorPosition="bottom" rows="16" lazy="true" emptyMessage="Nenhum dado encontrado">
+                             
+                            
+                             
+                             
+                         </p:dataList>
+                 
+                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
+            </p:dialog>
+             
+        </h:form>
+        
+
+        
+    </h:body>
+</html>
+

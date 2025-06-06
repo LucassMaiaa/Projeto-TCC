@@ -36,7 +36,7 @@
             body .ui-datatable thead tr:not(.ui-datatable-empty-message),
             body .ui-datatable tbody tr:not(.ui-datatable-empty-message){
                 display: grid;
-                grid-template-columns: 62px 1fr 1fr 56px 110px 70px;
+                grid-template-columns: 62px 1fr 1fr 56px 125px 70px;
             }
             
             body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -60,49 +60,7 @@
         <h:form id="form" styleClass="main"> 
              <div class="grid-content">
                  
-                 <div class="content-menu-lateral">
-                     <div class="logo-menu-lateral">
-                         <img src="#{request.contextPath}/resources/images/logo.svg" />
-                    </div>
-                     <div class="content-botoes-lateral">
-                         <p:commandLink class="btn-circle" action="dashboard.html?faces-redirect=true" immediate="true">
-                             <i class="fa-solid fa-house"></i>
-                         </p:commandLink>
-                         <p:commandLink class="btn-circle btn-circle-active"  >
-                             <i class="fa-solid fa-calendar-days"></i>
-                         </p:commandLink>
-                         <p:commandLink class="btn-circle"  >
-                             <i class="fa-solid fa-file-lines"></i>
-                         </p:commandLink>
-                         <p:commandLink class="btn-circle" action="controle_caixa.html?faces-redirect=true" immediate="true">
-                             <i class="fa-solid fa-money-bill-transfer"></i>
-                         </p:commandLink>
-                        <div class="relative">
-                             <div  id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
-                                 <label class="title-name-top-func">Cadastros</label>
-                                 <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Clientes</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Funcionários</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Usuários</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Tipo de pagamento/serviços</label>
-                                 </p:commandLink>
-                                     
-                             </div>
-                             <p:commandLink class="btn-circle" onclick="openDiv(event)">
-                                <i class="fa-solid fa-gear"></i>
-                            </p:commandLink>
-                         </div>
-                     </div>
-                     <div>
-                         
-                     </div>
-                 </div>
+                 <ui:include src="menu_lateral.xhtml"></ui:include>
                  <div class="content-dashboard">
                      <div class="content-perfil flex space-between">
                          <div class="flex align-center">

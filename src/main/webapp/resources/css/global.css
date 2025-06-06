@@ -6,11 +6,11 @@ html, body{
     margin: 0;
     height: 100vh !important;
     background-color: #F1F1F1 !important;
-    font-family: "Barlow";
+    font-family: "Barlow" !important;
 }
 
 body .ui-widget{
-    font-family: "Barlow";
+    font-family: "Barlow" !important;
 }
 
 .row {
@@ -74,6 +74,14 @@ body .ui-widget{
 
 .mr8{
     margin-right: 8px !important;
+}
+
+.mt15{
+	margin-top: 15px !important;	
+}
+
+.mb15{
+	margin-bottom: 15px !important;
 }
 
 /* Conteúdo Principal */
@@ -242,6 +250,20 @@ body .ui-widget{
     background: #23A4D5 !important;
 }
 
+.btn-circle-green.ui-button{
+	width: 40px !important;
+	height: 40px ;
+	background: #4EB458 ;
+	border-radius: 50%;
+	border: none;
+	
+}
+
+.btn-circle-green.ui-button:hover{
+	background: #4EB458
+	
+}
+
 .btn-circle{
     border-radius: 25px !important;
     width: 40px !important;
@@ -259,14 +281,6 @@ body .ui-widget{
     background: #EBEBEB !important;
 }
 
-.btn-circle-active{
-    border-radius: 25px !important;
-    width: 40px;
-    height: 40px;
-    background: black !important;
-    border: none !important;
-    color: white !important;
-}
 
 .btn-circle:hover:not(.avatar-circle){
     background: black !important;
@@ -324,8 +338,8 @@ body .ui-widget{
 }
 
  .ui-selectonebutton {
-    display: inline-flex;
-    padding: 3px;
+    display: inline-flex !important;
+    padding: 3px !important;
     background-color: #DBDBDB;
     border-radius: 25px;
     height: fit-content;
@@ -389,6 +403,11 @@ body .ui-widget{
     font-family: "New Order";
 }
 
+.title-button{
+	font-size: 17px;
+	font-weight: bold
+}
+
 .title-filter{
     font-size: 11px !important;
     margin-right: 10px;
@@ -408,7 +427,7 @@ body .ui-widget{
     display: block;
     font-size: 17px;
     font-weight: 500;
-    font-family: "New Order";
+    font-family: "Inter";
 }
 
 .title-name-top-func{
@@ -448,6 +467,20 @@ body .ui-widget{
 
 .title-date:first-child{
     margin-bottom: 4px !important;
+}
+
+.title-list{
+	display: block;
+	font-size: 12px;
+	font-weight: 500;
+	color: #8A8A8A;
+}
+
+.subtitle-list{
+	font-size: 14px;
+	color: #0C0C17;
+	font-weight: bold;
+	text-transform: uppercase;
 }
 
 .subtitle-obj{
@@ -659,6 +692,62 @@ body .ui-dialog:has( .header-modal) .ui-dialog-titlebar{
     padding: 0;
 }
 
+/* Cards */
+
+.card-list{
+	padding: 20px;
+	background: #FFFFFF;
+	border-radius: 8px;
+	line-height: 20px;
+    box-shadow: 0 3px 6px #00000029;
+    transition: all .2s ease;
+    position: relative;
+}
+
+.card-list::before{
+	content: "";
+	display: block;
+	width: 3px;
+	height: 40px;
+	position: absolute;
+	left: 0;
+	top: 16px;
+}
+
+.card-list.ativo::before{
+	background: #66D875;
+}
+
+.card-list.inativo::before{
+	background: #EE1E1E;
+}
+
+.card-list div{
+	pointer-events: none;
+}
+
+.card-list:hover{
+	cursor: pointer;
+	background: #ededed;
+	text-decoration: none;
+}
+
+.card-list .title-list{
+	display: block;
+	font-size: 12px;
+	font-weight: 500;
+	color: #8A8A8A;
+	
+}
+
+.card-list .subtitle-list{
+	font-size: 14px;
+	color: #0C0C17;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+
 /* Others */
 
 .header-filters{
@@ -675,59 +764,61 @@ body .ui-dialog:has( .header-modal) .ui-dialog-titlebar{
     width: 46px;
 }
 
-  .fluxo-grafico {
-    width: 100%;
-    max-width: 40px;
-    background-color: #6367D9;
-    border-radius: 20px 20px 0 0;
-    align-self: center;
-    height: 100%;
-    margin-top: 13.78px;
-  }
+.fluxo-grafico {
+  width: 100%;
+  max-width: 40px;
+  background-color: #6367D9;
+  border-radius: 20px 20px 0 0;
+  align-self: center;
+  height: 100%;
+  margin-top: 13.78px;
+}
   
-  .perfil-top-funcionario{
-     width: 68px;
-    height: 68px;
-    background: #E3C695;
-    border-radius: 50%;
-    margin-top: 10px;
-    background-image: url(../images/top-func.svg)
-  }
+.perfil-top-funcionario{
+   width: 68px;
+  height: 68px;
+  background: #E3C695;
+  border-radius: 50%;
+  margin-top: 10px;
+  background-image: url(../images/top-func.svg)
+}
  
-  label{
-    margin-bottom: 0 !important;
-    padding: 0;
-    line-height: 1;
+label{
+  margin-bottom: 0 !important;
+  padding: 0;
+  line-height: 1;
 }
 
 body .ui-datatable thead th {
-    background: none;
-    padding: 0 13px 7px;
+    background: none !important;
+    padding: 0 13px 7px !important;
     font-size: 12px;
-    border: none;
+    border: none !important;
+    font-family: "Barlow"
 }
 
 body .ui-datatable .ui-datatable-data>tr>td {
-    padding: 10px 13px;
+    padding: 10px 13px !important;
     font-size: 12px;
     font-weight: bold;
+    font-family: "Barlow"
 }
 
 body .ui-datatable .ui-datatable-data>tr{
-    background: transparent;
+    background: transparent !important;
 }
 
 body .ui-datatable .ui-datatable-data>tr>td {
-    border: none;
+    border: none !important;
     height: 39px;
 }
 
 body .ui-datatable .ui-datatable-odd > td{
-    background-color: #F6F7FB;
+    background-color: transparent;
 }
 
 body .ui-datatable .ui-datatable-even > td{
-    background-color: transparent;
+    background-color: #F6F7FB;
 }
 
 body .ui-datatable .ui-datatable-data>tr>td:first-child {
@@ -741,6 +832,10 @@ body .ui-datatable .ui-datatable-data>tr>td:last-child {
 body .ui-datatable .ui-datatable-data>tr>td[colspan="5"] {
     height: 514px;
     font-size: 17px;
+}
+
+.ui-datatable table{
+	table-layout: auto;
 }
 
 .ui-datatable-tablewrapper{
@@ -765,6 +860,30 @@ body .ui-growl .ui-growl-item-container .ui-growl-item {
     border: 1px solid #ef5350;
     color: #b71c1c;
 
+}
+
+body .dataList-custom.ui-datalist .ui-datalist-content,
+body .dataList-dialog-custom.ui-datalist .ui-datalist-content {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: 17px;
+}
+
+dl, ol, .dataList-dialog-custom ul[class="ui-datalist-data"] {
+    margin: 0;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    row-gap: 17px;
 }
 
 .fundo-valores-totais{

@@ -1,5 +1,6 @@
 package com.barbersys.controller;
 
+import com.barbersys.dao.ControleCaixaDAO;
 import com.barbersys.dao.GenericDAO;
 import com.barbersys.model.ControleCaixa;
 import java.io.Serializable;
@@ -31,9 +32,10 @@ import org.primefaces.model.SortMeta;
 @SessionScoped
 public class ControleCaixaController implements Serializable {
 
-    private String statusSelecionado = "a";
-    private String verificaCampo = "a";
-    private Boolean dadosLiberados = false;
+    private String statusSelecionado = "f";
+    private String verificaCampo = "f";
+    private Boolean dadosLiberados = true;
+    private Boolean chaveCaixa = false;
     private Date dataSelecionada = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
     private LazyDataModel<ControleCaixa> lstControleCaixa;
     private ControleCaixa controleCaixaModel = new ControleCaixa();
@@ -52,12 +54,12 @@ public class ControleCaixaController implements Serializable {
 
             @Override
             public List<ControleCaixa> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
-                return GenericDAO.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor); 
+                return ControleCaixaDAO.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor); 
             }
             
               @Override
             public int count(Map<String, FilterMeta> filterBy) {
-                return GenericDAO.contarTotalCaixas(dataSelecionada, filtroTipoDeValor);
+                return ControleCaixaDAO.contarTotalCaixas(dataSelecionada, filtroTipoDeValor);
             }
             
         };
@@ -66,8 +68,8 @@ public class ControleCaixaController implements Serializable {
     }
     
     public void calcularTotal() {
-        List<Map<String, Object>> listaPorDia = GenericDAO.buscarCaixasContagem(this.dataSelecionada);
-        List<Map<String, Object>> listaPorMes = GenericDAO.buscarCaixasContagemPorMes(dataSelecionada);
+        List<Map<String, Object>> listaPorDia = ControleCaixaDAO.buscarCaixasContagem(this.dataSelecionada);
+        List<Map<String, Object>> listaPorMes = ControleCaixaDAO.buscarCaixasContagemPorMes(dataSelecionada);
   
         for (Map<String, Object>caixa : listaPorDia) {
             Double tipoValorEntrada = (Double) caixa.get("entrada");
@@ -113,6 +115,7 @@ public class ControleCaixaController implements Serializable {
         
         if (dataSelecionadaFormatada.equals(dataAtualFormatada)) {
             statusSelecionado = verificaCampo;
+            chaveCaixa = false;
             
             if(verificaCampo.equals("a")){
                 dadosLiberados = false;
@@ -123,6 +126,7 @@ public class ControleCaixaController implements Serializable {
         } else if(!dataSelecionadaFormatada.equals(dataAtualFormatada)) {
             statusSelecionado = "f";
             dadosLiberados = true;
+            chaveCaixa = true;
         }
         
         calcularTotal();
@@ -140,7 +144,7 @@ public class ControleCaixaController implements Serializable {
             controleCaixaModel.setMovimentacao("Saida");
         }
         
-        GenericDAO.salvar(controleCaixaModel);
+        ControleCaixaDAO.salvar(controleCaixaModel);
         
         controleCaixaModel = new ControleCaixa();
         

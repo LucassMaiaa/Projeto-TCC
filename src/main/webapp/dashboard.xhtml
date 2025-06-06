@@ -67,52 +67,10 @@
             }
         </style>    
         
-         <h:form styleClass="main"> 
+         <h:form id="form" styleClass="main"> 
              <div class="grid-content">
                  
-                 <div class="content-menu-lateral">
-                     <div class="logo-menu-lateral">
-                         <img src="#{request.contextPath}/resources/images/logo.svg" />
-                    </div>
-                     <div class="content-botoes-lateral">
-                         <p:commandLink class="btn-circle btn-circle-active" >
-                             <i class="fa-solid fa-house"></i>
-                         </p:commandLink>
-                         <p:commandLink class="btn-circle" action="agendamento.html?faces-redirect=true">
-                             <i class="fa-solid fa-calendar-days"></i>
-                         </p:commandLink>
-                         <p:commandLink class="btn-circle" >
-                             <i class="fa-solid fa-file-lines"></i>
-                         </p:commandLink>
-                         <p:commandLink  class="btn-circle" action="controle_caixa.html?faces-redirect=true">
-                             <i class="fa-solid fa-money-bill-transfer"></i>
-                         </p:commandLink>
-                         <div class="relative">
-                             <div  id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
-                                 <label class="title-name-top-func">Cadastros</label>
-                                 <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Clientes</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Funcionários</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Usuários</label>
-                                 </p:commandLink>
-                                  <p:commandLink  action="controle_caixa.html?faces-redirect=true">
-                                     <label class="title-menu-flutuante">Tipo de pagamento/serviços</label>
-                                 </p:commandLink>
-                                     
-                             </div>
-                             <p:commandLink class="btn-circle" onclick="openDiv(event)">
-                                <i class="fa-solid fa-gear"></i>
-                            </p:commandLink>
-                         </div>
-                     </div>
-                     <div>
-                         
-                     </div>
-                 </div>
+                 <ui:include src="menu_lateral.xhtml"></ui:include>
                  <div class="content-dashboard">
                      <div class="content-perfil flex space-between">
                          <div class="flex align-center">
@@ -139,7 +97,7 @@
                      <div class="header-filters">
                            <div class="content-filter ">
                                <i class="fa-solid fa-filter"></i>
-                               <p:selectOneButton value="#{financeiroController.dataSelecionada}">
+                               <p:selectOneButton value="#{homeController.dataSelecionada}" unselectable="false">
                                     <f:selectItem itemLabel="mês" itemValue="m" />
                                     <f:selectItem itemLabel="ano" itemValue="a" />
                                     <p:ajax update="@form" process="@this"/>
@@ -154,8 +112,11 @@
                                      <i class="fa-solid fa-hand-holding-dollar"></i>
                                  </div>
                                  <div class="subtitle-info">
-                                     <label class="title-info">Faturado no - #{financeiroController.dataSelecionada == "m" ? "mês" : "ano" }</label>
-                                     <label class="sub-info">R$ 500,00</label>
+                                 	<h:panelGroup id="lblFaturado">
+                                 		 <h:outputLabel  class="title-info">Faturado no - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
+                                    	 <label class="sub-info">R$ 500,00</label>
+                                 	</h:panelGroup>
+                                    
                                  </div>
                              </div>
                              
@@ -265,8 +226,12 @@
                                  <div class="icon-circle icon-circle-green">
                                      <i class="fa-solid fa-calendar-plus"></i>
                                  </div>
+       
                                  <div class="subtitle-info">
-                                     <label class="title-info">Agendamentos - #{financeiroController.dataSelecionada == "m" ? "mês" : "ano" }</label>
+                                 	<h:panelGroup id="lblAgendamentos">
+                                 		 <h:outputLabel class="title-info">Agendamentos - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
+                                 	</h:panelGroup>
+                                    
                                  </div>
                              </div>
                          </div>
@@ -301,7 +266,7 @@
                  </div>
                  
                  <div class="content-filter no-filter">
-                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}">
+                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}" unselectable="false">
                         <f:selectItem itemLabel="Com cadastro" itemValue="c" />
                          <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
                          <p:ajax update="dlgAttCliente" process="@this"/>
@@ -394,6 +359,7 @@
             </p:dialog>
              
         </h:form>
+        
         
     </h:body>
 </html>
