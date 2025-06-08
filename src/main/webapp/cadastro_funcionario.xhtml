@@ -132,10 +132,14 @@
             
              <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
                  <div class="header-modal">
-                     <div class="icon-circle">
-                         <i class="fa-solid fa-calendar-days"></i>
-                     </div>
-                     <label>Novo Funcionário</label>
+                 	<div>
+                 		<div class="icon-circle">
+	                         <i class="fa-solid fa-calendar-days"></i>
+	                     </div>
+	                     <label>Novo Funcionário</label>
+                 	</div>
+                     
+                    <p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark" onclick="PF('dlgAgendar').hide()" />
                  </div>
                  
                  <div class="content-filter no-filter">

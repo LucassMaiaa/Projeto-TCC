@@ -60,6 +60,10 @@ body .ui-widget{
     justify-content: center;
 }
 
+.justify-end{
+	justify-content: end;
+}
+
 .column{
     flex-direction: column;
 }
@@ -309,6 +313,24 @@ body .ui-widget{
     background: black !important;
     color: white !important;
     text-decoration: none !important;
+}
+
+.btn-x.ui-button{
+	border-radius: 50% ;
+    width: 30px !important;
+    height: 30px ;
+    background: #EBEBEB;
+    color: black;
+    border: none;
+}
+
+.btn-x:hover{
+    background: #D1D1D1 !important;
+    color: black !important;
+}
+
+.btn-x.ui-button.ui-button-icon-only .ui-icon {
+    left: 55% !important;
 }
 
 .btn-sair-header.ui-button .ui-button-text {
@@ -681,6 +703,7 @@ body .ui-datepicker .ui-datepicker-calendar td{
     padding-bottom: 15px;
     border-bottom: 1px solid #EBEBEB;
     margin-bottom: 15px;
+    justify-content: space-between;
 }
 
 body .ui-dialog:has( .header-modal) .ui-dialog-content{

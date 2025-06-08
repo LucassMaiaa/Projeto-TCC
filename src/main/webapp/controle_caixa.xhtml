@@ -20,7 +20,7 @@
             .content-agendamentos{
                 border-radius: 0px;
                 height: 100vh;
-                max-height: calc(100vh - 290px);
+                max-height: calc(100vh - 354px);
                 padding: 15px 20px 30px;
             }
             
@@ -29,19 +29,25 @@
             }
             
             .content-valores {
-                height: 140px;
+                height: 204px;
             }
             
            body .ui-datatable thead tr:not(.ui-datatable-empty-message),
            body .ui-datatable tbody tr:not(.ui-datatable-empty-message){
                 display: grid;
-                grid-template-columns: 62px 130px 110px 70px 1fr;
+                grid-template-columns: 62px 150px 110px 70px 1fr;
             }
             
             body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
             body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message){
                 text-align: center !important;
             }
+            
+            body .ui-dialog:has( .header-modal) .ui-dialog-content {
+			    padding: 20px;
+			    width: 400px;
+			    min-width: 400px !important;
+			}
             
         </style>    
         
@@ -129,9 +135,9 @@
                      </div>
                      <div class="content-btns">
                          <p:selectOneButton disabled="#{controleCaixaController.chaveCaixa}" id="attBtnCaixa" value="#{controleCaixaController.statusSelecionado}" unselectable="false">
-                            <f:selectItem itemLabel="Aberto" itemValue="a" />
-                             <f:selectItem itemLabel="Fechado" itemValue="f" />   
-                             <p:ajax update="@form" process="@this"  listener="#{controleCaixaController.verificaTravaCampo()}"/>
+                            <f:selectItem itemLabel="Aberto" itemValue="A" />
+                             <f:selectItem itemLabel="Fechado" itemValue="I" />   
+                             <p:ajax update="@form" process="@this"  listener="#{controleCaixaController.verificaTravaCampo()}" oncomplete="if (args.aberto) PF('dlgSaldo').show();"/>
                          </p:selectOneButton>
                          
                          <p:outputPanel id="attCaixa">
@@ -139,11 +145,11 @@
                                  <p:outputLabel class="title-date" value="#{controleCaixaController.dataSelecionada}">
                                      <f:convertDateTime pattern="dd/MM/yyyy" />
                                  </p:outputLabel>
-                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'f'}" >
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}" >
                                      <p:outputLabel class="title-date" style="background: #C52323" 
                                                value="Fechado" />
                                  </ui:fragment>
-                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'a'}" >
+                                 <ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'A'}" >
                                      <p:outputLabel class="title-date" style="background: #23C538 " 
                                                value="Aberto" />
                                  </ui:fragment>
@@ -153,30 +159,44 @@
                          
                      </div>
                      <div class="content-valores">
-                         <div class="input-combined input-valores">
-                             <div class="row">
-                                 <div class="col-md-6">
-                                     <p:outputLabel class="title-input" value="Total de entradas no dia"/>
-                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradas}" readonly="true"/>
-                                 </div>
-                                 <div class="col-md-6">
-                                     <p:outputLabel class="title-input" value="Total de saídas no dia"/>
-                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidas}" readonly="true"/>
-                                 </div>
-                             </div>
-                             
-                             <div class="row">
-                                 <div class="col-md-6">
-                                     <p:outputLabel class="title-input" value="Total de entradas no mês"/>
-                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradasMes}" readonly="true"/>
-                                 </div>
-                                 <div class="col-md-6">
-                                     <p:outputLabel class="title-input" value="Total de saídas no mês"/>
-                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidasMes}" readonly="true"/>
-                                 </div>
-                             </div>
-                            
-                         </div>
+                     	<h:panelGroup id="vlrCaixa">
+                     		<div class="input-combined input-valores">
+	                         	<div class="row">
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Caixa Inicial do dia"/>
+	                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.valorInicial}" readonly="true"/>
+	                                 </div>
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Caixa Final do dia"/>
+	                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.valorFinal}" readonly="true"/>
+	                                 </div>
+	                             </div>
+	                         
+	                             <div class="row">
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Total de entradas no dia"/>
+	                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradas}" readonly="true"/>
+	                                 </div>
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Total de saídas no dia"/>
+	                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidas}" readonly="true"/>
+	                                 </div>
+	                             </div>
+	                             
+	                             <div class="row">
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Total de entradas no mês"/>
+	                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.totalEntradasMes}" readonly="true"/>
+	                                 </div>
+	                                 <div class="col-md-6">
+	                                     <p:outputLabel class="title-input" value="Total de saídas no mês"/>
+	                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.totalSaidasMes}" readonly="true"/>
+	                                 </div>
+	                             </div>
+	                            
+	                         </div>
+                     	</h:panelGroup>
+                         
                      </div>
                      <div class="content-agendamentos flex column space-between">
                          <div>
@@ -234,6 +254,64 @@
                      </div>
                  </div>
              </div>
+             
+             <p:dialog id="dlgSaldo" widgetVar="dlgSaldo" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
+                 <div class="header-modal">
+                 	<div class="flex align-center">
+                 		<div class="icon-circle">
+	                         <i class="fa-solid fa-calendar-days"></i>
+	                     </div>
+	                     <p:outputLabel value="#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}" />
+                 	</div>
+                 </div>
+                 
+                 <h:panelGroup id="dialogVlr">
+                 	<div class="row">
+	                     <div class="col-md-12">
+	                     	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
+	                     		<div class="input-combined">
+	                              <p:outputLabel class="title-input" value="Valor Inicial" />
+	                              <p:inputNumber symbol="R$ " value="#{controleCaixaController.valorInicial}" 
+	                                             required="true" requiredMessage="Preencha o campo de valor" />
+	                          	</div>
+	                     	</ui:fragment>
+	                     	
+	                     	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
+	                     		<div class="input-combined">
+	                              <p:outputLabel class="title-input" value="Valor Final" />
+	                              <p:inputNumber symbol="R$ " value="#{controleCaixaController.valorFinal}" 
+	                                             required="true" requiredMessage="Preencha o campo de valor" />
+	                          	</div>
+	                     	</ui:fragment>
+	                     </div>
+	                 </div>
+	                 
+	                 <ui:fragment rendered="#{controleCaixaController.motivoFinal eq 'A'}">
+	                 	<div class="row">
+		                     <div class="col-md-12">
+		                         <div class="input-combined">
+		                             <p:outputLabel class="title-input" value="Valor final menor que o inicial informe o motivo"/>
+		                             <p:inputTextarea maxlength="100" required="true" value="#{controleCaixaController.mensagemMotivoFinal}"/>
+		                         </div>
+		                     </div>
+		                 </div>
+	                 </ui:fragment>
+                 </h:panelGroup>
+                 
+                  <div class="flex justify-center mt15">
+                  	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
+                  		<p:commandButton class="btn btn-blue medium" value="Registrar" update="@form" process="dlgSaldo" actionListener="#{controleCaixaController.salvarRegistroInicial()}" />
+                  	</ui:fragment>
+                  	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
+                  		<p:commandButton class="btn btn-blue medium" value="Registrar"
+                  		 update="datatableCaixas vlrCaixa dialogVlr" process="@this" 
+                  		 actionListener="#{controleCaixaController.salvarRegistroFinal()}"
+                  		 oncomplete="if (!args.mostrarMotivo) PF('dlgSaldo').hide();" />
+                  	</ui:fragment>
+                      
+                  </div>
+                 
+            </p:dialog>
              
         </h:form>
         

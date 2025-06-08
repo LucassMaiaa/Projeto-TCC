@@ -41,7 +41,7 @@ public class ControleCaixaDAO {
                 caixa.setMovimentacao(rs.getString("con_movimentacao"));
                 
                 
-                if(caixa.getMovimentacao().equals("Entrada")){
+                if(caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Fechamento de Caixa")){
                     totalEntradas += caixa.getValor();
                      
                 }else if(caixa.getMovimentacao().equals("Saida")){
@@ -91,7 +91,7 @@ public class ControleCaixaDAO {
                 caixa.setData(rs.getDate("con_data"));
                 caixa.setMovimentacao(rs.getString("con_movimentacao"));
 
-                if (caixa.getMovimentacao().equals("Entrada")) {
+                if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
                     totalEntradas += caixa.getValor();
                 } else if (caixa.getMovimentacao().equals("Saida")) {
                     totalSaidas += caixa.getValor();
@@ -115,7 +115,13 @@ public class ControleCaixaDAO {
         List<ControleCaixa> lista = new ArrayList<>();
         String sql = "SELECT con_codigo, con_valor, con_movimentacao, "
                 + "con_hora, con_motivo, con_data FROM controlecaixa  WHERE con_data = ?"
-                + "AND (? = '' OR con_movimentacao = ?) ORDER BY con_codigo DESC LIMIT ?, ? ";
+                + "AND ("
+                + "      ? = '' "
+                + "   OR con_movimentacao = ? "
+                + "   OR con_movimentacao = 'Abertura de Caixa' "
+                + "   OR con_movimentacao = 'Fechamento de Caixa'"
+                + ") "
+                + "ORDER BY con_codigo DESC LIMIT ?, ? ";
         
         try (Connection conn = DatabaseConnection.getConnection(); 
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -178,7 +184,7 @@ public class ControleCaixaDAO {
     
       public static void salvar(ControleCaixa caixa) {
             String sql = "INSERT INTO controlecaixa (con_valor, con_movimentacao, "
-                    + "con_hora, con_motivo, con_data) VALUES (?, ?, ?, ?, ?)";
+                    + "con_hora, con_motivo, con_data, cai_codigo) VALUES (?, ?, ?, ?, ?, ?)";
             try (Connection conn = DatabaseConnection.getConnection(); // Usando a conexão correta
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setDouble(1, caixa.getValor());
@@ -186,6 +192,7 @@ public class ControleCaixaDAO {
                 stmt.setString(3, caixa.getHoraAtual());
                 stmt.setString(4, caixa.getMotivo());
                 stmt.setDate(5, new java.sql.Date (caixa.getData().getTime()));
+                stmt.setLong(6, caixa.getCaixaData().getId());
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
