@@ -163,11 +163,11 @@
                      		<div class="input-combined input-valores">
 	                         	<div class="row">
 	                                 <div class="col-md-6">
-	                                     <p:outputLabel class="title-input" value="Caixa Inicial do dia"/>
+	                                     <p:outputLabel class="title-input" value="Abertura de caixa"/>
 	                                     <p:inputNumber  symbol="R$ " value="#{controleCaixaController.valorInicial}" readonly="true"/>
 	                                 </div>
 	                                 <div class="col-md-6">
-	                                     <p:outputLabel class="title-input" value="Caixa Final do dia"/>
+	                                     <p:outputLabel class="title-input" value="Fechamento de caixa"/>
 	                                     <p:inputNumber symbol="R$ " value="#{controleCaixaController.valorFinal}" readonly="true"/>
 	                                 </div>
 	                             </div>
@@ -264,6 +264,7 @@
 	                     <p:outputLabel value="#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}" />
                  	</div>
                  </div>
+                 <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true" />
                  
                  <h:panelGroup id="dialogVlr">
                  	<div class="row">
@@ -286,16 +287,18 @@
 	                     </div>
 	                 </div>
 	                 
-	                 <ui:fragment rendered="#{controleCaixaController.motivoFinal eq 'A'}">
-	                 	<div class="row">
+	               
+                	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
+                		<div class="row">
 		                     <div class="col-md-12">
 		                         <div class="input-combined">
-		                             <p:outputLabel class="title-input" value="Valor final menor que o inicial informe o motivo"/>
-		                             <p:inputTextarea maxlength="100" required="true" value="#{controleCaixaController.mensagemMotivoFinal}"/>
+		                             <p:outputLabel class="title-input" value="#{controleCaixaController.motivoFinal eq 'A' ? 'Valor final menor que o inicial informe o motivo' : 'Motivo'}"/>
+		                             <p:inputTextarea maxlength="100" required="#{controleCaixaController.motivoFinal eq 'A' ? true : false}" value="#{controleCaixaController.mensagemMotivoFinal}"/>
 		                         </div>
 		                     </div>
 		                 </div>
-	                 </ui:fragment>
+                	</ui:fragment>
+	                
                  </h:panelGroup>
                  
                   <div class="flex justify-center mt15">
@@ -303,10 +306,13 @@
                   		<p:commandButton class="btn btn-blue medium" value="Registrar" update="@form" process="dlgSaldo" actionListener="#{controleCaixaController.salvarRegistroInicial()}" />
                   	</ui:fragment>
                   	<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
-                  		<p:commandButton class="btn btn-blue medium" value="Registrar"
-                  		 update="datatableCaixas vlrCaixa dialogVlr" process="@this" 
-                  		 actionListener="#{controleCaixaController.salvarRegistroFinal()}"
-                  		 oncomplete="if (!args.mostrarMotivo) PF('dlgSaldo').hide();" />
+                  		<p:commandButton 
+					    class="btn btn-blue medium" 
+					    value="Registrar"
+					    update="datatableCaixas vlrCaixa dialogVlr messages" 
+					    process="dlgSaldo" 
+					    actionListener="#{controleCaixaController.salvarRegistroFinal()}" 
+					    oncomplete="if (args.validado) PF('dlgSaldo').hide();" />
                   	</ui:fragment>
                       
                   </div>

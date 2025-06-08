@@ -15,8 +15,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
+import javax.faces.context.FacesContext;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -98,7 +101,10 @@ public class ControleCaixaController implements Serializable {
     }
 
     public void verificaTravaCampo(){
-        PrimeFaces.current().ajax().addCallbackParam("aberto", true);   
+        PrimeFaces.current().ajax().addCallbackParam("aberto", true); 
+        if(statusSelecionado.equals("A")) {
+        	valorInicial = 0.0;
+        }
     }
     
     public void verificaData() {
@@ -156,10 +162,10 @@ public class ControleCaixaController implements Serializable {
 			caixaDataModel.setValorFinal(valorFinal);
 			caixaDataModel.setStatus(statusSelecionado);
 		}
-		System.out.println(controleCaixaModel.getMotivo());
 		if(caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()) {
     		motivoFinal = "A";
-    		PrimeFaces.current().ajax().addCallbackParam("mostrarMotivo", true);
+    		PrimeFaces.current().ajax().addCallbackParam("validado", false);
+    		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,"", "O campo motivo é obrigatório."));
     	}else {
     		motivoFinal = "I";
     		CaixaDataDAO.atualizar(caixaDataModel);
@@ -173,9 +179,10 @@ public class ControleCaixaController implements Serializable {
             ControleCaixaDAO.salvar(controleCaixaModel);
             
             controleCaixaModel = new ControleCaixa();
+            mensagemMotivoFinal = "";
     		calcularTotal();
     		dadosLiberados = true;
-    		PrimeFaces.current().ajax().addCallbackParam("mostrarMotivo", false);
+    		PrimeFaces.current().ajax().addCallbackParam("validado", true);
     	}
     	
     }
@@ -190,6 +197,11 @@ public class ControleCaixaController implements Serializable {
     		caixaDataModel.setStatus(statusSelecionado);
     		CaixaDataDAO.salvar(caixaDataModel);
     		
+    		List<CaixaData> searchData = CaixaDataDAO.verificaExisteData(dataSelecionada);
+    		
+    		for(CaixaData item : searchData) {
+    			caixaDataModel.setId(item.getId());
+    		}
     		String horaAtualFormatada = LocalTime.now().format(horaFormatada);
             controleCaixaModel.setCaixaData(caixaDataModel);
             controleCaixaModel.setHoraAtual(horaAtualFormatada);
@@ -201,6 +213,7 @@ public class ControleCaixaController implements Serializable {
             controleCaixaModel = new ControleCaixa();
     		
     	}else {
+    		
     		for(CaixaData item : checkData) {
     			caixaDataModel.setId(item.getId());
     			caixaDataModel.setValorInicial(valorInicial);
