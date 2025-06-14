@@ -11,191 +11,280 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.barbersys.model.CaixaData;
 import com.barbersys.model.ControleCaixa;
 import com.barbersys.util.DatabaseConnection;
 
 public class ControleCaixaDAO {
+
+	public static List<Map<String, Object>> buscarCaixasContagem(Date dataSelecionada) {
+		Double totalEntradas = 0.0;
+		Double totalSaidas = 0.0;
+
+		List<Map<String, Object>> listaCarregada = new ArrayList<>();
+		Map<String, Object> lista = new HashMap<>();
+		String sql = "SELECT con_valor, con_data, con_movimentacao FROM controlecaixa WHERE con_data = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
+			String dataFiltro = dataFormatada.format(dataSelecionada);
+
+			ps.setString(1, dataFiltro);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				ControleCaixa caixa = new ControleCaixa();
+				caixa.setValor(rs.getDouble("con_valor"));
+				caixa.setData(rs.getDate("con_data"));
+				caixa.setMovimentacao(rs.getString("con_movimentacao"));
+
+				if (caixa.getMovimentacao().equals("Entrada")) {
+					totalEntradas += caixa.getValor();
+
+				} else if (caixa.getMovimentacao().equals("Saida")) {
+					totalSaidas += caixa.getValor();
+
+				}
+
+			}
+
+			lista.put("entrada", totalEntradas);
+			lista.put("saida", totalSaidas);
+
+			listaCarregada.add(lista);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listaCarregada;
+	}
+
+	public static List<Map<String, Object>> buscarCaixasContagemPorMes(Date dataSelecionada) {
+		Double totalEntradas = 0.0;
+		Double totalSaidas = 0.0;
+
+		List<Map<String, Object>> listaCarregada = new ArrayList<>();
+		Map<String, Object> lista = new HashMap<>();
+
+		String sql = "SELECT con_valor, con_data, con_movimentacao FROM controlecaixa "
+				+ "WHERE MONTH(con_data) = ? AND YEAR(con_data) = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			java.util.Calendar calendar = java.util.Calendar.getInstance();
+			calendar.setTime(dataSelecionada);
+			int mes = calendar.get(java.util.Calendar.MONTH) + 1;
+			int ano = calendar.get(java.util.Calendar.YEAR);
+
+			ps.setInt(1, mes);
+			ps.setInt(2, ano);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				ControleCaixa caixa = new ControleCaixa();
+				caixa.setValor(rs.getDouble("con_valor"));
+				caixa.setData(rs.getDate("con_data"));
+				caixa.setMovimentacao(rs.getString("con_movimentacao"));
+
+				if (caixa.getMovimentacao().equals("Entrada")
+						|| caixa.getMovimentacao().equals("Fechamento de Caixa")) {
+					totalEntradas += caixa.getValor();
+				} else if (caixa.getMovimentacao().equals("Saida")) {
+					totalSaidas += caixa.getValor();
+				}
+			}
+
+			lista.put("entrada", totalEntradas);
+			lista.put("saida", totalSaidas);
+			listaCarregada.add(lista);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return listaCarregada;
+	}
+
+	public static List<ControleCaixa> buscarCaixasPaginado(int first, int pageSize, Date dataSelecionada,
+			String tipoValor) {
+		List<ControleCaixa> lista = new ArrayList<>();
+		String sql = "SELECT con_codigo, con_valor, con_movimentacao, "
+				+ "con_hora, con_motivo, con_data FROM controlecaixa  WHERE con_data = ?" + "AND (" + "      ? = '' "
+				+ "   OR con_movimentacao = ? " + "   OR con_movimentacao = 'Abertura de Caixa' "
+				+ "   OR con_movimentacao = 'Fechamento de Caixa'" + ") " + "ORDER BY con_codigo DESC LIMIT ?, ? ";
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
+			String dataFiltro = dataFormatada.format(dataSelecionada);
+
+			ps.setString(1, dataFiltro);
+			ps.setString(2, tipoValor);
+			ps.setString(3, tipoValor);
+			ps.setInt(4, first);
+			ps.setInt(5, pageSize);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				ControleCaixa caixa = new ControleCaixa();
+				caixa.setId(rs.getLong("con_codigo"));
+				caixa.setValor(rs.getDouble("con_valor"));
+				caixa.setMovimentacao(rs.getString("con_movimentacao"));
+				caixa.setHoraAtual(rs.getString("con_hora"));
+				caixa.setMotivo(rs.getString("con_motivo"));
+				caixa.setData(rs.getDate("con_data"));
+				lista.add(caixa);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return lista;
+	}
+
+	public static int contarTotalCaixas(Date dataSelecionada, String tipoValor) {
+		String sql = "SELECT COUNT(*) FROM controlecaixa WHERE con_data = ? AND (? = '' OR con_movimentacao = ?)";
+		int total = 0;
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);) {
+
+			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
+			String dataFiltro = dataFormatada.format(dataSelecionada);
+
+			ps.setString(1, dataFiltro);
+			ps.setString(2, tipoValor);
+			ps.setString(3, tipoValor);
+
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				total = rs.getInt(1);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return total;
+	}
+
+	public static Map<String, Double> buscarEntradasESaidasDesdeUltimaAbertura(Date dataSelecionada) {
+		Map<String, Double> resultado = new HashMap<>();
+		double totalEntradas = 0.0;
+		double totalSaidas = 0.0;
+
+		String sql = "SELECT con_codigo, con_valor, con_data, con_movimentacao "
+				+ "FROM controlecaixa WHERE con_data = ? ORDER BY con_codigo DESC";
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
+			String dataFiltro = dataFormatada.format(dataSelecionada);
+
+			ps.setString(1, dataFiltro);
+			ResultSet rs = ps.executeQuery();
+
+			Long idUltimaAbertura = -1L;
+
+			while (rs.next()) {
+				String movimentacao = rs.getString("con_movimentacao");
+				if (movimentacao.equals("Abertura de Caixa")) {
+					idUltimaAbertura = rs.getLong("con_codigo");
+					break;
+				}
+			}
+
+			if (idUltimaAbertura != -1L) {
+				String sqlMovimentacoes = "SELECT con_valor, con_movimentacao "
+						+ "FROM controlecaixa WHERE con_data = ? AND con_codigo > ?";
+
+				try (PreparedStatement ps2 = conn.prepareStatement(sqlMovimentacoes)) {
+					ps2.setString(1, dataFiltro);
+					ps2.setLong(2, idUltimaAbertura);
+
+					ResultSet rs2 = ps2.executeQuery();
+					while (rs2.next()) {
+						double valor = rs2.getDouble("con_valor");
+						String movimentacao = rs2.getString("con_movimentacao");
+
+						if (movimentacao.equals("Entrada")) {
+							totalEntradas += valor;
+						} else if (movimentacao.equals("Saida")) {
+							totalSaidas += valor;
+						}
+					}
+				}
+			}
+
+			resultado.put("entrada", totalEntradas);
+			resultado.put("saida", totalSaidas);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return resultado;
+	}
+
+	public static ControleCaixa buscarUltimoRegistroPorData(Date dataSelecionada) {
+	    String sql = "SELECT * FROM controlecaixa WHERE con_data = ? ORDER BY con_hora DESC LIMIT 1";
+	    ControleCaixa controle = null;
+
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
+	        String dataFiltro = dataFormatada.format(dataSelecionada);
+
+	        ps.setString(1, dataFiltro);
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            controle = new ControleCaixa();
+	            controle.setId(rs.getLong("con_codigo"));
+	            controle.setHoraAtual(rs.getString("con_hora"));
+	            controle.setData(rs.getDate("con_data"));
+	            controle.setValor(rs.getDouble("con_valor"));
+	            controle.setMovimentacao(rs.getString("con_movimentacao"));
+	            controle.setMotivo(rs.getString("con_motivo"));
+
+	            CaixaData caixaData = new CaixaData();
+	            caixaData.setId(rs.getLong("cai_codigo"));
+	            controle.setCaixaData(caixaData);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return controle;
+	}
 	
-	 public static List<Map<String, Object>> buscarCaixasContagem(Date dataSelecionada) {
-         Double totalEntradas = 0.0;
-         Double totalSaidas = 0.0;
-         
-        List<Map<String, Object>> listaCarregada = new ArrayList<>();
-        Map<String, Object> lista = new HashMap<>();
-        String sql = "SELECT con_valor, con_data, con_movimentacao FROM controlecaixa WHERE con_data = ?";
-        
-        try (Connection conn = DatabaseConnection.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
-            String dataFiltro = dataFormatada.format(dataSelecionada);
-            
-            ps.setString(1, dataFiltro);
+	public static boolean ultimoRegistroEhFechamento(Date dataSelecionada) {
+	    ControleCaixa ultimoRegistro = buscarUltimoRegistroPorData(dataSelecionada);
+	    if (ultimoRegistro == null) {
+	        return false;
+	    }
+	    return "Fechamento de Caixa".equalsIgnoreCase(ultimoRegistro.getMovimentacao());
+	}
 
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ControleCaixa caixa = new ControleCaixa();
-                caixa.setValor(rs.getDouble("con_valor"));
-                caixa.setData(rs.getDate("con_data"));
-                caixa.setMovimentacao(rs.getString("con_movimentacao"));
-                
-                
-                if(caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Fechamento de Caixa")){
-                    totalEntradas += caixa.getValor();
-                     
-                }else if(caixa.getMovimentacao().equals("Saida")){
-                    totalSaidas += caixa.getValor();
-                    
-                }
-                
-            }
-            
-            lista.put("entrada", totalEntradas);
-            lista.put("saida", totalSaidas);
-            
-            listaCarregada.add(lista);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return listaCarregada;
-    }
-     
-     public static List<Map<String, Object>> buscarCaixasContagemPorMes(Date dataSelecionada) {
-        Double totalEntradas = 0.0;
-        Double totalSaidas = 0.0;
-
-        List<Map<String, Object>> listaCarregada = new ArrayList<>();
-        Map<String, Object> lista = new HashMap<>();
-
-        String sql = "SELECT con_valor, con_data, con_movimentacao FROM controlecaixa "
-                   + "WHERE MONTH(con_data) = ? AND YEAR(con_data) = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            java.util.Calendar calendar = java.util.Calendar.getInstance();
-            calendar.setTime(dataSelecionada);
-            int mes = calendar.get(java.util.Calendar.MONTH) + 1; 
-            int ano = calendar.get(java.util.Calendar.YEAR);
-
-            ps.setInt(1, mes);
-            ps.setInt(2, ano);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ControleCaixa caixa = new ControleCaixa();
-                caixa.setValor(rs.getDouble("con_valor"));
-                caixa.setData(rs.getDate("con_data"));
-                caixa.setMovimentacao(rs.getString("con_movimentacao"));
-
-                if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
-                    totalEntradas += caixa.getValor();
-                } else if (caixa.getMovimentacao().equals("Saida")) {
-                    totalSaidas += caixa.getValor();
-                }
-            }
-
-            lista.put("entrada", totalEntradas);
-            lista.put("saida", totalSaidas);
-            listaCarregada.add(lista);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return listaCarregada;
-    }
-
-    
-
-    public static List<ControleCaixa> buscarCaixasPaginado(int first, int pageSize, Date dataSelecionada, String tipoValor) {
-        List<ControleCaixa> lista = new ArrayList<>();
-        String sql = "SELECT con_codigo, con_valor, con_movimentacao, "
-                + "con_hora, con_motivo, con_data FROM controlecaixa  WHERE con_data = ?"
-                + "AND ("
-                + "      ? = '' "
-                + "   OR con_movimentacao = ? "
-                + "   OR con_movimentacao = 'Abertura de Caixa' "
-                + "   OR con_movimentacao = 'Fechamento de Caixa'"
-                + ") "
-                + "ORDER BY con_codigo DESC LIMIT ?, ? ";
-        
-        try (Connection conn = DatabaseConnection.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
-            String dataFiltro = dataFormatada.format(dataSelecionada);
-            
-            ps.setString(1, dataFiltro);
-            ps.setString(2, tipoValor);
-            ps.setString(3, tipoValor);
-            ps.setInt(4, first);
-            ps.setInt(5, pageSize);
-            
-
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ControleCaixa caixa = new ControleCaixa();
-                caixa.setId(rs.getLong("con_codigo"));
-                caixa.setValor(rs.getDouble("con_valor"));
-                caixa.setMovimentacao(rs.getString("con_movimentacao"));
-                caixa.setHoraAtual(rs.getString("con_hora"));
-                caixa.setMotivo(rs.getString("con_motivo"));
-                caixa.setData(rs.getDate("con_data"));
-                lista.add(caixa);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return lista;
-    }
-
-    public static int contarTotalCaixas(Date dataSelecionada, String tipoValor) {
-        String sql = "SELECT COUNT(*) FROM controlecaixa WHERE con_data = ? AND (? = '' OR con_movimentacao = ?)";
-        int total = 0;
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);) {
-            
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
-            String dataFiltro = dataFormatada.format(dataSelecionada);
-            
-            ps.setString(1, dataFiltro);
-            ps.setString(2, tipoValor);
-            ps.setString(3, tipoValor);
-            
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                total = rs.getInt(1);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return total;
-    }
-    
-      public static void salvar(ControleCaixa caixa) {
-            String sql = "INSERT INTO controlecaixa (con_valor, con_movimentacao, "
-                    + "con_hora, con_motivo, con_data, cai_codigo) VALUES (?, ?, ?, ?, ?, ?)";
-            try (Connection conn = DatabaseConnection.getConnection(); // Usando a conexão correta
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setDouble(1, caixa.getValor());
-                stmt.setString(2, caixa.getMovimentacao());
-                stmt.setString(3, caixa.getHoraAtual());
-                stmt.setString(4, caixa.getMotivo());
-                stmt.setDate(5, new java.sql.Date (caixa.getData().getTime()));
-                stmt.setLong(6, caixa.getCaixaData().getId());
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+	public static void salvar(ControleCaixa caixa) {
+		String sql = "INSERT INTO controlecaixa (con_valor, con_movimentacao, "
+				+ "con_hora, con_motivo, con_data, cai_codigo) VALUES (?, ?, ?, ?, ?, ?)";
+		try (Connection conn = DatabaseConnection.getConnection(); // Usando a conexão correta
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setDouble(1, caixa.getValor());
+			stmt.setString(2, caixa.getMovimentacao());
+			stmt.setString(3, caixa.getHoraAtual());
+			stmt.setString(4, caixa.getMotivo());
+			stmt.setDate(5, new java.sql.Date(caixa.getData().getTime()));
+			stmt.setLong(6, caixa.getCaixaData().getId());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

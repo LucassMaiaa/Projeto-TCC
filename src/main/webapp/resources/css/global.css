@@ -537,6 +537,20 @@ body .ui-widget{
     font-weight: bold;
 }
 
+.desc-topo{
+    font-size: 12px;
+    font-family: 'Barlow';
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.desc-topo-segundary{
+    font-size: 14px;
+    font-family: 'Barlow';
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
 /* Grids */
 .grid-top-grafico{
     display: grid;
@@ -665,7 +679,7 @@ body .ui-datepicker .ui-datepicker-calendar td{
 
 .select-segundario .ui-selectonebutton {
     display: flex;
-    padding: 0px;
+    padding: 0px !important;
     background-color: #DBDBDB;
     border-radius: 25px;
     height: fit-content;
