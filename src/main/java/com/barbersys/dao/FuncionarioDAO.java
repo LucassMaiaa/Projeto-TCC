@@ -1,5 +1,6 @@
 package com.barbersys.dao;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,137 +12,162 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.barbersys.model.CaixaData;
 import com.barbersys.model.ControleCaixa;
 import com.barbersys.model.Funcionario;
 import com.barbersys.util.DatabaseConnection;
 
 public class FuncionarioDAO {
 	
-	 public static int funcionarioCount(){   
-		String sql = "SELECT COUNT(*) FROM funcionario";
-        int total = 0;
+	public static int funcionarioCount(String nome, String status) {
+	    int total = 0;
+	    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM funcionario WHERE 1=1");
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);) {           
-            
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                total = rs.getInt(1);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return total;
-    }
-     
-	 public static List<Funcionario> buscarFuncionario(int first, int pageSize) {
-	        List<Funcionario> lista = new ArrayList<>();
-	        String sql = "SELECT * FROM funcionario ORDER BY fun_codigo DESC LIMIT ?, ?";
-	        
-	        try (Connection conn = DatabaseConnection.getConnection(); 
-	             PreparedStatement ps = conn.prepareStatement(sql)) {
-	                        
-	            ps.setInt(1, first);
-	            ps.setInt(2, pageSize);    
-
-	            ResultSet rs = ps.executeQuery();
-
-	            while (rs.next()) {
-	                Funcionario funcionario = new Funcionario();
-	                funcionario.setId(rs.getLong("fun_codigo"));
-	                funcionario.setNome(rs.getString("fun_nome"));
-	                funcionario.setStatus(rs.getString("fun_status"));
-	                lista.add(funcionario);
-	            }
-
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-	        return lista;
+	    if (nome != null && !nome.trim().isEmpty()) {
+	        sql.append(" AND LOWER(fun_nome) LIKE ?");
 	    }
 
-    
+	    if (status != null && !status.equals("")) {
+	        sql.append(" AND fun_status = ?");
+	    }
 
-    public static List<ControleCaixa> buscarCaixasPaginado(int first, int pageSize, Date dataSelecionada, String tipoValor) {
-        List<ControleCaixa> lista = new ArrayList<>();
-        String sql = "SELECT con_codigo, con_valor, con_movimentacao, "
-                + "con_hora, con_motivo, con_data FROM controlecaixa  WHERE con_data = ?"
-                + "AND (? = '' OR con_movimentacao = ?) ORDER BY con_codigo DESC LIMIT ?, ? ";
-        
-        try (Connection conn = DatabaseConnection.getConnection(); 
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
-            String dataFiltro = dataFormatada.format(dataSelecionada);
-            
-            ps.setString(1, dataFiltro);
-            ps.setString(2, tipoValor);
-            ps.setString(3, tipoValor);
-            ps.setInt(4, first);
-            ps.setInt(5, pageSize);
-            
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+	        int paramIndex = 1;
+
+	        if (nome != null && !nome.trim().isEmpty()) {
+	            ps.setString(paramIndex++, "%" + nome.toLowerCase() + "%");
+	        }
+
+	        if (status != null && !status.equals("")) {
+	            ps.setString(paramIndex++, status);
+	        }
+
+	        ResultSet rs = ps.executeQuery();
+	        if (rs.next()) {
+	            total = rs.getInt(1);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return total;
+	}
 
 
-            ResultSet rs = ps.executeQuery();
+	public static List<Funcionario> buscarFuncionario(String nome, String status, int first, int pageSize) {
+		List<Funcionario> lista = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM funcionario WHERE 1=1");
 
-            while (rs.next()) {
-                ControleCaixa caixa = new ControleCaixa();
-                caixa.setId(rs.getLong("con_codigo"));
-                caixa.setValor(rs.getDouble("con_valor"));
-                caixa.setMovimentacao(rs.getString("con_movimentacao"));
-                caixa.setHoraAtual(rs.getString("con_hora"));
-                caixa.setMotivo(rs.getString("con_motivo"));
-                caixa.setData(rs.getDate("con_data"));
-                lista.add(caixa);
-            }
+		if (nome != null && !nome.trim().isEmpty()) {
+			sql.append(" AND LOWER(fun_nome) LIKE ?");
+		}
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return lista;
-    }
+		if (status != null && !status.isEmpty()) {
+			sql.append(" AND fun_status = ?");
+		}
 
-    public static int contarTotalCaixas(Date dataSelecionada, String tipoValor) {
-        String sql = "SELECT COUNT(*) FROM controlecaixa WHERE con_data = ? AND (? = '' OR con_movimentacao = ?)";
-        int total = 0;
+		sql.append(" ORDER BY fun_codigo DESC LIMIT ?, ?");
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);) {
-            
-            SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
-            String dataFiltro = dataFormatada.format(dataSelecionada);
-            
-            ps.setString(1, dataFiltro);
-            ps.setString(2, tipoValor);
-            ps.setString(3, tipoValor);
-            
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                total = rs.getInt(1);
-            }
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return total;
-    }
-    
-      public static void salvar(ControleCaixa caixa) {
-            String sql = "INSERT INTO controlecaixa (con_valor, con_movimentacao, "
-                    + "con_hora, con_motivo, con_data) VALUES (?, ?, ?, ?, ?)";
-            try (Connection conn = DatabaseConnection.getConnection(); // Usando a conexão correta
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setDouble(1, caixa.getValor());
-                stmt.setString(2, caixa.getMovimentacao());
-                stmt.setString(3, caixa.getHoraAtual());
-                stmt.setString(4, caixa.getMotivo());
-                stmt.setDate(5, new java.sql.Date (caixa.getData().getTime()));
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+			int paramIndex = 1;
+
+			if (nome != null && !nome.trim().isEmpty()) {
+				ps.setString(paramIndex++, "%" + nome.toLowerCase() + "%");
+			}
+
+			if (status != null && !status.isEmpty()) {
+				ps.setString(paramIndex++, status);
+			}
+
+			ps.setInt(paramIndex++, first);
+			ps.setInt(paramIndex, pageSize);
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Funcionario funcionario = new Funcionario();
+				funcionario.setId(rs.getLong("fun_codigo"));
+				funcionario.setNome(rs.getString("fun_nome"));
+				funcionario.setStatus(rs.getString("fun_status"));
+				lista.add(funcionario);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
+
+	public static void atualizar(Funcionario funcionario) {
+		String sql = "UPDATE funcionario SET fun_nome = ?, fun_status = ? WHERE fun_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, funcionario.getNome());
+			stmt.setString(2, funcionario.getStatus());
+			stmt.setLong(3, funcionario.getId());
+
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void deletarHorariosPorFuncionario(Funcionario funcionario) {
+		String sql = "DELETE FROM horario WHERE fun_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setLong(1, funcionario.getId());
+			stmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void deletar(Funcionario funcionario) {
+		String sql = "DELETE FROM funcionario WHERE fun_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			deletarHorariosPorFuncionario(funcionario);
+
+			stmt.setLong(1, funcionario.getId());
+			stmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void salvar(Funcionario funcionario) {
+		String sql = "INSERT INTO funcionario (fun_nome, fun_status) VALUES (?, ?)";
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+			stmt.setString(1, funcionario.getNome());
+			stmt.setString(2, funcionario.getStatus());
+			stmt.executeUpdate();
+
+			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					funcionario.setId(generatedKeys.getLong(1));
+				}
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

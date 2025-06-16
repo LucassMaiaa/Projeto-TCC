@@ -27,8 +27,6 @@ public class Funcionario implements Serializable{
 	private String nome;
 	
 	@Column
-	private String status;
+	private String status = "A";
 	
-	@OneToMany(mappedBy = "funcionario")
-	private List<Horario> horarios;
 }
