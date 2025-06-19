@@ -36,6 +36,11 @@
 	margin: 0;
 }
 
+.dataList-custom.ui-datalist .ui-datalist-content {
+	min-height: 379px;
+	height: 379px;
+}
+
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
 	{
 	display: grid;
@@ -57,8 +62,39 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 	font-size: 17px;
 }
 
+body .dataList-dialog-custom.ui-datalist .ui-datalist-content {
+	min-height: 211px;
+}
+
+body .data-list-time.ui-datalist .ui-datalist-content {
+	min-height: 211px;
+}
+
+body .ui-datalist .ui-datalist-content {
+	border: none;
+	padding: 0;
+}
+
 .grid-content {
 	grid-template-columns: 105px 1fr;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-empty-message {
+	min-height: 379px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 17px !important;
+	font-weight: bold;
+}
+
+.data-list-time.ui-datalist .ui-datalist-empty-message {
+	min-height: 211px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 14px;
+	font-weight: bold;
 }
 </style>
 
@@ -96,13 +132,14 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 
 				<div class="header-filters">
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-2 input-combined-no-text">
 							<p:inputText value="#{funcionarioController.nomeFuncionario}"
 								placeholder="Pesquisar funcionário">
 								<p:ajax event="keyup" delay="100" update="@form" process="@this" />
 							</p:inputText>
+							<i class="fa-solid fa-magnifying-glass"></i>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="content-filter ">
 								<i class="fa-solid fa-filter"></i>
 								<p:selectOneButton
@@ -122,8 +159,8 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 				<div class="flex align-center mt15 mb15">
 					<p:commandButton
 						actionListener="#{funcionarioController.novoFuncionario()}"
-						update="dlgFuncForm" process="@form" class="btn-circle-green"
-						icon="fa fa-plus" onclick="PF('dlgFunc').show()" />
+						update="form:dlgFunc" process="@form" class="btn-circle-green"
+						icon="fa fa-plus" oncomplete="PF('dlgFunc').show()" />
 					<label class="title-button ml8">Novo funcionário</label>
 				</div>
 
@@ -160,40 +197,51 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 			draggable="false" resizable="false">
 			<h:panelGroup id="dlgFuncForm">
 				<div class="header-modal">
-					<div>
+					<div class="flex align-center">
 						<div class="icon-circle">
 							<i class="fa-solid fa-calendar-days"></i>
 						</div>
 						<label>#{funcionarioController.editarModel eq 'A' ?
 							'Editar Funcionário' : 'Novo Funcionário'}</label>
 					</div>
-					<ui:fragment rendered="#{funcionarioController.editarModel eq 'A'}">
-						<p:commandButton icon="fa-solid fa-trash" styleClass="btn-trash"
-							onclick="PF('dlgConfirm').show()" />
-						<p:commandButton update="dlgFuncForm" process="@form"
-							actionListener="#{funcionarioController.atualizarFuncionario()}"
-							styleClass="btn btn-green" value="Salvar" />
-					</ui:fragment>
-					<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
-						<p:commandButton update="dlgFuncForm" process="@form"
-							actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
-							styleClass="btn btn-green" value="Salvar" />
-					</ui:fragment>
+					<div class="flex align-center">
+						<ui:fragment
+							rendered="#{funcionarioController.editarModel eq 'A'}">
+							<p:commandButton update="dttLstHorariosAux" process="@this"
+								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
+								icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgFuncForm" process="@form"
+								actionListener="#{funcionarioController.atualizarFuncionario()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{funcionarioController.editarModel eq 'I'}">
+							<p:commandButton update="dlgFuncForm" process="@form"
+								actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
 
-					<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-						onclick="PF('dlgFunc').hide()"
-						actionListener="#{funcionarioController.limpaListaHorario()}" />
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgFunc').hide()"
+							actionListener="#{funcionarioController.limpaListaHorario()}" />
+					</div>
+
 				</div>
 
-				<div class="content-filter no-filter">
-					<p:selectOneButton
-						value="#{funcionarioController.funcionarioModel.status}"
-						unselectable="false">
-						<f:selectItem itemLabel="Ativo" itemValue="A" />
-						<f:selectItem itemLabel="Inativo" itemValue="I" />
-						<p:ajax update="@this" process="@this" />
-					</p:selectOneButton>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="content-filter no-filter">
+							<p:selectOneButton
+								value="#{funcionarioController.funcionarioModel.status}"
+								unselectable="false">
+								<f:selectItem itemLabel="Ativo" itemValue="A" />
+								<f:selectItem itemLabel="Inativo" itemValue="I" />
+								<p:ajax update="@this" process="@this" />
+							</p:selectOneButton>
+						</div>
+					</div>
 				</div>
+
 
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
@@ -235,35 +283,63 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 					</div>
 				</div>
 
+				<label class="title-item mt30 mb25">Horários de Trabalho</label>
 
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
-					<p:dataList id="dttLstHorariosAux"
+					<p:dataList id="dttLstHorariosAux" paginator="true"
+						paginatorPosition="bottom" rows="4"
+						class="dataList-dialog-custom data-list-time"
 						value="#{funcionarioController.lstHorarioAux}"
 						emptyMessage="Nenhum horário adicionado" var="horario"
 						rowIndexVar="index">
-				  #{horario.horaInicial} - #{horario.horaFinal}
-				  <p:commandButton update="dttLstHorariosAux" process="@this"
-							styleClass="btn-trash"
-							actionListener="#{funcionarioController.recebeValorDeleteHorarioAux(index)}"
-							icon="fa-solid fa-trash" />
+
+						<div class="list-time">
+							<div>
+								<i class="fa-solid fa-clock"></i>
+								<div>
+									<label class="title-obj">Inicial</label> <label
+										class="subtitle-obj">#{horario.horaInicial}</label>
+								</div>
+								<div>
+									<label>-</label>
+								</div>
+								<div>
+									<label class="title-obj">Final</label> <label
+										class="subtitle-obj">#{horario.horaFinal}</label>
+								</div>
+							</div>
+
+							<p:commandButton update="dttLstHorariosAux" process="@this"
+								styleClass="btn-trash"
+								actionListener="#{funcionarioController.recebeValorDeleteHorarioAux(index)}"
+								icon="fa-solid fa-trash" />
+						</div>
+
 					</p:dataList>
 				</ui:fragment>
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'A'}">
 					<p:dataList id="dttLstHorarios" rowIndexVar="row"
-						class="dataList-dialog-custom"
+						class="dataList-dialog-custom data-list-time"
 						value="#{funcionarioController.lstHorarios}" var="horario"
-						paginator="true" paginatorPosition="bottom" rows="5" lazy="true"
-						emptyMessage="Nenhum dado encontrado">
+						paginator="true" paginatorPosition="bottom" rows="4" lazy="true"
+						emptyMessage="Nenhum horário cadastrado para esse funcionário">
 
-						<div class="flex">
+						<div class="list-time">
 							<div>
-								<label class="title-obj">Inicial</label> <label
-									class="subtitle-obj">#{horario.horaInicial}</label>
+								<i class="fa-solid fa-clock"></i>
+								<div>
+									<label class="title-obj">Inicial</label> <label
+										class="subtitle-obj">#{horario.horaInicial}</label>
+								</div>
+								<div>
+									<label>-</label>
+								</div>
+								<div>
+									<label class="title-obj">Final</label> <label
+										class="subtitle-obj">#{horario.horaFinal}</label>
+								</div>
 							</div>
-							<div>
-								<label class="title-obj">Final</label> <label
-									class="subtitle-obj">#{horario.horaFinal}</label>
-							</div>
+
 							<p:commandButton update="dttLstHorarios" process="@this"
 								styleClass="btn-trash"
 								actionListener="#{funcionarioController.recebeValorDeleteHorario(horario)}"
@@ -282,19 +358,18 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
 			<h:panelGroup id="dlgConfirmForm">
-				<div class="header-modal">
+				<div class="header-modal-confirm">
 					<div>
-						<div class="icon-circle">
-							<i class="fa-solid fa-calendar-days"></i>
-						</div>
 						<label>Realmente deseja excluir esse funcionário?</label>
 					</div>
 				</div>
 
-				<div class="flex align-center">
-					<p:commandButton value="Confirmar f"
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
 						actionListener="#{funcionarioController.deletaFuncionario()}" />
-					<p:commandButton value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
 				</div>
 
 			</h:panelGroup>
@@ -304,19 +379,18 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 		<p:dialog id="dlgHora" widgetVar="dlgHora" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
-			<div class="header-modal">
+			<div class="header-modal-confirm">
 				<div>
-					<div class="icon-circle">
-						<i class="fa-solid fa-calendar-days"></i>
-					</div>
 					<label>Realmente deseja excluir esse horário?</label>
 				</div>
 			</div>
 
-			<div class="flex align-center">
-				<p:commandButton value="Confirmar"
+			<div class="flex align-center justify-center">
+				<p:commandButton styleClass="btn medium btn-confirm"
+					value="Confirmar"
 					actionListener="#{funcionarioController.deletaHorario()}" />
-				<p:commandButton value="Cancelar" onclick="PF('dlgHora').hide()" />
+				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
+					onclick="PF('dlgHora').hide()" />
 			</div>
 
 		</p:dialog>
@@ -324,19 +398,18 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 		<p:dialog id="dlgHoraAux" widgetVar="dlgHoraAux" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
-			<div class="header-modal">
+			<div class="header-modal-confirm">
 				<div>
-					<div class="icon-circle">
-						<i class="fa-solid fa-calendar-days"></i>
-					</div>
 					<label>Realmente deseja excluir esse horário?</label>
 				</div>
 			</div>
 
-			<div class="flex align-center">
-				<p:commandButton value="Confirmar"
+			<div class="flex align-center justify-center">
+				<p:commandButton styleClass="btn medium btn-confirm"
+					value="Confirmar"
 					actionListener="#{funcionarioController.deletaHorarioAux()}" />
-				<p:commandButton value="Cancelar" onclick="PF('dlgHoraAux').hide()" />
+				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
+					onclick="PF('dlgHoraAux').hide()" />
 			</div>
 		</p:dialog>
 

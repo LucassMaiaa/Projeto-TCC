@@ -196,7 +196,8 @@ public class FuncionarioController {
 				PrimeFaces.current()
 						.executeScript("Swal.fire({" + "  icon: 'success',"
 								+ "  title: '<span style=\"font-size: 14px\">Horário adicionado com sucesso!</span>',"
-								+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+								+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px',"
+								+ "  customClass: {" + "    popup: 'my-swal-popup'" + "  }" + "});");
 
 			} else {
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
