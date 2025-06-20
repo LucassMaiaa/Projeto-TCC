@@ -383,7 +383,6 @@ a {
     border-radius: 30px !important;
     box-shadow: none !important;
     height: 40px;
-    padding: 0 20px;
     display: flex;
     align-items: center;
     font-size: 12px;
@@ -436,6 +435,10 @@ a {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.icon-circle i[class^="fa"]{
+	font-size: 16px;
 }
 
 .icon-circle-blue{
@@ -645,6 +648,7 @@ a {
     border-radius: 8px !important;
     box-shadow: none;
     border-color: #ced4da;
+    padding-right: 40px;
 }
 
 .input-combined{
@@ -781,7 +785,6 @@ body .ui-datepicker .ui-datepicker-calendar td{
 .select-segundario .ui-selectonebutton>.ui-button.ui-state-active {
     background-color: #E74A46 !important;
     width: 55% !important;
-    padding: 0 20px;
 }
 
 /* Modal */

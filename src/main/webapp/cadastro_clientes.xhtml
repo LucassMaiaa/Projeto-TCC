@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<title>BarberSys</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/global.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+	<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</h:head>
+
+<h:body>
+
+	<style>
+.content-info-lateral {
+	background: #FCFCFF;
+}
+
+.header-filters {
+	margin-top: 9px;
+}
+
+.perfil-top-funcionario {
+	height: 28px;
+	width: 28px;
+	background-size: cover;
+	margin: 0;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-content {
+	min-height: 411px;
+    height: 411px;
+}
+
+body .dataList-dialog-custom.ui-datalist .ui-datalist-content {
+	min-height: 211px;
+}
+
+body .ui-datalist .ui-datalist-content {
+	border: none;
+	padding: 0;
+}
+
+.grid-content {
+	grid-template-columns: 105px 1fr;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-empty-message {
+	min-height: 379px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 17px !important;
+	font-weight: bold;
+}
+
+.card-list {
+	padding: 10px 20px;
+	align-items: start;
+	flex-direction: column;
+	gap: 6px;
+}
+</style>
+
+	<h:form id="form" styleClass="main">
+		<div class="grid-content">
+
+
+			<ui:include src="menu_lateral.xhtml"></ui:include>
+
+			<div class="content-dashboard">
+
+				<div class="content-perfil flex space-between">
+					<div class="flex align-center">
+						<div class="avatar-circle btn-circle mr8"></div>
+
+						<div class="content-title-perfil">
+							<h:outputText class="title-welcome-perfil" value="Olá" />
+							<h:outputText class="title-name-perfil"
+								value="#{usuarioController.login}" />
+						</div>
+					</div>
+					<div class="flex">
+						<p:commandButton class="btn-circle" icon="fa-solid fa-bell" />
+
+						<p:commandButton class="btn-sair-header" value="Sair"
+							icon="fa-solid fa-right-from-bracket" />
+					</div>
+				</div>
+
+				<div class="flex space-between">
+					<p:outputLabel class="title-page" value="Cadastro de Clientes" />
+				</div>
+
+				<div class="header-filters">
+					<div class="row">
+						<div class="col-md-3 input-combined-no-text">
+							<p:inputText value="#{clienteController.nomeCliente}" autocomplete="off"
+								placeholder="Pesquisar cliente">
+								<p:ajax event="keyup" delay="100" update="@form" process="@this" />
+							</p:inputText>
+							<i class="fa-solid fa-magnifying-glass"></i>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="flex align-center mt15 mb15">
+					<p:commandButton
+						actionListener="#{clienteController.novoCliente()}"
+						update="form:dlgCli" process="@form" class="btn-circle-green"
+						icon="fa fa-plus" oncomplete="PF('dlgCli').show()" />
+					<label class="title-button ml8">Novo Cliente</label>
+				</div>
+
+				<div>
+					<p:dataList rowIndexVar="row" class="dataList-custom"
+						value="#{clienteController.lstCliente}" var="clientes"
+						paginator="true" paginatorPosition="bottom" rows="16" lazy="true"
+						emptyMessage="Nenhum dado encontrado">
+						<p:commandLink
+							actionListener="#{clienteController.clienteSelecionado(clientes)}"
+							update="form:dlgCli" process="@this"
+							oncomplete="PF('dlgCli').show()">
+							<div class="card-list">
+								<div>
+									<label class="title-list">Cliente</label>
+									<p:outputLabel styleClass="subtitle-list"
+										value="#{clientes.nome}" />
+								</div>
+								<div>
+									<label class="title-list">CPF</label>
+									<p:outputLabel styleClass="subtitle-list"
+										value="#{clientes.cpf.substring(0,3)}.#{clientes.cpf.substring(3,6)}.#{clientes.cpf.substring(6,9)}-#{clientes.cpf.substring(9,11)}" />
+								</div>
+							</div>
+						</p:commandLink>
+					</p:dataList>
+				</div>
+
+			</div>
+
+		</div>
+
+
+
+		<p:dialog id="dlgCli" widgetVar="dlgCli" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgCliForm">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<ui:fragment rendered="#{clienteController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{clienteController.editarModel eq 'I'}">
+								<i class="fa-solid fa-user-plus"></i>
+							</ui:fragment>
+						</div>
+						<label>#{clienteController.editarModel eq 'A' ?
+							'Editar Cliente' : 'Novo Cliente'}</label>
+					</div>
+					<div class="flex align-center">
+						<ui:fragment
+							rendered="#{clienteController.editarModel eq 'A'}">
+							<p:commandButton
+								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
+								icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgCliForm" process="@form"
+								actionListener="#{clienteController.atualizarCliente()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{clienteController.editarModel eq 'I'}">
+							<p:commandButton update="dlgCliForm" process="@form"
+								actionListener="#{clienteController.adicionarNovoCliente()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgCli').hide()"/>
+					</div>
+
+				</div>
+
+				<p:messages id="msgs" closable="true" showIcon="true"
+					autoUpdate="true" />
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Nome do cliente" />
+							<p:inputText styleClass="senha-login" autocomplete="off"
+								value="#{clienteController.clienteModel.nome}" />
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="CPF" />
+							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
+								value="#{clienteController.clienteModel.cpf}" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Telefone" />
+							<p:inputMask mask="(99) 99999 - 9999" styleClass="senha-login"
+								value="#{clienteController.clienteModel.telefone}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Email" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.email}" />
+						</div>
+					</div>
+				</div>
+
+			</h:panelGroup>
+
+		</p:dialog>
+
+		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgConfirmForm">
+				<div class="header-modal-confirm">
+					<div>
+						<label>Realmente deseja excluir esse cliente?</label>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
+						actionListener="#{clienteController.deletaCliente()}" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+				</div>
+
+			</h:panelGroup>
+
+		</p:dialog>
+
+	</h:form>
+
+
+
+</h:body>
+</html>
+
