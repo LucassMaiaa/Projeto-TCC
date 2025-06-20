@@ -216,7 +216,7 @@ public class ControleCaixaController implements Serializable {
 			caixaDataModel.setValorFinal(valorFinal);
 			caixaDataModel.setStatus(statusSelecionado);
 		}
-		if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial()
+		if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()
 				|| caixaDataModel.getValorFinal() < valorSugerido && controleCaixaModel.getMotivo().isEmpty()) {
 			motivoFinal = "A";
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
