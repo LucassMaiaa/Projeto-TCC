@@ -785,6 +785,11 @@ body .ui-datepicker .ui-datepicker-calendar td{
 .select-segundario .ui-selectonebutton>.ui-button.ui-state-active {
     background-color: #E74A46 !important;
     width: 55% !important;
+    padding: 0 20px;
+}
+
+.select-segundario .ui-selectonebutton>.ui-button{
+	padding: 0 20px;
 }
 
 /* Modal */

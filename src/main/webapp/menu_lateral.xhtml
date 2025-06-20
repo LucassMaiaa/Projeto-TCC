@@ -11,6 +11,7 @@
             left: 42px;
             border-radius: 8px;
             padding: 20px;
+            z-index: 1000;
         }
 
         #menu-flutuante-cadastro .title-name-top-func {
@@ -45,7 +46,7 @@
 		    display: flex;
 		    justify-content: center;
 		    align-items: center;
-		    
+		    cursor: pointer;
 		}
 		
 		.btn-circle-menu:hover{
@@ -104,13 +105,13 @@
                     <div id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
                         <label class="title-name-top-func">Cadastros</label>
 
-                        <h:commandLink outcome="/clientes" styleClass="title-menu-flutuante">Clientes</h:commandLink>
-                        <h:commandLink action="/cadastro_funcionario.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Funcionários</h:commandLink>
+                        <h:commandLink immediate="true" action="/cadastro_clientes.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Clientes</h:commandLink>
+                        <h:commandLink immediate="true" action="/cadastro_funcionario.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Funcionários</h:commandLink>
                         <h:commandLink outcome="/usuarios" styleClass="title-menu-flutuante">Usuários</h:commandLink>
                         <h:commandLink outcome="/pagamentos" styleClass="title-menu-flutuante">Tipo de pagamento/serviços</h:commandLink>
                     </div>
 
-                    <div class="btn-circle-menu" onclick="openDiv(event)">
+                    <div class="btn-circle-menu #{view.viewId.contains('cadastro_clientes') ? 'btn-circle-menu-active' : 'btn-circle-menu'}" onclick="openDiv(event)">
                         <i class="fa-solid fa-gear"></i>
                     </div>
                 </div>
@@ -120,15 +121,43 @@
 
 
     <script>
-        const popup = document.getElementById('menu-flutuante-cadastro');
-
-        function openDiv(event) {
-            event.stopPropagation();
-            popup.style.display = 'block';
-        }
-
-        document.addEventListener('click', () => {
-            popup.style.display = 'none';
-        });
-    </script>
+	  function openDiv(event) {
+	    event.stopPropagation();
+	    const popup = document.getElementById('menu-flutuante-cadastro');
+	    if (!popup) return;
+	    popup.style.display = 'block';
+	  }
+	
+	  // Fecha o popup se clicar fora
+	  document.addEventListener('click', (event) => {
+	    const popup = document.getElementById('menu-flutuante-cadastro');
+	    const btn = document.querySelector('.btn-circle-menu');
+	    if (!popup) return;
+	    if (!btn) return;
+	
+	    // Se o clique NÃO foi nem no popup e nem no botão, fecha o popup
+	    if (!popup.contains(event.target)) {
+	      if (!btn.contains(event.target)) {
+	        popup.style.display = 'none';
+	      }
+	    }
+	  });
+	
+	  // Se o botão existe, adiciona o listener para abrir o menu
+	  const btn = document.querySelector('.btn-circle-menu');
+	  if (btn) {
+	    btn.addEventListener('click', openDiv);
+	  }
+	
+	  // Reaplica após AJAX do PrimeFaces para manter funcionalidade
+	  if (window.PrimeFaces) {
+	    PrimeFaces.ajax.Queue.onComplete(() => {
+	      const btn = document.querySelector('.btn-circle-menu');
+	      if (btn) {
+	        btn.removeEventListener('click', openDiv); // remove para evitar duplicação
+	        btn.addEventListener('click', openDiv);
+	      }
+	    });
+	  }
+	</script>
 </ui:composition>

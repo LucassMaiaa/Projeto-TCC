@@ -239,6 +239,7 @@ public class ControleCaixaController implements Serializable {
 			calcularTotal();
 			dadosLiberados = true;
 			PrimeFaces.current().ajax().addCallbackParam("validado", true);
+			PrimeFaces.current().ajax().update("form");
 		}
 
 	}

@@ -20,39 +20,39 @@
 <h:body>
 
 	<style>
-		.content-agendamentos {
-			border-radius: 0px;
-			height: 100vh;
-			max-height: calc(100vh - 354px);
-			padding: 15px 20px 30px;
-		}
-		
-		.content-info-lateral {
-			background: #FCFCFF;
-		}
-		
-		.content-valores {
-			height: 204px;
-		}
-		
-		body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
-			{
-			display: grid;
-			grid-template-columns: 62px 150px 110px 70px 1fr;
-		}
-		
-		body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
-			body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message)
-			{
-			text-align: center !important;
-		}
-		
-		body .ui-dialog:has( .header-modal) .ui-dialog-content {
-			padding: 20px;
-			width: 400px;
-			min-width: 400px !important;
-		}
-	</style>
+.content-agendamentos {
+	border-radius: 0px;
+	height: 100vh;
+	max-height: calc(100vh - 354px);
+	padding: 15px 20px 30px;
+}
+
+.content-info-lateral {
+	background: #FCFCFF;
+}
+
+.content-valores {
+	height: 204px;
+}
+
+body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
+	{
+	display: grid;
+	grid-template-columns: 62px 150px 110px 70px 1fr;
+}
+
+body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
+	body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message)
+	{
+	text-align: center !important;
+}
+
+body .ui-dialog:has( .header-modal) .ui-dialog-content {
+	padding: 20px;
+	width: 400px;
+	min-width: 400px !important;
+}
+</style>
 
 	<h:form id="form" styleClass="main">
 		<div class="grid-content">
@@ -82,17 +82,22 @@
 				</div>
 
 				<div class="header-filters">
-					<div class="content-filter ">
-						<i class="fa-solid fa-filter"></i>
-						<p:selectOneButton
-							value="#{controleCaixaController.filtroTipoDeValor}"
-							unselectable="false">
-							<f:selectItem itemLabel="Todos" itemValue="" />
-							<f:selectItem itemLabel="Entradas" itemValue="Entrada" />
-							<f:selectItem itemLabel="Saídas" itemValue="Saida" />
-							<p:ajax update="@form" process="@this" />
-						</p:selectOneButton>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="content-filter ">
+								<i class="fa-solid fa-filter"></i>
+								<p:selectOneButton
+									value="#{controleCaixaController.filtroTipoDeValor}"
+									unselectable="false">
+									<f:selectItem itemLabel="Todos" itemValue="" />
+									<f:selectItem itemLabel="Entradas" itemValue="Entrada" />
+									<f:selectItem itemLabel="Saídas" itemValue="Saida" />
+									<p:ajax update="@form" process="@this" />
+								</p:selectOneButton>
+							</div>
+						</div>
 					</div>
+
 				</div>
 
 				<div>
@@ -310,10 +315,11 @@
 			<div class="header-modal">
 				<div class="flex align-center">
 					<div class="icon-circle">
-						<i class="fa-solid fa-calendar-days"></i>
+						<i class="fa-solid fa-money-bill-transfer"></i>
 					</div>
-					<p:outputLabel
-						value="#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}" />
+					<label>
+						#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}
+					</label>
 				</div>
 			</div>
 			<p:messages id="messages" showDetail="true" autoUpdate="true"

@@ -132,14 +132,14 @@ body .ui-datalist .ui-datalist-content {
 
 				<div class="header-filters">
 					<div class="row">
-						<div class="col-md-2 input-combined-no-text">
-							<p:inputText value="#{funcionarioController.nomeFuncionario}"
+						<div class="col-md-3 input-combined-no-text">
+							<p:inputText value="#{funcionarioController.nomeFuncionario}" autocomplete="off"
 								placeholder="Pesquisar funcionário">
 								<p:ajax event="keyup" delay="100" update="@form" process="@this" />
 							</p:inputText>
 							<i class="fa-solid fa-magnifying-glass"></i>
 						</div>
-						<div class="col-md-3">
+						<div class="col-md-2">
 							<div class="content-filter ">
 								<i class="fa-solid fa-filter"></i>
 								<p:selectOneButton
@@ -190,8 +190,6 @@ body .ui-datalist .ui-datalist-content {
 
 		</div>
 
-
-
 		<p:dialog id="dlgFunc" widgetVar="dlgFunc" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
@@ -199,7 +197,12 @@ body .ui-datalist .ui-datalist-content {
 				<div class="header-modal">
 					<div class="flex align-center">
 						<div class="icon-circle">
-							<i class="fa-solid fa-calendar-days"></i>
+							<ui:fragment rendered="#{funcionarioController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
+								<i class="fa-solid fa-user-plus"></i>
+							</ui:fragment>
 						</div>
 						<label>#{funcionarioController.editarModel eq 'A' ?
 							'Editar Funcionário' : 'Novo Funcionário'}</label>

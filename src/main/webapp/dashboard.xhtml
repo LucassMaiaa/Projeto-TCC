@@ -1,366 +1,391 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:f="http://xmlns.jcp.org/jsf/core"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-    <h:head>
-        <title>BarberSys</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    </h:head>
+<h:head>
+	<title>BarberSys</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/global.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+</h:head>
 
-    <h:body>
-        
-        <style>          
-            .content-top-visitas{
-                border: 1px solid #DDE3DF;
-                height: 281px;
-                border-radius: 8px;
-                padding: 14px 25px;
-            }
+<h:body>
 
-            .content-gastos-mes{
-                background-color: #C5D9BF;
-                height: 281px;
-                border-radius: 8px;
-                padding: 14px 25px;
-            }
+	<style>
+.content-top-visitas {
+	border: 1px solid #DDE3DF;
+	height: 281px;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
 
-            .content-faturado{
-                border-radius: 8px;
-                background: #D8E0E8;
-                padding: 14px 25px;
-            }
+.content-gastos-mes {
+	background-color: #C5D9BF;
+	height: 281px;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
 
-            .content-top-func{
-                border: 1px solid #DDE3DF;
-                border-radius: 8px;
-                padding: 14px 25px;
-            }
-            
-            .content-logo-system{
-                height: 132px;
-                width: 100%;
-                background: #F5F5F7;
-                background-image: url('resources/images/logo-com-imagem.svg') ;
-                background-repeat: no-repeat;
-                background-position: center top;
-            }
-            
-            .content-btns{
-                width: 100%;
-                height: 54px;
-                display: flex;
-                justify-content: center;
-                padding: 8px;
-            }
-            
-            .content-agendamentos{
-                height: calc(100vh - 186px);
-                background: #FCFCFF;
-                border-radius: 8px 8px 0 0;
-                padding: 20px;
-            }
-        </style>    
-        
-         <h:form id="form" styleClass="main"> 
-             <div class="grid-content">
-                 
-                 <ui:include src="menu_lateral.xhtml"></ui:include>
-                 <div class="content-dashboard">
-                     <div class="content-perfil flex space-between">
-                         <div class="flex align-center">
-                             <div class="avatar-circle btn-circle mr8">
-                                 
-                             </div>
-                             
-                             <div class="content-title-perfil">
-                                 <h:outputText class="title-welcome-perfil" value="Olá" />
-                                 <h:outputText class="title-name-perfil" value="#{usuarioController.login}" />
-                             </div>
-                         </div>
-                         <div class="flex">
-                             <p:commandButton class="btn-circle"  icon="fa-solid fa-bell" />
-                             
-                             <p:commandButton class="btn-sair-header" value="Sair" icon="fa-solid fa-right-from-bracket" />
-                         </div>
-                     </div>
-                     
-                     <div class="flex space-between">
-                             <p:outputLabel class="title-page" value="Dashboard Geral" />
-                     </div>
-                     
-                     <div class="header-filters">
-                           <div class="content-filter ">
-                               <i class="fa-solid fa-filter"></i>
-                               <p:selectOneButton value="#{homeController.dataSelecionada}" unselectable="false">
-                                    <f:selectItem itemLabel="mês" itemValue="m" />
-                                    <f:selectItem itemLabel="ano" itemValue="a" />
-                                    <p:ajax update="@form" process="@this"/>
-                                </p:selectOneButton>
-                            </div>
-                     </div>
-                     
-                     <div class="grid-top-grafico">
-                         <div class="content-faturado">
-                             <div class="flex">
-                                 <div class="icon-circle icon-circle-blue">
-                                     <i class="fa-solid fa-hand-holding-dollar"></i>
-                                 </div>
-                                 <div class="subtitle-info">
-                                 	<h:panelGroup id="lblFaturado">
-                                 		 <h:outputLabel  class="title-info">Faturado no - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
-                                    	 <label class="sub-info">R$ 500,00</label>
-                                 	</h:panelGroup>
-                                    
-                                 </div>
-                             </div>
-                             
-                             <div class="content-grafic">
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>jan</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>fev</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>mar</label>
-                                 </div>
-                                 <div class="active">
-                                     <div class="fluxo-grafico"></div>
-                                     <label>abr</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>mai</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>jul</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>jun</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>ago</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>set</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>out</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>nov</label>
-                                 </div>
-                                 <div>
-                                     <div class="fluxo-grafico"></div>
-                                     <label>dez</label>
-                                 </div>
-                             </div>
-                         </div>
-                         <div class="content-top-func">
-                             <div class="flex">
-                                 <div class="icon-circle">
-                                     <i class="fa-solid fa-medal"></i>
-                                 </div>
-                                 <div class="subtitle-info">
-                                     <label class="title-info">Top Funcionário</label>
-                                 </div>
-                             </div>
-                             
-                             <div class="flex align-center column">
-                                 <div class="perfil-top-funcionario">
-                                     
-                                 </div>
-                                 <label class="title-name-top-func">PAULO UBEDA</label>
-                                 
-                                 <div class="content-obj">
-                                     <div class="flex">
-                                         <div class="icon-circle">
-                                             <i class="fa-solid fa-star"></i>
-                                         </div>
-                                         <div>
-                                             <label class="title-obj">Avaliação</label>
-                                            <label class="subtitle-obj">5.0</label>
-                                         </div>
-                                     </div>
-                                     <div class="flex">
-                                          <div class="icon-circle">
-                                             <i class="fa-solid fa-scissors"></i>
-                                         </div>
-                                         <div>
-                                             <label class="title-obj">Total de cortes</label>
-                                              <label class="subtitle-obj">20</label>
-                                         </div>
-                                     </div>
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
-                     <div class="grid-bottom-grafico">
-                         <div class="content-top-visitas">
-                             <div class="flex">
-                                 <div class="icon-circle">
-                                     <i class="fa-solid fa-people-group"></i>
-                                 </div>
-                                 <div class="subtitle-info">
-                                     <label class="title-info">Top Visitas na semana</label>
-                                 </div>
-                             </div>
-                         </div>
-                         <div class="content-gastos-mes">
-                             <div class="flex">
-                                 <div class="icon-circle icon-circle-green">
-                                     <i class="fa-solid fa-calendar-plus"></i>
-                                 </div>
-       
-                                 <div class="subtitle-info">
-                                 	<h:panelGroup id="lblAgendamentos">
-                                 		 <h:outputLabel class="title-info">Agendamentos - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
-                                 	</h:panelGroup>
-                                    
-                                 </div>
-                             </div>
-                         </div>
-                     </div>
-                 </div>
-                 <div class="content-info-lateral">
-                     <div class="content-logo-system">
-                         
-                     </div>
-                     <div class="content-btns">
-                         <p:commandButton class="btn btn-green" value="Agendar Cliente" onclick="PF('dlgAgendar').show()"/>
-                     </div>
-                     <div class="content-agendamentos">
-                         <div class="flex">
-                                <div class="icon-circle">
-                                    <i class="fa-solid fa-clock"></i>
-                                </div>
-                                <div class="subtitle-info">
-                                    <label class="title-info">Últimos Agendamentos</label>
-                                </div>
-                            </div>
-                     </div>
-                 </div>
-             </div>
-             
-             <p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false">
-                 <div class="header-modal">
-                     <div class="icon-circle">
-                         <i class="fa-solid fa-calendar-days"></i>
-                     </div>
-                     <label>Agendamento</label>
-                 </div>
-                 
-                 <div class="content-filter no-filter">
-                     <p:selectOneButton value="#{agendamentoController.tipoCadastro}" unselectable="false">
-                        <f:selectItem itemLabel="Com cadastro" itemValue="c" />
-                         <f:selectItem itemLabel="Sem cadastros" itemValue="s" />   
-                         <p:ajax update="dlgAttCliente" process="@this"/>
-                     </p:selectOneButton>
-                 </div>
-                 
-                 
-                     <div class="row">
-                         <div class="col-md-8">
-                             <p:outputPanel id="dlgAttCliente">
-                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 'c'}">
-                                     <div class="input-combined">
-                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-                                        <p:selectOneMenu converter="#{countryConverter}"
-                                                    var="c"
-                                                    filter="true" filterMatchMode="startsWith">
+.content-faturado {
+	border-radius: 8px;
+	background: #D8E0E8;
+	padding: 14px 25px;
+}
 
-                                        <f:selectItems var="country"
-                                                   />
+.content-top-func {
+	border: 1px solid #DDE3DF;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
 
-                                        <p:column >
-                                            <span class="flag" />
-                                        </p:column>
+.content-logo-system {
+	height: 132px;
+	width: 100%;
+	background: #F5F5F7;
+	background-image: url('resources/images/logo-com-imagem.svg');
+	background-repeat: no-repeat;
+	background-position: center top;
+}
 
-                                        <p:column>
-                                            <f:facet name="header">
-                                                <h:outputText value="Name"/>
-                                            </f:facet>
-                                            <h:outputText/>
-                                        </p:column>
+.content-btns {
+	width: 100%;
+	height: 54px;
+	display: flex;
+	justify-content: center;
+	padding: 8px;
+}
 
-                                        <f:facet name="footer">
-                                            <h:outputText
-                                                        />
-                                        </f:facet>
-                                    </p:selectOneMenu>
-                                      </div>
-                                 </ui:fragment>
-                                 <ui:fragment rendered="#{agendamentoController.tipoCadastro eq 's'}">
-                                     <div class="input-combined">
-                                        <p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-                                        <p:inputText styleClass="senha-login"/>
-                                      </div>
-                                 </ui:fragment>
-                                
-                            </p:outputPanel>
-                         </div>
-                         <div class="col-md-4">
-                             <div class="input-combined">
-                                <p:outputLabel styleClass="title-input" value="Selecione uma data" />
-                                <p:datePicker showIcon="true" pattern="dd/MM/yyyy" />
-                              </div>
-                         </div>
-                     </div>
-                 
-                 <div class="row">
-                     <div class="col-md-8">
-                         <div class="input-combined">
-                                <p:outputLabel styleClass="title-input" value="Nome do funcionário" />
-                                <p:selectOneMenu >
-                                    <f:selectItem itemLabel="Selecione funcionário" itemValue=""/>
-                                    <f:selectItems/>
-                                    <f:facet name="footer">
-                                        <p:divider styleClass="mt-0" />
-                                        <h:outputText value="3 options" style="font-weight:bold;"/>
-                                    </f:facet>
-                                </p:selectOneMenu>
-                         </div>
-                         
-                     </div>
-                     
-                     <div class="col-md-4">
-                         <div class="input-combined">
-                            <p:outputLabel styleClass="title-input" value="Horários disponíveis" />
-                            <p:selectOneMenu >
-                                <f:selectItem itemLabel="Selecione horário" itemValue=""/>
-                                <f:selectItems/>
-                                <f:facet name="footer">
-                                    <p:divider styleClass="mt-0" />
-                                    <h:outputText value="3 options" style="font-weight:bold;"/>
-                                </f:facet>
-                            </p:selectOneMenu>
-                         </div>
-                         
-                     </div>
-                </div>
-                     
-                 
-                <p:commandButton value="OK" onclick="PF('dlgAgendar').hide()" />
-            </p:dialog>
-             
-        </h:form>
-        
-        
-    </h:body>
+.content-agendamentos {
+	height: calc(100vh - 186px);
+	background: #FCFCFF;
+	border-radius: 8px 8px 0 0;
+	padding: 20px;
+}
+</style>
+
+	<h:form id="form" styleClass="main">
+		<div class="grid-content">
+
+			<ui:include src="menu_lateral.xhtml"></ui:include>
+			<div class="content-dashboard">
+				<div class="content-perfil flex space-between">
+					<div class="flex align-center">
+						<div class="avatar-circle btn-circle mr8"></div>
+
+						<div class="content-title-perfil">
+							<h:outputText class="title-welcome-perfil" value="Olá" />
+							<h:outputText class="title-name-perfil"
+								value="#{usuarioController.login}" />
+						</div>
+					</div>
+					<div class="flex">
+						<p:commandButton class="btn-circle" icon="fa-solid fa-bell" />
+
+						<p:commandButton class="btn-sair-header" value="Sair"
+							icon="fa-solid fa-right-from-bracket" />
+					</div>
+				</div>
+
+				<div class="flex space-between">
+					<p:outputLabel class="title-page" value="Dashboard Geral" />
+				</div>
+
+				<div class="header-filters">
+					<div class="row">
+						<div class="col-md-2">
+
+							<div class="content-filter ">
+								<i class="fa-solid fa-filter"></i>
+								<p:selectOneButton value="#{homeController.dataSelecionada}"
+									unselectable="false">
+									<f:selectItem itemLabel="mês" itemValue="m" />
+									<f:selectItem itemLabel="ano" itemValue="a" />
+									<p:ajax update="@form" process="@this" />
+								</p:selectOneButton>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="grid-top-grafico">
+					<div class="content-faturado">
+						<div class="flex">
+							<div class="icon-circle icon-circle-blue">
+								<i class="fa-solid fa-hand-holding-dollar"></i>
+							</div>
+							<div class="subtitle-info">
+								<h:panelGroup id="lblFaturado">
+									<h:outputLabel class="title-info">Faturado no - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
+									<label class="sub-info">R$ 500,00</label>
+								</h:panelGroup>
+
+							</div>
+						</div>
+
+						<div class="content-grafic">
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>jan</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>fev</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>mar</label>
+							</div>
+							<div class="active">
+								<div class="fluxo-grafico"></div>
+								<label>abr</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>mai</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>jul</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>jun</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>ago</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>set</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>out</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>nov</label>
+							</div>
+							<div>
+								<div class="fluxo-grafico"></div>
+								<label>dez</label>
+							</div>
+						</div>
+					</div>
+					<div class="content-top-func">
+						<div class="flex">
+							<div class="icon-circle">
+								<i class="fa-solid fa-medal"></i>
+							</div>
+							<div class="subtitle-info">
+								<label class="title-info">Top Funcionário</label>
+							</div>
+						</div>
+
+						<div class="flex align-center column">
+							<div class="perfil-top-funcionario"></div>
+							<label class="title-name-top-func">PAULO UBEDA</label>
+
+							<div class="content-obj">
+								<div class="flex">
+									<div class="icon-circle">
+										<i class="fa-solid fa-star"></i>
+									</div>
+									<div>
+										<label class="title-obj">Avaliação</label> <label
+											class="subtitle-obj">5.0</label>
+									</div>
+								</div>
+								<div class="flex">
+									<div class="icon-circle">
+										<i class="fa-solid fa-scissors"></i>
+									</div>
+									<div>
+										<label class="title-obj">Total de cortes</label> <label
+											class="subtitle-obj">20</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="grid-bottom-grafico">
+					<div class="content-top-visitas">
+						<div class="flex">
+							<div class="icon-circle">
+								<i class="fa-solid fa-people-group"></i>
+							</div>
+							<div class="subtitle-info">
+								<label class="title-info">Top Visitas na semana</label>
+							</div>
+						</div>
+					</div>
+					<div class="content-gastos-mes">
+						<div class="flex">
+							<div class="icon-circle icon-circle-green">
+								<i class="fa-solid fa-calendar-plus"></i>
+							</div>
+
+							<div class="subtitle-info">
+								<h:panelGroup id="lblAgendamentos">
+									<h:outputLabel class="title-info">Agendamentos - #{homeController.dataSelecionada == "m" ? "mês" : "ano" }</h:outputLabel>
+								</h:panelGroup>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="content-info-lateral">
+				<div class="content-logo-system"></div>
+				<div class="content-btns">
+					<p:commandButton class="btn btn-green" value="Agendar Cliente"
+						onclick="PF('dlgAgendar').show()" />
+				</div>
+				<div class="content-agendamentos">
+					<div class="flex">
+						<div class="icon-circle">
+							<i class="fa-solid fa-clock"></i>
+						</div>
+						<div class="subtitle-info">
+							<label class="title-info">Últimos Agendamentos</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<div class="header-modal">
+				<div class="flex align-center">
+					<div class="icon-circle">
+						<i class="fa-solid fa-calendar-days"></i>
+
+					</div>
+					<label>Agendamento</label>
+				</div>
+				<div class="flex align-center">
+					<p:commandButton
+						actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
+						styleClass="btn btn-green" value="Agendar" />
+					<div>
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgAgendar').hide()" />
+					</div>
+				</div>
+
+
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+					<div class="content-filter no-filter">
+						<p:selectOneButton value="#{agendamentoController.tipoCadastro}"
+							unselectable="false">
+							<f:selectItem itemLabel="Com cadastro" itemValue="c" />
+							<f:selectItem itemLabel="Sem cadastros" itemValue="s" />
+							<p:ajax update="dlgAttCliente" process="@this" />
+						</p:selectOneButton>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8">
+					<p:outputPanel id="dlgAttCliente">
+						<ui:fragment
+							rendered="#{agendamentoController.tipoCadastro eq 'c'}">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+								<p:selectOneMenu converter="#{countryConverter}" var="c"
+									filter="true" filterMatchMode="startsWith">
+
+									<f:selectItems var="country" />
+
+									<p:column>
+										<span class="flag" />
+									</p:column>
+
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Name" />
+										</f:facet>
+										<h:outputText />
+									</p:column>
+
+									<f:facet name="footer">
+										<h:outputText />
+									</f:facet>
+								</p:selectOneMenu>
+							</div>
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.tipoCadastro eq 's'}">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+								<p:inputText styleClass="senha-login" />
+							</div>
+						</ui:fragment>
+
+					</p:outputPanel>
+				</div>
+				<div class="col-md-4">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input" value="Selecione uma data" />
+						<p:datePicker showIcon="true" pattern="dd/MM/yyyy" autocomplete="off" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input"
+							value="Nome do funcionário" />
+						<p:selectOneMenu>
+							<f:selectItem itemLabel="Selecione funcionário" itemValue="" />
+							<f:selectItems />
+							<f:facet name="footer">
+								<p:divider styleClass="mt-0" />
+								<h:outputText value="3 options" style="font-weight:bold;" />
+							</f:facet>
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+
+				<div class="col-md-4">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input"
+							value="Horários disponíveis" />
+						<p:selectOneMenu>
+							<f:selectItem itemLabel="Selecione horário" itemValue="" />
+							<f:selectItems />
+							<f:facet name="footer">
+								<p:divider styleClass="mt-0" />
+								<h:outputText value="3 options" style="font-weight:bold;" />
+							</f:facet>
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+			</div>
+		</p:dialog>
+
+	</h:form>
+
+
+</h:body>
 </html>
 
