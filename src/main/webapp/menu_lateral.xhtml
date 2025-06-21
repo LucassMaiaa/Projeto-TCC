@@ -108,7 +108,7 @@
                         <h:commandLink immediate="true" action="/cadastro_clientes.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Clientes</h:commandLink>
                         <h:commandLink immediate="true" action="/cadastro_funcionario.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Funcionários</h:commandLink>
                         <h:commandLink outcome="/usuarios" styleClass="title-menu-flutuante">Usuários</h:commandLink>
-                        <h:commandLink outcome="/pagamentos" styleClass="title-menu-flutuante">Tipo de pagamento/serviços</h:commandLink>
+                        <h:commandLink immediate="true" action="/cadastro_pagamento.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Tipo de pagamento/serviços</h:commandLink>
                     </div>
 
                     <div class="btn-circle-menu #{view.viewId.contains('cadastro_clientes') ? 'btn-circle-menu-active' : 'btn-circle-menu'}" onclick="openDiv(event)">

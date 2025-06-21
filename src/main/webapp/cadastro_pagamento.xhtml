@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<title>BarberSys</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" type="text/css"
+		href="#{request.contextPath}/resources/css/global.css" />
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+	<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</h:head>
+
+<h:body>
+
+	<style>
+.content-info-lateral {
+	background: #FCFCFF;
+}
+
+.header-filters {
+	margin-top: 9px;
+}
+
+.perfil-top-funcionario {
+	height: 28px;
+	width: 28px;
+	background-size: cover;
+	margin: 0;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-content {
+	min-height: calc(100vh - 387.07px);
+}
+
+body .dataList-dialog-custom.ui-datalist .ui-datalist-content {
+	min-height: 211px;
+}
+
+body .data-list-time.ui-datalist .ui-datalist-content {
+	min-height: 211px;
+}
+
+body .ui-datalist .ui-datalist-content {
+	border: none;
+	padding: 0;
+}
+
+.grid-content {
+	grid-template-columns: 105px 1fr;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-empty-message {
+	min-height: 379px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 17px !important;
+	font-weight: bold;
+}
+
+.data-list-time.ui-datalist .ui-datalist-empty-message {
+	min-height: 211px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.grid-template {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	column-gap: 30px;
+}
+
+dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
+	display: block;
+}
+
+.ui-datalist-item:nth-child(even) .card-list {
+	background: #F1F1F1;
+}
+
+.card-list {
+	padding: 0 17px;
+	min-height: 39px;
+	box-shadow: none;
+	justify-content: space-between;
+	display: grid;
+	grid-template-columns: 1fr 300px;
+}
+
+.card-list>div:last-child {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+.card-list>div:last-child label:first-child {
+	text-transform: capitalize;
+	min-width: 90px;
+	text-align: left;
+}
+
+.card-list::before {
+	height: 22px;
+	top: 9px;
+}
+
+.card-list:hover {
+	background: #ededed !important;
+}
+</style>
+
+	<h:form id="form" styleClass="main">
+		<div class="grid-content">
+
+
+			<ui:include src="menu_lateral.xhtml"></ui:include>
+
+			<div class="content-dashboard">
+
+
+
+				<div class="content-perfil flex space-between">
+					<div class="flex align-center">
+						<div class="avatar-circle btn-circle mr8"></div>
+
+						<div class="content-title-perfil">
+							<h:outputText class="title-welcome-perfil" value="Olá" />
+							<h:outputText class="title-name-perfil"
+								value="#{usuarioController.login}" />
+						</div>
+					</div>
+					<div class="flex">
+						<p:commandButton class="btn-circle" icon="fa-solid fa-bell" />
+
+						<p:commandButton class="btn-sair-header" value="Sair"
+							icon="fa-solid fa-right-from-bracket" />
+					</div>
+				</div>
+
+				<div class="flex space-between">
+					<p:outputLabel class="title-page"
+						value="Cadastros de Pagamentos/Serviços" />
+				</div>
+
+				<div class="row grid-template">
+					<div>
+						<div class="header-filters">
+							<div class="row">
+								<div class="col-md-6 input-combined-no-text">
+									<p:inputText value="#{pagamentoController.nomePagamento}"
+										autocomplete="off" placeholder="Pesquisar tipo de pagamento">
+										<p:ajax event="keyup" delay="100" update="@form"
+											process="@this" />
+									</p:inputText>
+									<i class="fa-solid fa-magnifying-glass"></i>
+								</div>
+								<div class="col-md-6">
+									<div class="content-filter ">
+										<i class="fa-solid fa-filter"></i>
+										<p:selectOneButton
+											value="#{pagamentoController.statusSelecionado}"
+											unselectable="false">
+											<f:selectItem itemLabel="Todos" itemValue="" />
+											<f:selectItem itemLabel="Ativos" itemValue="A" />
+											<f:selectItem itemLabel="Inativos" itemValue="I" />
+											<p:ajax update="@form" process="@this" />
+										</p:selectOneButton>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="flex align-center mt15 mb15">
+							<p:commandButton
+								actionListener="#{pagamentoController.novoPagamento()}"
+								update="form:dlgPag" process="@form" class="btn-circle-green"
+								icon="fa fa-plus" oncomplete="PF('dlgPag').show()" />
+							<label class="title-button ml8">Novo Tipo de Pagamento</label>
+						</div>
+
+						<div>
+							<p:dataList rowIndexVar="row" class="dataList-custom"
+								value="#{pagamentoController.lstPagamento}" var="pagamento"
+								paginator="true" paginatorPosition="bottom" rows="13"
+								lazy="true" emptyMessage="Nenhum dado encontrado">
+								<p:commandLink
+									actionListener="#{pagamentoController.pagamentoSelecionado(pagamento)}"
+									update="form:dlgPag" process="@this"
+									oncomplete="PF('dlgPag').show()">
+									<div
+										class="card-list #{pagamento.status eq 'I' ? 'inativo' : 'ativo'}">
+										<div>
+											<p:outputLabel styleClass="subtitle-list"
+												value="#{pagamento.nome}" />
+										</div>
+										<div></div>
+									</div>
+								</p:commandLink>
+							</p:dataList>
+						</div>
+
+					</div>
+
+					<div>
+						<div class="header-filters">
+							<div class="row">
+								<div class="col-md-6 input-combined-no-text">
+									<p:inputText value="#{servicosController.nomeServicos}"
+										autocomplete="off" placeholder="Pesquisar serviço">
+										<p:ajax event="keyup" delay="100" update="@form"
+											process="@this" />
+									</p:inputText>
+									<i class="fa-solid fa-magnifying-glass"></i>
+								</div>
+								<div class="col-md-6">
+									<div class="content-filter ">
+										<i class="fa-solid fa-filter"></i>
+										<p:selectOneButton
+											value="#{servicosController.statusSelecionado}"
+											unselectable="false">
+											<f:selectItem itemLabel="Todos" itemValue="" />
+											<f:selectItem itemLabel="Ativos" itemValue="A" />
+											<f:selectItem itemLabel="Inativos" itemValue="I" />
+											<p:ajax update="@form" process="@this" />
+										</p:selectOneButton>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="flex align-center mt15 mb15">
+							<p:commandButton
+								actionListener="#{servicosController.novoServico()}"
+								update="form:dlgService" process="@form"
+								class="btn-circle-green" icon="fa fa-plus"
+								oncomplete="PF('dlgService').show()" />
+							<label class="title-button ml8">Novo Serviço</label>
+						</div>
+
+						<div>
+							<p:dataList rowIndexVar="row" class="dataList-custom"
+								value="#{servicosController.lstServicos}" var="servico"
+								paginator="true" paginatorPosition="bottom" rows="16"
+								lazy="true" emptyMessage="Nenhum dado encontrado">
+								<p:commandLink
+									actionListener="#{servicosController.servicoSelecionado(servico)}"
+									update="form:dlgService" process="@this"
+									oncomplete="PF('dlgService').show()">
+									<div
+										class="card-list #{servico.status eq 'I' ? 'inativo' : 'ativo'}">
+										<div>
+											<p:outputLabel styleClass="subtitle-list"
+												value="#{servico.nome}" />
+										</div>
+										<div>
+											<p:outputLabel styleClass="subtitle-list"
+												value="#{servico.minutos} Minutos" />
+											<p:outputLabel styleClass="subtitle-list"
+												value="#{servico.preco}">
+												<f:convertNumber type="currency" currencySymbol="R$"
+													minFractionDigits="2" maxFractionDigits="2" />
+											</p:outputLabel>
+										</div>
+									</div>
+								</p:commandLink>
+							</p:dataList>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+		<p:dialog id="dlgPag" widgetVar="dlgPag" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgPagForm">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<ui:fragment rendered="#{pagamentoController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{pagamentoController.editarModel eq 'I'}">
+								<i class="fa-solid fa-money-check-dollar"></i>
+							</ui:fragment>
+						</div>
+						<label>#{pagamentoController.editarModel eq 'A' ? 'Editar
+							tipo de Pagamento' : 'Novo tipo de Pagamento'}</label>
+					</div>
+					<div class="flex align-center">
+						<ui:fragment rendered="#{pagamentoController.editarModel eq 'A'}">
+							<p:commandButton styleClass="btn-trash"
+								onclick="PF('dlgConfirm').show()" icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgPagForm" process="@form"
+								actionListener="#{pagamentoController.atualizarPagamento()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment rendered="#{pagamentoController.editarModel eq 'I'}">
+							<p:commandButton update="dlgPagForm" process="@form"
+								actionListener="#{pagamentoController.adicionarNovoPagamento()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgPag').hide()" />
+					</div>
+
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<div class="content-filter no-filter">
+							<p:selectOneButton
+								value="#{pagamentoController.pagamentoModel.status}"
+								unselectable="false">
+								<f:selectItem itemLabel="Ativo" itemValue="A" />
+								<f:selectItem itemLabel="Inativo" itemValue="I" />
+								<p:ajax update="@this" process="@this" />
+							</p:selectOneButton>
+						</div>
+					</div>
+				</div>
+
+
+				<p:messages id="msgs" closable="true" showIcon="true"
+					autoUpdate="true" />
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Nome do tipo de pagamento" />
+							<p:inputText styleClass="senha-login"
+								value="#{pagamentoController.pagamentoModel.nome}" />
+						</div>
+					</div>
+				</div>
+			</h:panelGroup>
+
+		</p:dialog>
+
+		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgConfirmForm">
+				<div class="header-modal-confirm">
+					<div>
+						<label>Realmente deseja excluir esse tipo de Pagamento?</label>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
+						actionListener="#{pagamentoController.deletaPagamento()}" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+				</div>
+
+			</h:panelGroup>
+
+		</p:dialog>
+
+		<p:dialog id="dlgService" widgetVar="dlgService" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgServiceForm">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<ui:fragment rendered="#{servicosController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{servicosController.editarModel eq 'I'}">
+								<i class="fa-solid fa-scissors"></i>
+							</ui:fragment>
+						</div>
+						<label>#{servicosController.editarModel eq 'A' ? 'Editar
+							Serviço' : 'Novo Serviço'}</label>
+					</div>
+					<div class="flex align-center">
+						<ui:fragment rendered="#{servicosController.editarModel eq 'A'}">
+							<p:commandButton styleClass="btn-trash"
+								onclick="PF('dlgConfirmService').show()"
+								icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgServiceForm" process="@form"
+								actionListener="#{servicosController.atualizarServico()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment rendered="#{servicosController.editarModel eq 'I'}">
+							<p:commandButton update="dlgServiceForm" process="@form"
+								actionListener="#{servicosController.adicionarNovoServico()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgService').hide()" />
+					</div>
+
+				</div>
+
+				<div class="row">
+					<div class="col-md-4">
+						<div class="content-filter no-filter">
+							<p:selectOneButton
+								value="#{servicosController.servicosModel.status}"
+								unselectable="false">
+								<f:selectItem itemLabel="Ativo" itemValue="A" />
+								<f:selectItem itemLabel="Inativo" itemValue="I" />
+								<p:ajax update="@this" process="@this" />
+							</p:selectOneButton>
+						</div>
+					</div>
+				</div>
+
+
+				<p:messages id="msgsService" closable="true" showIcon="true"
+					autoUpdate="true" />
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Nome do serviço" />
+							<p:inputText styleClass="senha-login"
+								value="#{servicosController.servicosModel.nome}" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Tempo estimado do serviço" />
+							<p:inputNumber
+								value="#{servicosController.servicosModel.minutos}" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Preço do serviço" />
+							<p:inputNumber symbol="R$ "
+								value="#{servicosController.servicosModel.preco}" />
+						</div>
+					</div>
+				</div>
+			</h:panelGroup>
+
+		</p:dialog>
+
+		<p:dialog id="dlgConfirmService" widgetVar="dlgConfirmService"
+			modal="true" showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgConfirmServiceForm">
+				<div class="header-modal-confirm">
+					<div>
+						<label>Realmente deseja excluir esse Serviço?</label>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
+						actionListener="#{servicosController.deletaServico()}" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirmService').hide()" />
+				</div>
+
+			</h:panelGroup>
+
+		</p:dialog>
+
+	</h:form>
+
+
+
+</h:body>
+</html>
+
