@@ -15,6 +15,7 @@ import java.util.Map;
 import com.barbersys.model.CaixaData;
 import com.barbersys.model.ControleCaixa;
 import com.barbersys.model.Funcionario;
+import com.barbersys.model.Horario;
 import com.barbersys.util.DatabaseConnection;
 
 public class FuncionarioDAO {
@@ -54,6 +55,31 @@ public class FuncionarioDAO {
 	    }
 
 	    return total;
+	}
+	
+	public static List<Funcionario> buscarTodosFuncionarios() {
+		List<Funcionario> lista = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM funcionario ORDER BY fun_codigo DESC");
+
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Funcionario funcionario = new Funcionario();
+				funcionario.setId(rs.getLong("fun_codigo"));
+				funcionario.setNome(rs.getString("fun_nome"));
+				funcionario.setStatus(rs.getString("fun_status"));
+				lista.add(funcionario);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return lista;
 	}
 
 
@@ -102,6 +128,32 @@ public class FuncionarioDAO {
 		}
 
 		return lista;
+	}
+	
+	public static List<Horario> buscarHorarioPorFuncionario(Funcionario funcionario) {
+	    List<Horario> lista = new ArrayList<>();
+	    String sql = "SELECT * FROM horario WHERE fun_codigo = ?";
+
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        stmt.setLong(1, funcionario.getId());
+	        ResultSet rs = stmt.executeQuery();
+
+	        while (rs.next()) {
+	            Horario horario = new Horario();
+	            horario.setId(rs.getLong("hor_codigo"));
+	            horario.setHoraInicial(rs.getTime("hor_hora_inicio").toLocalTime());
+	            horario.setHoraFinal(rs.getTime("hor_hora_fim").toLocalTime());
+
+	            lista.add(horario);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return lista;
 	}
 
 	public static void atualizar(Funcionario funcionario) {

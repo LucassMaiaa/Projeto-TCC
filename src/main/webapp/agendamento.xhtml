@@ -15,6 +15,7 @@
 	<link rel="stylesheet"
 		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 	<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </h:head>
 
 <h:body>
@@ -38,7 +39,7 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
 	{
 	display: grid;
-	grid-template-columns: 62px 1fr 1fr 56px 125px 70px;
+	grid-template-columns: 40px 1fr 1fr 87px 110px 70px;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -54,6 +55,26 @@ body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
 body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 	height: 514px;
 	font-size: 17px;
+}
+
+.data-select-custom {
+	background-color: orange !important;
+}
+
+body .ui-datatable .ui-datatable-even>td {
+	background-color: transparent;
+}
+
+.ui-datatable-even {
+	background-color: #F6F7FB !important;
+}
+
+.list-time {
+	position: relative;
+}
+
+.list-time>div:first-of-type .fa-solid {
+	left: 12px;
 }
 </style>
 
@@ -82,21 +103,42 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 
 				<div class="flex space-between">
 					<p:outputLabel class="title-page" value="Agendamentos" />
-					<p:commandButton class="btn btn-green" value="Agendar Cliente"
+					<p:commandButton update="dttDataSelect"
+						actionListener="#{agendamentoController.novoAgendamento()}"
+						process="@this" class="btn btn-green" value="Agendar Cliente"
 						onclick="PF('dlgAgendar').show()" />
 				</div>
 
 				<div class="header-filters">
 					<div class="row">
-						<div class="col-md-3">
+						<div class="col-md-3 input-combined-no-text">
+							<p:inputText value="#{agendamentoController.nomeClienteFiltro}"
+								autocomplete="off" placeholder="Pesquisar cliente">
+								<p:ajax event="keyup" delay="100" update="@form" process="@this" />
+							</p:inputText>
+							<i class="fa-solid fa-magnifying-glass"></i>
+						</div>
+						<div class="col-md-4 input-combined-no-text">
+							<p:selectOneMenu
+								value="#{agendamentoController.nomeFuncionarioFiltro}"
+								filter="true" filterMatchMode="startsWith">
+								<f:selectItem itemLabel="Selecione um funcionário" />
+
+								<f:selectItems var="func"
+									value="#{agendamentoController.lstFuncionario}"
+									itemLabel="#{func.nome}" itemValue="#{func.nome}" />
+								<p:ajax update="@form" process="@this" />
+							</p:selectOneMenu>
+						</div>
+						<div class="col-md-5">
 							<div class="content-filter ">
 								<i class="fa-solid fa-filter"></i>
 								<p:selectOneButton
-									value="#{controleCaixaController.filtroTipoDeValor}"
+									value="#{agendamentoController.statusSelecionado}"
 									unselectable="false">
 									<f:selectItem itemLabel="Todos" itemValue="" />
-									<f:selectItem itemLabel="Entradas" itemValue="Entrada" />
-									<f:selectItem itemLabel="Saídas" itemValue="Saida" />
+									<f:selectItem itemLabel="Ativos" itemValue="A" />
+									<f:selectItem itemLabel="Cancelados" itemValue="I" />
 									<p:ajax update="@form" process="@this" />
 								</p:selectOneButton>
 							</div>
@@ -106,251 +148,396 @@ body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 				</div>
 
 				<div>
-					<p:dataTable id="datatableCaixas" rowIndexVar="row"
-						class="data-table-info"
-						value="#{controleCaixaController.lstControleCaixa}" var="caixa"
-						paginator="true" paginatorPosition="bottom" rows="13" lazy="true"
-						emptyMessage="Nenhum dado encontrado">
+					<p:dataTable id="datatableCaixas"
+						value="#{agendamentoController.lstAgendamentos}" var="agend"
+						rowKey="#{agend.id}"
+						selection="#{agendamentoController.agendamentoModel}"
+						selectionMode="single" paginator="true" paginatorPosition="bottom"
+						rows="13" lazy="true" emptyMessage="Nenhum dado encontrado">
 
-						<p:column headerText="Status">
-							<h:outputText value="#{row + 1}" />
+						<p:ajax event="rowSelect" update="@form"
+							listener="#{agendamentoController.agendamentoSelecionado}" />
+						<p:column styleClass="flex justify-center align-center"
+							headerText="Status">
+							<div
+								class="status-table #{agend.status eq 'A' ? 'ativo' : 'inativo'}">
+
+							</div>
 						</p:column>
 
-						<p:column headerText="Cliente">
-							<h:outputText value="#{caixa.movimentacao}" />
+						<p:column styleClass="flex align-center" headerText="Cliente">
+							<ui:fragment rendered="#{agend.cliente.id eq null}">
+								<h:outputText value="#{agend.nomeClienteAvulso}" />
+							</ui:fragment>
+							<ui:fragment rendered="#{agend.cliente.id != null}">
+								<h:outputText value="#{agend.cliente.nome}" />
+							</ui:fragment>
+
 						</p:column>
 
-						<p:column headerText="Funcionário">
-							<h:outputText value="#{caixa.valor}">
-								<f:convertNumber type="currency" currencySymbol="R$"
-									locale="pt_BR" />
+						<p:column styleClass="flex align-center" headerText="Funcionário">
+							<h:outputText value="#{agend.funcionario.nome}" />
+						</p:column>
+
+						<p:column styleClass="flex align-center" headerText="Data">
+							<h:outputText value="#{agend.dataCriado}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
-						<p:column headerText="Data">
-							<h:outputText value="#{caixa.horaAtual.substring(0,5)}" />
+						<p:column styleClass="flex align-center justify-center"
+							headerText="Quant. Serviços">
+							<h:outputText value="#{agend.servicos.size()}" />
 						</p:column>
 
-						<p:column headerText="Quant. Serviços">
-							<h:outputText value="#{caixa.motivo}" />
+						<p:column styleClass="flex align-center justify-center"
+							headerText="Horário">
+							<h:outputText styleClass="title-date-table"
+								value="#{agend.horaSelecionada}" />
 						</p:column>
-
-						<p:column headerText="Horário">
-							<h:outputText value="#{caixa.motivo}" />
-						</p:column>
-
-
 
 					</p:dataTable>
+
+
 				</div>
 
 			</div>
+
 			<div class="content-info-lateral">
-				<div class="content-logo-system">
-					<div class="flex space-between">
-						<div class="flex">
-							<div class="icon-circle">
-								<i class="fa-solid fa-user"></i>
+				<ui:fragment
+					rendered="#{agendamentoController.clienteModel.id != null or agendamentoController.agendamentoModel.nomeClienteAvulso != null}">
+					<div class="content-logo-system">
+						<div class="flex space-between">
+							<div class="flex">
+								<div class="icon-circle">
+									<i class="fa-solid fa-user"></i>
+								</div>
+								<div class="subtitle-info flex space-between">
+									<label class="title-info">Cliente</label>
+								</div>
 							</div>
-							<div class="subtitle-info flex space-between">
-								<label class="title-info">Cliente</label>
+
+							<div class="flex">
+								<p:commandButton update="dttDataSelect" process="@this"
+									actionListener="#{agendamentoController.editAgendamento()}"
+									oncomplete="PF('dlgAgendar').show()"
+									class="btn-circle btn-circle-info-lateral"
+									icon="fa-solid fa-pen" />
+								<p:commandButton
+									actionListener="#{agendamentoController.fecharCliente()}"
+									class="btn-circle btn-circle-info-lateral" icon="fa-solid fa-xmark" />
+							</div>
+						</div>
+					</div>
+					<div class="content-btns">
+						<div class="flex">
+							<div class="perfil-top-funcionario mr8"></div>
+							<div>
+								<label class="title-obj">Cliente</label>
+								<ui:fragment
+									rendered="#{agendamentoController.agendamentoModel.cliente.id eq null}">
+									<label class="subtitle-obj">#{agendamentoController.agendamentoModel.nomeClienteAvulso}
+									</label>
+								</ui:fragment>
+								<ui:fragment
+									rendered="#{agendamentoController.agendamentoModel.cliente.id != null}">
+									<label class="subtitle-obj">#{agendamentoController.clienteModel.nome}
+									</label>
+								</ui:fragment>
+
 							</div>
 						</div>
 
-						<div class="flex">
-							<p:commandButton class="btn-circle btn-circle-info-lateral"
-								icon="fa-solid fa-pen" />
-							<p:commandButton class="btn-circle btn-circle-info-lateral"
-								icon="fa-solid fa-x" />
-						</div>
+
+						<p:outputPanel id="attCaixa">
+							<div>
+								<p:outputLabel class="title-date"
+									value="#{agendamentoController.agendamentoModel.dataCriado}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</p:outputLabel>
+								<ui:fragment
+									rendered="#{agendamentoController.agendamentoModel.status eq 'I'}">
+									<p:outputLabel class="title-date" style="background: #C52323"
+										value="Cancelado" />
+								</ui:fragment>
+								<ui:fragment
+									rendered="#{agendamentoController.agendamentoModel.status eq 'A'}">
+									<p:outputLabel class="title-date" style="background: #23C538 "
+										value="Ativo" />
+								</ui:fragment>
+
+							</div>
+						</p:outputPanel>
+
 					</div>
-				</div>
-				<div class="content-btns">
-					<div class="flex">
-						<div class="perfil-top-funcionario mr8"></div>
+					<div class="content-valores">
+						<label class="title-obj">Funcionário a realizar serviços</label> <label
+							class="subtitle-obj">#{agendamentoController.agendamentoModel.funcionario.nome}</label>
+					</div>
+					<div class="content-agendamentos flex column space-between">
+
 						<div>
-							<label class="title-obj">Cliente</label> <label
-								class="subtitle-obj">Lucas Eduardo Maia</label>
+							<label class="title-servicos mb15">Serviços contratados</label>
+
+							<p:dataList id="dttlstservicos" rows="4"
+								class="dataList-dialog-custom data-list-time"
+								value="#{agendamentoController.agendamentoModel.servicos}"
+								var="servico" rowIndexVar="index">
+
+								<div class="list-time">
+									<div>
+										<i class="fa-solid fa-scissors"></i>
+										<div>
+											<label class="title-obj uppercase">#{servico.nome}</label> <label
+												class="subtitle-obj"><h:outputText
+													value="#{servico.preco}">
+													<f:convertNumber type="currency" currencySymbol="R$"
+														maxFractionDigits="2" />
+												</h:outputText> </label>
+										</div>
+									</div>
+
+								</div>
+
+							</p:dataList>
 						</div>
-					</div>
 
 
-					<p:outputPanel id="attCaixa">
 						<div>
-							<p:outputLabel class="title-date"
-								value="#{controleCaixaController.dataSelecionada}">
-								<f:convertDateTime pattern="dd/MM/yyyy" />
-							</p:outputLabel>
-							<ui:fragment
-								rendered="#{controleCaixaController.statusSelecionado eq 'f'}">
-								<p:outputLabel class="title-date" style="background: #C52323"
-									value="Cancelado" />
-							</ui:fragment>
-							<ui:fragment
-								rendered="#{controleCaixaController.statusSelecionado eq 'a'}">
-								<p:outputLabel class="title-date" style="background: #23C538 "
-									value="Ativo" />
-							</ui:fragment>
+							<div class="fundo-valores-totais">
+								<label>Total</label> <label> <h:outputText
+										value="#{agendamentoController.totalGastoServicos}">
+										<f:convertNumber type="currency" currencySymbol="R$"
+											maxFractionDigits="2" />
+									</h:outputText>
+								</label>
+							</div>
 
-						</div>
-					</p:outputPanel>
+							<div class="input-combined">
+								<p:outputLabel class="title-input" value="Método de pagamento" />
+								<p:selectOneMenu value="#{agendamentoController.tipoPagamento}">
+									<f:selectItem itemLabel="Selecione forma de pagamento"
+										itemValue="" noSelectionOption="false" />
+									<f:selectItems value="#{agendamentoController.lstPagamento}"
+										var="pag" itemLabel="#{pag.nome}" itemValue="#{pag.nome}" />
+									<p:ajax update="@form" process="@this" />
+								</p:selectOneMenu>
+							</div>
 
-				</div>
-				<div class="content-valores">
-					<label class="title-obj">Funcionário a realizar serviços</label> <label
-						class="subtitle-obj">PAULO UBEDA</label>
-				</div>
-				<div class="content-agendamentos flex column space-between">
+							<div class="fundo-btns">
+								<ui:fragment
+									rendered="#{agendamentoController.verificaPagamento eq 'A'}">
+									<p:commandButton
+										actionListener="#{agendamentoController.confirmaPagamentoPedido()}"
+										class="btn btn-green" value="Confirmar pagamento"
+										update="@form" process="@form" />
+								</ui:fragment>
 
-					<label class="title-servicos">Serviços contratados</label>
-
-					<div>
-						<div class="fundo-valores-totais">
-							<label>Total</label> <label>R$ 90,00</label>
-						</div>
-
-						<div class="input-combined">
-							<p:outputLabel class="title-input" value="Método de pagamento" />
-							<p:selectOneMenu>
-								<f:selectItem itemLabel="Selecione forma de pagamento"
-									itemValue="" />
-								<f:selectItem itemLabel="Dinheiro" itemValue="d" />
-								<f:selectItem itemLabel="Cartão - débito" itemValue="cd" />
-								<f:selectItem itemLabel="Cartão - crédito" itemValue="cc" />
-								<f:selectItem itemLabel="Pix" itemValue="p" />
-							</p:selectOneMenu>
+								<p:commandButton
+									actionListener="#{agendamentoController.finalizarPedido()}"
+									class="btn btn-blue medium" value="Finalizar" update="@form"
+									process="@this" />
+							</div>
 						</div>
 
-						<div class="fundo-btns">
-							<p:commandButton class="btn btn-green"
-								value="Confirmar pagamento" update="@form" process="@form" />
-							<p:commandButton class="btn btn-blue medium" value="Finalizar"
-								update="@form" process="@form" />
-						</div>
 					</div>
-
-				</div>
+				</ui:fragment>
 			</div>
+
+
 		</div>
 
 		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
-			<div class="header-modal">
-				<div class="flex align-center">
-					<div class="icon-circle">
-						<i class="fa-solid fa-calendar-days"></i>
-
+			<h:panelGroup id="dttDataSelect">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							
+							<ui:fragment rendered="#{agendamentoController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{agendamentoController.editarModel eq 'I'}">
+								<i class="fa-solid fa-calendar-days"></i>
+							</ui:fragment>
+						</div>
+						<label>#{agendamentoController.editarModel eq 'A' ?
+							'Editar Agendamento' : 'Novo Agendamento'}</label>
 					</div>
-					<label>Agendamento</label>
-				</div>
-				<div class="flex align-center">
-					<p:commandButton
-						actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
-						styleClass="btn btn-green" value="Agendar" />
-					<div>
+					<div class="flex align-center">
+						<ui:fragment
+							rendered="#{agendamentoController.editarModel eq 'A'}">
+							<p:commandButton styleClass="btn-trash"
+								onclick="PF('dlgConfirm').show()" icon="fa-solid fa-trash" />
+							<p:commandButton update="dttlstservicos" process="@form"
+								actionListener="#{agendamentoController.atualizarAgendamento()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.editarModel eq 'I'}">
+							<p:commandButton update="dttDataSelect" process="@form"
+								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
+								styleClass="btn btn-green" value="Agendar" />
+						</ui:fragment>
+
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
 							onclick="PF('dlgAgendar').hide()" />
 					</div>
+
+
 				</div>
 
-
-			</div>
-
-			<div class="row">
-				<div class="col-md-6">
-					<div class="content-filter no-filter">
-						<p:selectOneButton value="#{agendamentoController.tipoCadastro}"
-							unselectable="false">
-							<f:selectItem itemLabel="Com cadastro" itemValue="c" />
-							<f:selectItem itemLabel="Sem cadastros" itemValue="s" />
-							<p:ajax update="dlgAttCliente" process="@this" />
-						</p:selectOneButton>
+				<ui:fragment rendered="#{agendamentoController.editarModel eq 'I'}">
+					<div class="row">
+						<div class="col-md-6">
+							<div class="content-filter no-filter">
+								<p:selectOneButton value="#{agendamentoController.tipoCadastro}"
+									unselectable="false">
+									<f:selectItem itemLabel="Com cadastro" itemValue="A" />
+									<f:selectItem itemLabel="Sem cadastros" itemValue="I" />
+									<p:ajax update="dlgAttCliente" process="@this" />
+								</p:selectOneButton>
+							</div>
+						</div>
 					</div>
-				</div>
-			</div>
+				</ui:fragment>
 
-			<div class="row">
-				<div class="col-md-8">
-					<p:outputPanel id="dlgAttCliente">
-						<ui:fragment
-							rendered="#{agendamentoController.tipoCadastro eq 'c'}">
-							<div class="input-combined">
-								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-								<p:selectOneMenu converter="#{countryConverter}" var="c"
-									filter="true" filterMatchMode="startsWith">
+				<p:messages id="msgs" closable="true" showIcon="true"
+					autoUpdate="true" />
+				<div class="row">
+					<div class="col-md-8">
+						<p:outputPanel id="dlgAttCliente">
+							<ui:fragment
+								rendered="#{agendamentoController.tipoCadastro eq 'A'}">
+								<div class="input-combined">
+									<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+									<p:selectOneMenu value="#{agendamentoController.nomeCliente}"
+										filter="true" filterMatchMode="startsWith">
+										<f:selectItem itemLabel="Selecione um cliente" />
 
-									<f:selectItems var="country" />
+										<f:selectItems var="cli"
+											value="#{agendamentoController.lstCliente}"
+											itemLabel="#{cli.nome}" itemValue="#{cli.nome}" />
 
-									<p:column>
-										<span class="flag" />
-									</p:column>
+										<p:column>
+											<f:facet name="header">
+												<h:outputText value="Clientes cadastrados" />
 
-									<p:column>
-										<f:facet name="header">
-											<h:outputText value="Name" />
+											</f:facet>
+											<h:outputText value="#{cli.nome}" />
+										</p:column>
+
+										<f:facet name="footer">
+											<p:divider styleClass="mt-0" />
+											<h:outputText
+												value="#{agendamentoController.lstCliente.size()} Clientes encontrados"
+												style="font-weight:bold;" />
 										</f:facet>
-										<h:outputText />
-									</p:column>
+									</p:selectOneMenu>
+								</div>
+							</ui:fragment>
+							<ui:fragment
+								rendered="#{agendamentoController.tipoCadastro eq 'I'}">
+								<div class="input-combined">
+									<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+									<p:inputText value="#{agendamentoController.nomeCliente}"
+										styleClass="senha-login" />
+								</div>
+							</ui:fragment>
 
-									<f:facet name="footer">
-										<h:outputText />
-									</f:facet>
-								</p:selectOneMenu>
-							</div>
-						</ui:fragment>
-						<ui:fragment
-							rendered="#{agendamentoController.tipoCadastro eq 's'}">
-							<div class="input-combined">
-								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
-								<p:inputText styleClass="senha-login" />
-							</div>
-						</ui:fragment>
-
-					</p:outputPanel>
-				</div>
-				<div class="col-md-4">
-					<div class="input-combined">
-						<p:outputLabel styleClass="title-input" value="Selecione uma data" />
-						<p:datePicker showIcon="true" pattern="dd/MM/yyyy"
-							autocomplete="off" />
-					</div>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col-md-8">
-					<div class="input-combined">
-						<p:outputLabel styleClass="title-input"
-							value="Nome do funcionário" />
-						<p:selectOneMenu>
-							<f:selectItem itemLabel="Selecione funcionário" itemValue="" />
-							<f:selectItems />
-							<f:facet name="footer">
-								<p:divider styleClass="mt-0" />
-								<h:outputText value="3 options" style="font-weight:bold;" />
-							</f:facet>
-						</p:selectOneMenu>
+						</p:outputPanel>
 					</div>
 
-				</div>
 
-				<div class="col-md-4">
-					<div class="input-combined">
-						<p:outputLabel styleClass="title-input"
-							value="Horários disponíveis" />
-						<p:selectOneMenu>
-							<f:selectItem itemLabel="Selecione horário" itemValue="" />
-							<f:selectItems />
-							<f:facet name="footer">
-								<p:divider styleClass="mt-0" />
-								<h:outputText value="3 options" style="font-weight:bold;" />
-							</f:facet>
-						</p:selectOneMenu>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Selecione uma data" />
+							<p:datePicker value="#{agendamentoController.dataSelecionada}"
+								showIcon="true" pattern="dd/MM/yyyy" autocomplete="off" />
+						</div>
 					</div>
 
+
 				</div>
-			</div>
+
+				<div class="row">
+					<div class="col-md-8">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Nome do funcionário" />
+							<p:selectOneMenu value="#{agendamentoController.nomeFuncionario}"
+								filter="true" filterMatchMode="startsWith">
+								<f:selectItem itemLabel="Selecione um funcionário" itemValue="" />
+								<f:selectItems value="#{agendamentoController.lstFuncionario}"
+									var="func" itemLabel="#{func.nome}" itemValue="#{func.nome}" />
+								<p:ajax
+									listener="#{agendamentoController.gerarHorariosDisponiveis}"
+									update="inputHorario" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<div class="col-md-4">
+						<div class="input-combined">
+
+							<p:outputLabel styleClass="title-input"
+								value="Horários disponíveis" />
+							<p:selectOneMenu id="inputHorario"
+								value="#{agendamentoController.horaSelecionada}">
+								<f:selectItem itemLabel="Selecione horário" itemValue="" />
+								<f:selectItems
+									value="#{agendamentoController.horariosDisponiveis}" var="h"
+									itemLabel="#{h}" itemValue="#{h}" />
+							</p:selectOneMenu>
+
+
+						</div>
+					</div>
+
+
+
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Serviços" />
+							<p:selectCheckboxMenu
+								value="#{agendamentoController.servicosSelecionadosIds}"
+								label="Selecione os serviços" multiple="true" filter="true"
+								converter="javax.faces.Long">
+								<f:selectItems value="#{agendamentoController.lstServico}"
+									var="servico" itemLabel="#{servico.nome}"
+									itemValue="#{servico.id}" />
+							</p:selectCheckboxMenu>
+						</div>
+					</div>
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+
+		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgConfirmForm">
+				<div class="header-modal-confirm">
+					<div>
+						<label>Realmente deseja excluir esse Agendamento?</label>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
+						actionListener="#{agendamentoController.deletarAgendamento()}" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+				</div>
+
+			</h:panelGroup>
+
 		</p:dialog>
 
 	</h:form>

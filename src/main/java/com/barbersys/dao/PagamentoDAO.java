@@ -48,6 +48,30 @@ public class PagamentoDAO {
 
 	    return total;
 	}
+	
+	public static List<Pagamento> buscarTodosPagamento() {
+		List<Pagamento> lista = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM pagamento ORDER BY pag_codigo DESC");
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Pagamento pagamento = new Pagamento();
+				pagamento.setId(rs.getLong("pag_codigo"));
+				pagamento.setNome(rs.getString("pag_nome"));
+				pagamento.setStatus(rs.getString("pag_status"));
+				lista.add(pagamento);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
 
 
 	public static List<Pagamento> buscarPagamento(String nome, String status, int first, int pageSize) {

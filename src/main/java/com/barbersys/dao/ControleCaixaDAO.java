@@ -40,7 +40,7 @@ public class ControleCaixaDAO {
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
 
-				if (caixa.getMovimentacao().equals("Entrada")) {
+				if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Entrada automática")) {
 					totalEntradas += caixa.getValor();
 
 				} else if (caixa.getMovimentacao().equals("Saida")) {
@@ -89,8 +89,7 @@ public class ControleCaixaDAO {
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
 
-				if (caixa.getMovimentacao().equals("Entrada")
-						|| caixa.getMovimentacao().equals("Fechamento de Caixa")) {
+				if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Entrada automática")) {
 					totalEntradas += caixa.getValor();
 				} else if (caixa.getMovimentacao().equals("Saida")) {
 					totalSaidas += caixa.getValor();
@@ -210,7 +209,7 @@ public class ControleCaixaDAO {
 						double valor = rs2.getDouble("con_valor");
 						String movimentacao = rs2.getString("con_movimentacao");
 
-						if (movimentacao.equals("Entrada")) {
+						if (movimentacao.equals("Entrada") || movimentacao.equals("Entrada automática")) {
 							totalEntradas += valor;
 						} else if (movimentacao.equals("Saida")) {
 							totalSaidas += valor;

@@ -42,6 +42,10 @@ body .ui-widget{
     padding-left: 2px !important;
 }
 
+.uppercase{
+	text-transform: uppercase !important;
+}
+
 a {
     text-decoration: none !important;
 }
@@ -536,6 +540,18 @@ a {
     text-transform: uppercase;
 }
 
+.title-date-table{
+	display: block;
+    padding: 3px 7px;
+    background: black;
+    color: white;
+    border-radius: 10px;
+    font-size: 12px !important;
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
 .title-date:first-child{
     margin-bottom: 4px !important;
 }
@@ -635,9 +651,35 @@ a {
 	
 }
 
+.input-combined-no-text .ui-selectonemenu{
+	width: 100%;
+	border-radius: 8px;
+	height: 45.5px;
+}
+
+.input-combined-no-text .ui-selectonemenu label.ui-selectonemenu-label {
+    display: flex;
+    align-items: center;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger {
+    width: 24px;
+    height: 24px;
+    background: #DEDEDE;
+    border-radius: 8px;
+    top: 11px;
+    right: 8px;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger .ui-icon {
+    font-size: 12px;
+}
+
 .input-combined-no-text .ui-inputfield,
 .input-combined-no-text .ui-inputfield.ui-state-focus,
-.input-combined-no-text .ui-inputfield.ui-state-hover{
+.input-combined-no-text .ui-inputfield.ui-state-hover
+.input-combined-no-text .ui-selectonemenu.ui-state-focus,
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-label.ui-state-focus{
 	height: 46px;
     position: relative;
     width: 100%;
@@ -646,10 +688,15 @@ a {
     font-weight: 600;
     font-family: "Barlow";
     border-radius: 8px !important;
-    box-shadow: none;
-    border-color: #ced4da;
+    box-shadow: none !important;
+    border-color: #ced4da !important;
     padding-right: 40px;
 }
+
+.input-combined-no-text .ui-selectonemenu .ui-state-hover{
+	border-color: #ced4da !important;
+}
+
 
 .input-combined{
     position: relative;
@@ -901,6 +948,20 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 
 /* Others */
 
+.status-table{
+	width: 13px;
+	height: 13px;
+	border-radius: 50%;
+}
+
+.status-table.ativo{
+	background: #66D875;
+}
+
+.status-table.inativo{
+	background: #EE1E1E;
+}
+
 .list-time{
 	display: flex;
     justify-content: space-between;
@@ -991,12 +1052,20 @@ body .ui-datatable .ui-datatable-data>tr>td {
 }
 
 body .ui-datatable .ui-datatable-data>tr{
-    background: transparent !important;
+    background: transparent;
 }
 
 body .ui-datatable .ui-datatable-data>tr>td {
     border: none !important;
     height: 39px;
+}
+
+body .ui-datatable .ui-datatable-data>tr.ui-state-highlight{
+    background: #F5E5E9 !important;
+    color: #495057;
+    outline: 1px solid #E74A46;
+    border-radius: 8px;
+    outline-offset: -1px;
 }
 
 body .ui-datatable .ui-datatable-odd > td{

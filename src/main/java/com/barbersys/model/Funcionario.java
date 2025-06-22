@@ -2,6 +2,7 @@ package com.barbersys.model;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -28,5 +29,4 @@ public class Funcionario implements Serializable{
 	
 	@Column
 	private String status = "A";
-	
 }

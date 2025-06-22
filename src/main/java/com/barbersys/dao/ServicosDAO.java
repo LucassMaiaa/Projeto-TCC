@@ -48,6 +48,32 @@ public class ServicosDAO {
 
 	    return total;
 	}
+	
+	public static List<Servicos> buscarTodosServico() {
+		List<Servicos> lista = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM servicos ORDER BY ser_codigo");
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Servicos servicos = new Servicos();
+				servicos.setId(rs.getLong("ser_codigo"));
+				servicos.setNome(rs.getString("ser_nome"));
+				servicos.setStatus(rs.getString("ser_status"));
+				servicos.setMinutos(rs.getInt("ser_minutos"));
+				servicos.setPreco(rs.getDouble("ser_preco"));
+				lista.add(servicos);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
 
 
 	public static List<Servicos> buscarServico(String nome, String status, int first, int pageSize) {
@@ -97,6 +123,33 @@ public class ServicosDAO {
 		}
 
 		return lista;
+	}
+	
+	public static Servicos buscarPorId(Long id) {
+	    String sql = "SELECT * FROM servicos WHERE ser_codigo = ?";
+	    Servicos servico = null;
+
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+	        ps.setLong(1, id);
+
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            servico = new Servicos();
+	            servico.setId(rs.getLong("ser_codigo"));
+	            servico.setNome(rs.getString("ser_nome"));
+	            servico.setStatus(rs.getString("ser_status"));
+	            servico.setMinutos(rs.getInt("ser_minutos"));
+	            servico.setPreco(rs.getDouble("ser_preco"));
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return servico;
 	}
 
 	public static void atualizar(Servicos servicos) {

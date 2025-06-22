@@ -45,6 +45,33 @@ public class ClienteDAO {
 
 		return total;
 	}
+	
+	public static List<Cliente> buscarTodosClientes() {
+		List<Cliente> lista = new ArrayList<>();
+		StringBuilder sql = new StringBuilder("SELECT * FROM cliente ORDER BY cli_codigo DESC");
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Cliente cliente = new Cliente();
+				cliente.setId(rs.getLong("cli_codigo"));
+				cliente.setNome(rs.getString("cli_nome"));
+				cliente.setEmail(rs.getString("cli_email"));
+				cliente.setTelefone(rs.getString("cli_telefone"));
+				cliente.setCpf(rs.getString("cli_cpf"));
+				lista.add(cliente);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return lista;
+	}
 
 	public static List<Cliente> buscarCliente(String nome, int first, int pageSize) {
 		List<Cliente> lista = new ArrayList<>();
