@@ -370,7 +370,7 @@ body .ui-datatable .ui-datatable-even>td {
 							rendered="#{agendamentoController.editarModel eq 'A'}">
 							<p:commandButton styleClass="btn-trash"
 								onclick="PF('dlgConfirm').show()" icon="fa-solid fa-trash" />
-							<p:commandButton update="dttlstservicos" process="@form"
+							<p:commandButton update="dttDataSelect" process="@form"
 								actionListener="#{agendamentoController.atualizarAgendamento()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>

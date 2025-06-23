@@ -248,6 +248,7 @@ public class AgendamentoController {
 	}
 
 	public void editAgendamento() {
+		editarModel = "A";
 		servicosSelecionadosIds = new ArrayList<Long>();
 		if(agendamentoModel.getTipoCadastro().equals("A")) {
 			nomeCliente = agendamentoModel.getCliente().getNome();
