@@ -51,11 +51,13 @@ public class PagamentoDAO {
 	
 	public static List<Pagamento> buscarTodosPagamento() {
 		List<Pagamento> lista = new ArrayList<>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM pagamento ORDER BY pag_codigo DESC");
+		StringBuilder sql = new StringBuilder("SELECT * FROM pagamento WHERE pag_status = ? ORDER BY pag_codigo DESC");
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
+			
+			ps.setString(1, "A");
+			
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {

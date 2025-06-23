@@ -51,11 +51,13 @@ public class ServicosDAO {
 	
 	public static List<Servicos> buscarTodosServico() {
 		List<Servicos> lista = new ArrayList<>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM servicos ORDER BY ser_codigo");
+		StringBuilder sql = new StringBuilder("SELECT * FROM servicos WHERE ser_status = ? ORDER BY ser_codigo");
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
+			
+			ps.setString(1, "A");
+			
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {

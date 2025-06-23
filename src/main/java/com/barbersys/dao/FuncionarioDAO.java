@@ -59,12 +59,14 @@ public class FuncionarioDAO {
 	
 	public static List<Funcionario> buscarTodosFuncionarios() {
 		List<Funcionario> lista = new ArrayList<>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM funcionario ORDER BY fun_codigo DESC");
+		StringBuilder sql = new StringBuilder("SELECT * FROM funcionario WHERE fun_status = ? ORDER BY fun_codigo DESC");
 
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
+			
+			ps.setString(1, "A");
+			
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
