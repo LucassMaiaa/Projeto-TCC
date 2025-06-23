@@ -217,7 +217,32 @@ public class ControleCaixaController implements Serializable {
 			caixaDataModel.setValorFinal(valorFinal);
 			caixaDataModel.setStatus(statusSelecionado);
 		}
-		if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()
+		if(valorSugerido < 0 ) {
+			if(Math.abs(valorFinal - valorSugerido) > 0.0001 || controleCaixaModel.getMotivo().trim().isEmpty()) {
+				motivoFinal = "A";
+				PrimeFaces.current().ajax().addCallbackParam("validado", false);
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "", "Valor negativo! informe o valor exato que o valor sugerido informou e o motivo."));
+			}else {
+				motivoFinal = "I";
+				CaixaDataDAO.atualizar(caixaDataModel);
+
+				String horaAtualFormatada = LocalTime.now().format(horaFormatada);
+				controleCaixaModel.setCaixaData(caixaDataModel);
+				controleCaixaModel.setHoraAtual(horaAtualFormatada);
+				controleCaixaModel.setData(dataSelecionada);
+				controleCaixaModel.setValor(valorFinal - valorInicial);
+				controleCaixaModel.setMovimentacao("Fechamento de Caixa");
+				ControleCaixaDAO.salvar(controleCaixaModel);
+
+				controleCaixaModel = new ControleCaixa();
+				mensagemMotivoFinal = "";
+				calcularTotal();
+				dadosLiberados = true;
+				PrimeFaces.current().ajax().addCallbackParam("validado", true);
+				PrimeFaces.current().ajax().update("form");
+			}
+		}else if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()
 				|| caixaDataModel.getValorFinal() < valorSugerido && controleCaixaModel.getMotivo().isEmpty()) {
 			motivoFinal = "A";
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
