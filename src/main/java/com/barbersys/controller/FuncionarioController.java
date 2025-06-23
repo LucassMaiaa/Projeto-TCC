@@ -118,7 +118,16 @@ public class FuncionarioController {
 			if (funcionarioModel.getNome().isEmpty()) {
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 						"Campo nome do funcionário obrigatório", "Erro!"));
-			} else {
+				
+				return;
+			} 
+			if(lstHorarioAux.size() < 1) {
+				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+						"Funcionário precisa ter no mínimo 1 horário adicionado", "Erro!"));
+				
+				return;
+			}
+			
 				FuncionarioDAO.salvar(funcionarioModel);
 
 				if (funcionarioModel.getId() != null) {
@@ -142,7 +151,7 @@ public class FuncionarioController {
 				}
 				PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
 				PrimeFaces.current().ajax().update("form");
-			}
+			
 
 		} catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -151,7 +160,18 @@ public class FuncionarioController {
 	}
 
 	public void atualizarFuncionario() {
-		if (funcionarioModel.getNome() != null) {
+		List<Horario> checkHorario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioModel);
+		if(funcionarioModel.getNome() == null) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"O campo nome do funcionário é obrigatório.!", "Erro!"));
+			return;
+		}
+		if(checkHorario.isEmpty()) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Funcionário precisa ter no mínimo 1 horário adicionado", "Erro!"));
+			return;
+		}
+		
 			FuncionarioDAO.atualizar(funcionarioModel);
 			PrimeFaces.current()
 					.executeScript("Swal.fire({" + "  icon: 'success',"
@@ -159,10 +179,7 @@ public class FuncionarioController {
 							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 			PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
 			PrimeFaces.current().ajax().update("form");
-		} else {
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"O campo nome do funcionário é obrigatório.!", "Erro!"));
-		}
+	
 
 	}
 
@@ -244,13 +261,22 @@ public class FuncionarioController {
 	}
 
 	public void deletaHorario() {
+		List<Horario> checkHorario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioModel);
+		if(checkHorario.size() == 1) {
+			PrimeFaces.current().executeScript("PF('dlgHora').hide();");
+			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Funcionário deve ter no mínimo 1 horário cadastrado.!", "Erro!"));
+			return;
+		}
 		HorarioDAO.deletar(horarioModel.getId());
+		PrimeFaces.current()
+		.executeScript("Swal.fire({" + "  icon: 'success',"
+				+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
+				+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 		PrimeFaces.current().executeScript("PF('dlgHora').hide();");
 		PrimeFaces.current().ajax().update("form:dlgFuncForm");
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+		
 		carregarHorariosFuncionario();
 	}
 
