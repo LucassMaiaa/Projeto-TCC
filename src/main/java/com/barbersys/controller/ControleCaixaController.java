@@ -18,7 +18,6 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import lombok.Getter;
@@ -37,7 +36,7 @@ import org.primefaces.model.SortMeta;
 @Getter
 @Setter
 @ManagedBean
-@ViewScoped
+@SessionScoped
 public class ControleCaixaController implements Serializable {
 
 	private String statusSelecionado;
@@ -217,32 +216,8 @@ public class ControleCaixaController implements Serializable {
 			caixaDataModel.setValorFinal(valorFinal);
 			caixaDataModel.setStatus(statusSelecionado);
 		}
-		if(valorSugerido < 0 ) {
-			if(Math.abs(valorFinal - valorSugerido) > 0.0001 || controleCaixaModel.getMotivo().trim().isEmpty()) {
-				motivoFinal = "A";
-				PrimeFaces.current().ajax().addCallbackParam("validado", false);
-				FacesContext.getCurrentInstance().addMessage(null,
-						new FacesMessage(FacesMessage.SEVERITY_ERROR, "", "Valor negativo! informe o valor exato que o valor sugerido informou e o motivo."));
-			}else {
-				motivoFinal = "I";
-				CaixaDataDAO.atualizar(caixaDataModel);
-
-				String horaAtualFormatada = LocalTime.now().format(horaFormatada);
-				controleCaixaModel.setCaixaData(caixaDataModel);
-				controleCaixaModel.setHoraAtual(horaAtualFormatada);
-				controleCaixaModel.setData(dataSelecionada);
-				controleCaixaModel.setValor(valorFinal - valorInicial);
-				controleCaixaModel.setMovimentacao("Fechamento de Caixa");
-				ControleCaixaDAO.salvar(controleCaixaModel);
-
-				controleCaixaModel = new ControleCaixa();
-				mensagemMotivoFinal = "";
-				calcularTotal();
-				dadosLiberados = true;
-				PrimeFaces.current().ajax().addCallbackParam("validado", true);
-				PrimeFaces.current().ajax().update("form");
-			}
-		}else if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()
+		if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial())
+		if (caixaDataModel.getValorFinal() < caixaDataModel.getValorInicial() && controleCaixaModel.getMotivo().isEmpty()
 				|| caixaDataModel.getValorFinal() < valorSugerido && controleCaixaModel.getMotivo().isEmpty()) {
 			motivoFinal = "A";
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);

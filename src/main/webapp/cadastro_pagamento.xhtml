@@ -349,6 +349,16 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 						</div>
 					</div>
 				</div>
+
+				<!-- NOVO CAMPO DE CHECKBOX -->
+				<div class="row" style="margin-top: 15px;">
+				    <div class="col-md-12">
+				        <div class="flex align-center">
+				            <p:selectBooleanCheckbox value="#{pagamentoController.pagamentoModel.integraCaixa}"/>
+				            <p:outputLabel for="@previous" style="margin-left: 8px; margin-bottom: 0; font-weight: normal;" value="Registrar no caixa"/>
+				        </div>
+				    </div>
+				</div>
 			</h:panelGroup>
 
 		</p:dialog>

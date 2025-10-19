@@ -962,6 +962,10 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 	background: #EE1E1E;
 }
 
+.status-table.aguardando {
+   background-color: #FFC107;
+}
+
 .list-time{
 	display: flex;
     justify-content: space-between;

@@ -1,7 +1,9 @@
 package com.barbersys.controller;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,8 +34,8 @@ public class FuncionarioController {
 
 	private String nomeFuncionario;
 	private String statusSelecionado = "";
-	private LocalTime dataInicial = LocalTime.of(0, 0);
-	private LocalTime dataFinal = LocalTime.of(0, 0);
+	private Date dataInicial;
+	private Date dataFinal;
 	private Funcionario funcionarioModel = new Funcionario();
 	private Horario horarioModel = new Horario();
 	private LazyDataModel<Funcionario> lstFuncionario;
@@ -92,16 +94,16 @@ public class FuncionarioController {
 
 	public void limpaListaHorario() {
 		lstHorarioAux = new ArrayList<Horario>();
-		dataInicial = LocalTime.of(0, 0);
-		dataFinal = LocalTime.of(0, 0);
+		dataInicial = null;
+		dataFinal = null;
 		PrimeFaces.current().ajax().update("form");
 	}
 
 	public void funcionarioSelecionado(Funcionario event) {
 		funcionarioModel = event;
 		editarModel = "A";
-		dataInicial = LocalTime.of(0, 0);
-		dataFinal = LocalTime.of(0, 0);
+		dataInicial = null;
+		dataFinal = null;
 
 		carregarHorariosFuncionario();
 	}
@@ -118,16 +120,7 @@ public class FuncionarioController {
 			if (funcionarioModel.getNome().isEmpty()) {
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 						"Campo nome do funcionário obrigatório", "Erro!"));
-				
-				return;
-			} 
-			if(lstHorarioAux.size() < 1) {
-				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-						"Funcionário precisa ter no mínimo 1 horário adicionado", "Erro!"));
-				
-				return;
-			}
-			
+			} else {
 				FuncionarioDAO.salvar(funcionarioModel);
 
 				if (funcionarioModel.getId() != null) {
@@ -138,8 +131,8 @@ public class FuncionarioController {
 
 					funcionarioModel = new Funcionario();
 					lstHorarioAux.clear();
-					dataInicial = LocalTime.of(0, 0);
-					dataFinal = LocalTime.of(0, 0);
+					dataInicial = null;
+					dataFinal = null;
 					PrimeFaces.current().executeScript("Swal.fire({" + "  icon: 'success',"
 							+ "  title: '<span style=\"font-size: 14px\">Funcionário criado com sucesso!</span>',"
 							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
@@ -151,7 +144,7 @@ public class FuncionarioController {
 				}
 				PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
 				PrimeFaces.current().ajax().update("form");
-			
+			}
 
 		} catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
@@ -160,18 +153,7 @@ public class FuncionarioController {
 	}
 
 	public void atualizarFuncionario() {
-		List<Horario> checkHorario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioModel);
-		if(funcionarioModel.getNome() == null) {
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"O campo nome do funcionário é obrigatório.!", "Erro!"));
-			return;
-		}
-		if(checkHorario.isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Funcionário precisa ter no mínimo 1 horário adicionado", "Erro!"));
-			return;
-		}
-		
+		if (funcionarioModel.getNome() != null) {
 			FuncionarioDAO.atualizar(funcionarioModel);
 			PrimeFaces.current()
 					.executeScript("Swal.fire({" + "  icon: 'success',"
@@ -179,53 +161,51 @@ public class FuncionarioController {
 							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 			PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
 			PrimeFaces.current().ajax().update("form");
-	
+		} else {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"O campo nome do funcionário é obrigatório.!", "Erro!"));
+		}
 
 	}
 
 	public void novoHorario() {
-		if (funcionarioModel != null && funcionarioModel.getId() != null) {
-			if (dataInicial != null && dataFinal != null && dataInicial.isBefore(dataFinal)) {
-				horarioModel.setHoraInicial(dataInicial);
-				horarioModel.setHoraFinal(dataFinal);
-				horarioModel.setFuncionario(funcionarioModel);
-				HorarioDAO.salvar(horarioModel);
-				PrimeFaces.current()
-						.executeScript("Swal.fire({" + "  icon: 'success',"
-								+ "  title: '<span style=\"font-size: 14px\">Horário adicionado com sucesso!</span>',"
-								+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-			} else {
-				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-						"A hora inicial deve ser menor que a hora final.!", "Erro!"));
-				dataInicial = LocalTime.of(0, 0);
-				dataFinal = LocalTime.of(0, 0);
-				PrimeFaces.current().ajax().update("form:dlgFuncForm");
-			}
-
-			carregarHorariosFuncionario();
-		} else {
-			if (dataInicial != null && dataFinal != null && dataInicial.isBefore(dataFinal)) {
-				Horario horario = new Horario();
-				horario.setHoraFinal(dataFinal);
-				horario.setHoraInicial(dataInicial);
-				lstHorarioAux.add(horario);
-
-				PrimeFaces.current()
-						.executeScript("Swal.fire({" + "  icon: 'success',"
-								+ "  title: '<span style=\"font-size: 14px\">Horário adicionado com sucesso!</span>',"
-								+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px',"
-								+ "  customClass: {" + "    popup: 'my-swal-popup'" + "  }" + "});");
-
-			} else {
-				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-						"A hora inicial deve ser menor que a hora final.!", "Erro!"));
-
-				dataInicial = LocalTime.of(0, 0);
-				dataFinal = LocalTime.of(0, 0);
-				PrimeFaces.current().ajax().update("form:dlgFuncForm");
-			}
+		if (dataInicial == null || dataFinal == null || !dataInicial.before(dataFinal)) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"A hora inicial deve ser menor que a hora final!", "Erro!"));
+			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			return;
 		}
 
+		LocalTime horaInicial = dataInicial.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+		LocalTime horaFinal = dataFinal.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+
+		if (horaInicial.getMinute() % 30 != 0 || horaFinal.getMinute() % 30 != 0) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Os horários devem ser em intervalos de 30 minutos (ex: 08:00, 08:30).", "Erro!"));
+			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			return;
+		}
+
+		if (funcionarioModel != null && funcionarioModel.getId() != null) {
+			// Editando um funcionário existente
+			horarioModel.setHoraInicial(horaInicial);
+			horarioModel.setHoraFinal(horaFinal);
+			horarioModel.setFuncionario(funcionarioModel);
+			HorarioDAO.salvar(horarioModel);
+			carregarHorariosFuncionario();
+		} else {
+			// Criando um novo funcionário
+			Horario horario = new Horario();
+			horario.setHoraFinal(horaFinal);
+			horario.setHoraInicial(horaInicial);
+			lstHorarioAux.add(horario);
+		}
+
+		PrimeFaces.current()
+				.executeScript("Swal.fire({" + "  icon: 'success',"
+						+ "  title: '<span style=\"font-size: 14px\">Horário adicionado com sucesso!</span>',"
+						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+		PrimeFaces.current().ajax().update("form:dlgFuncForm");
 	}
 
 	public void recebeValorDeleteHorario(Horario event) {
@@ -261,22 +241,13 @@ public class FuncionarioController {
 	}
 
 	public void deletaHorario() {
-		List<Horario> checkHorario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioModel);
-		if(checkHorario.size() == 1) {
-			PrimeFaces.current().executeScript("PF('dlgHora').hide();");
-			PrimeFaces.current().ajax().update("form:dlgFuncForm");
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Funcionário deve ter no mínimo 1 horário cadastrado.!", "Erro!"));
-			return;
-		}
 		HorarioDAO.deletar(horarioModel.getId());
-		PrimeFaces.current()
-		.executeScript("Swal.fire({" + "  icon: 'success',"
-				+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
-				+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 		PrimeFaces.current().executeScript("PF('dlgHora').hide();");
 		PrimeFaces.current().ajax().update("form:dlgFuncForm");
-		
+		PrimeFaces.current()
+				.executeScript("Swal.fire({" + "  icon: 'success',"
+						+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
+						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 		carregarHorariosFuncionario();
 	}
 

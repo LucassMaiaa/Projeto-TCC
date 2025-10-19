@@ -2,76 +2,23 @@ package com.barbersys.dao;
 
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 import com.barbersys.model.Agendamento;
 import com.barbersys.model.Cliente;
 import com.barbersys.model.Funcionario;
+import com.barbersys.model.Pagamento;
 import com.barbersys.model.Servicos;
 import com.barbersys.util.DatabaseConnection;
+import java.time.LocalTime;
 
 public class AgendamentoDAO {
 
-    public static int agendamentoCount(String nomeCliente, String nomeFuncionario, String status) {
+    public static int agendamentoCount(String nomeCliente, String nomeFuncionario, String status, Date dataFiltro) {
+        cancelarAgendamentosAtrasados();
         int total = 0;
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(DISTINCT a.age_codigo) " +
-            "FROM agendamento a " +
-            "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
-            "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
-            "WHERE 1=1 ");
-
-        if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
-            sql.append(" AND a.cli_codigo IS NOT NULL AND LOWER(c.cli_nome) LIKE ?");
-        }
-        if (nomeFuncionario != null && !nomeFuncionario.trim().isEmpty()) {
-            sql.append(" AND LOWER(f.fun_nome) LIKE ?");
-        }
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND a.age_status = ?");
-        }
-
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-
-            int paramIndex = 1;
-            if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + nomeCliente.toLowerCase() + "%");
-            }
-            if (nomeFuncionario != null && !nomeFuncionario.trim().isEmpty()) {
-                ps.setString(paramIndex++, "%" + nomeFuncionario.toLowerCase() + "%");
-            }
-            if (status != null && !status.trim().isEmpty()) {
-                ps.setString(paramIndex++, status);
-            }
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                total = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return total;
-    }
-
-    public static List<Agendamento> buscarAgendamentos(String nomeCliente, String nomeFuncionario, String status) {
-        Map<Long, Agendamento> mapaAgendamentos = new LinkedHashMap<>();
-
-        StringBuilder sql = new StringBuilder(
-            "SELECT " +
-            "a.age_codigo AS agendamento_id, " +
-            "a.age_status AS agendamento_status, " +
-            "a.age_data AS agendamento_data, " +
-            "a.age_hora AS agendamento_hora, " +
-            "a.age_tipo_cadastro AS agendamento_tipo, " +
-            "s.ser_codigo AS servico_id, " +
-            "s.ser_nome AS servico_nome, " +
-            "s.ser_preco AS servico_preco, " +
-            "c.cli_codigo AS cliente_id, " +
-            "c.cli_nome AS cliente_nome, " +
-            "a.age_nome_cliente AS nome_cliente_avulso, " +
-            "f.fun_codigo AS funcionario_id, " +
-            "f.fun_nome AS funcionario_nome " +
             "FROM agendamento a " +
             "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "JOIN servicos s ON s.ser_codigo = ags.ser_codigo " +
@@ -88,7 +35,9 @@ public class AgendamentoDAO {
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND a.age_status = ?");
         }
-        sql.append(" ORDER BY a.age_codigo DESC");
+        if (dataFiltro != null) {
+            sql.append(" AND a.age_data = ?");
+        }
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -105,6 +54,86 @@ public class AgendamentoDAO {
             if (status != null && !status.trim().isEmpty()) {
                 ps.setString(paramIndex++, status);
             }
+            if (dataFiltro != null) {
+                ps.setDate(paramIndex++, new java.sql.Date(dataFiltro.getTime()));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                total = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
+    public static List<Agendamento> buscarAgendamentos(String nomeCliente, String nomeFuncionario, String status, Date dataFiltro, int first, int pageSize) {
+        cancelarAgendamentosAtrasados();
+        Map<Long, Agendamento> mapaAgendamentos = new LinkedHashMap<>();
+
+        StringBuilder sql = new StringBuilder(
+            "SELECT " +
+            "a.age_codigo AS agendamento_id, " +
+            "a.age_status AS agendamento_status, " +
+            "a.age_data AS agendamento_data, " +
+            "a.age_hora AS agendamento_hora, " +
+            "a.age_tipo_cadastro AS agendamento_tipo, " +
+            "a.age_pago AS agendamento_pago, " +
+            "s.ser_codigo AS servico_id, " +
+            "s.ser_nome AS servico_nome, " +
+            "s.ser_preco AS servico_preco, " +
+            "c.cli_codigo AS cliente_id, " +
+            "c.cli_nome AS cliente_nome, " +
+            "a.age_nome_cliente AS nome_cliente_avulso, " +
+            "f.fun_codigo AS funcionario_id, " +
+            "f.fun_nome AS funcionario_nome, " +
+            "p.pag_codigo AS pagamento_id, " +
+            "p.pag_nome AS pagamento_nome, " +
+            "p.pag_integra_caixa AS pagamento_integra_caixa " +
+            "FROM agendamento a " +
+            "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+            "JOIN servicos s ON s.ser_codigo = ags.ser_codigo " +
+            "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+            "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
+            "LEFT JOIN pagamento p ON a.pag_codigo = p.pag_codigo " +
+            "WHERE 1=1 ");
+
+        if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+            sql.append(" AND ( (a.cli_codigo IS NOT NULL AND LOWER(c.cli_nome) LIKE ?) OR (a.cli_codigo IS NULL AND LOWER(a.age_nome_cliente) LIKE ?) )");
+        }
+        if (nomeFuncionario != null && !nomeFuncionario.trim().isEmpty()) {
+            sql.append(" AND LOWER(f.fun_nome) LIKE ?");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND a.age_status = ?");
+        }
+        if (dataFiltro != null) {
+            sql.append(" AND a.age_data = ?");
+        }
+        sql.append(" ORDER BY a.age_codigo DESC LIMIT ?, ?");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+                String nomeParam = "%" + nomeCliente.toLowerCase() + "%";
+                ps.setString(paramIndex++, nomeParam);
+                ps.setString(paramIndex++, nomeParam); 
+            }
+            if (nomeFuncionario != null && !nomeFuncionario.trim().isEmpty()) {
+                ps.setString(paramIndex++, "%" + nomeFuncionario.toLowerCase() + "%");
+            }
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+            if (dataFiltro != null) {
+                ps.setDate(paramIndex++, new java.sql.Date(dataFiltro.getTime()));
+            }
+            
+            ps.setInt(paramIndex++, first);
+            ps.setInt(paramIndex, pageSize);
 
             ResultSet rs = ps.executeQuery();
 
@@ -119,6 +148,7 @@ public class AgendamentoDAO {
                     agendamento.setDataCriado(rs.getDate("agendamento_data"));
                     agendamento.setHoraSelecionada(rs.getTime("agendamento_hora").toLocalTime());
                     agendamento.setTipoCadastro(rs.getString("agendamento_tipo"));
+                    agendamento.setPago(rs.getString("agendamento_pago"));
 
                     Long clienteId = rs.getLong("cliente_id");
                     String clienteNome = rs.getString("cliente_nome");
@@ -137,6 +167,14 @@ public class AgendamentoDAO {
                     funcionario.setId(rs.getLong("funcionario_id"));
                     funcionario.setNome(rs.getString("funcionario_nome"));
                     agendamento.setFuncionario(funcionario);
+
+                    if (rs.getObject("pagamento_id") != null) {
+                        Pagamento pagamento = new Pagamento();
+                        pagamento.setId(rs.getLong("pagamento_id"));
+                        pagamento.setNome(rs.getString("pagamento_nome"));
+                        pagamento.setIntegraCaixa(rs.getBoolean("pagamento_integra_caixa"));
+                        agendamento.setPagamento(pagamento);
+                    }
 
                     agendamento.setServicos(new ArrayList<>());
                     mapaAgendamentos.put(agendamentoId, agendamento);
@@ -204,76 +242,336 @@ public class AgendamentoDAO {
         }
     }
 
-    public static void deletarAgendamento(Long agendamentoId) {
-        String sqlDeleteServicos = "DELETE FROM agendamento_servico WHERE age_codigo = ?";
-        String sqlDeleteAgendamento = "DELETE FROM agendamento WHERE age_codigo = ?";
-
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            conn.setAutoCommit(false);
-
-            try (PreparedStatement stmtServicos = conn.prepareStatement(sqlDeleteServicos);
-                 PreparedStatement stmtAgendamento = conn.prepareStatement(sqlDeleteAgendamento)) {
-
-                stmtServicos.setLong(1, agendamentoId);
-                stmtServicos.executeUpdate();
-
-                stmtAgendamento.setLong(1, agendamentoId);
-                stmtAgendamento.executeUpdate();
-
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
+    public static void atualizarInformacoesPagamento(Long agendamentoId, String status, Long pagamentoId) {
+        String sql = "UPDATE agendamento SET age_pago = ?, pag_codigo = ? WHERE age_codigo = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            if (pagamentoId != null) {
+                stmt.setLong(2, pagamentoId);
+            } else {
+                stmt.setNull(2, java.sql.Types.BIGINT);
             }
+            stmt.setLong(3, agendamentoId);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void deletarAgendamento(Long agendamentoId) {
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            Agendamento agendamento = buscarAgendamentoPorId(conn, agendamentoId);
+            if (agendamento == null) {
+                conn.rollback();
+                return;
+            }
+
+            int totalMinutos = 0;
+            for (Servicos servico : agendamento.getServicos()) {
+                Servicos servicoCompleto = ServicosDAO.buscarPorId(servico.getId());
+                if(servicoCompleto != null) {
+                    totalMinutos += servicoCompleto.getMinutos();
+                }
+            }
+            int numeroDeSlots = (totalMinutos + 29) / 30;
+            if (numeroDeSlots == 0) numeroDeSlots = 1;
+
+            String sqlDeleteServicos = "DELETE FROM agendamento_servico WHERE age_codigo = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sqlDeleteServicos)) {
+                stmt.setLong(1, agendamentoId);
+                stmt.executeUpdate();
+            }
+
+            LocalTime horaInicial = agendamento.getHoraSelecionada();
+            String sqlDeleteAgendamento = "DELETE FROM agendamento WHERE fun_codigo = ? AND age_data = ? AND age_hora >= ? AND age_hora < ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sqlDeleteAgendamento)) {
+                stmt.setLong(1, agendamento.getFuncionario().getId());
+                stmt.setDate(2, new java.sql.Date(agendamento.getDataCriado().getTime()));
+                stmt.setTime(3, java.sql.Time.valueOf(horaInicial));
+                stmt.setTime(4, java.sql.Time.valueOf(horaInicial.plusMinutes(numeroDeSlots * 30)));
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+        }
+    }
+
+    public static void cancelarAgendamento(Long agendamentoId) {
+	    Connection conn = null;
+	    try {
+	        conn = DatabaseConnection.getConnection();
+	        conn.setAutoCommit(false);
+
+	        Agendamento agendamento = buscarAgendamentoPorId(conn, agendamentoId);
+	        if (agendamento == null) {
+	            conn.rollback();
+	            return;
+	        }
+
+	        int totalMinutos = 0;
+	        for (Servicos servico : agendamento.getServicos()) {
+	            Servicos servicoCompleto = ServicosDAO.buscarPorId(servico.getId());
+	            if(servicoCompleto != null) {
+	                totalMinutos += servicoCompleto.getMinutos();
+	            }
+	        }
+	        int numeroDeSlots = (totalMinutos + 29) / 30;
+	        if (numeroDeSlots == 0) numeroDeSlots = 1;
+
+	        LocalTime horaInicial = agendamento.getHoraSelecionada();
+	        String sql = "UPDATE agendamento SET age_status = 'I' WHERE fun_codigo = ? AND age_data = ? AND age_hora >= ? AND age_hora < ?";
+	        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+	            stmt.setLong(1, agendamento.getFuncionario().getId());
+	            stmt.setDate(2, new java.sql.Date(agendamento.getDataCriado().getTime()));
+	            stmt.setTime(3, java.sql.Time.valueOf(horaInicial));
+	            stmt.setTime(4, java.sql.Time.valueOf(horaInicial.plusMinutes(numeroDeSlots * 30)));
+	            stmt.executeUpdate();
+	        }
+
+	        conn.commit();
+	    } catch (SQLException e) {
+	        if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+	        e.printStackTrace();
+	    } finally {
+	        if (conn != null) {
+	            try {
+	                conn.setAutoCommit(true);
+	                conn.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	    }
+	}
+
+    private static Agendamento buscarAgendamentoPorId(Connection conn, Long agendamentoId) throws SQLException {
+        String sql = "SELECT * FROM agendamento a " +
+                     "LEFT JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+                     "LEFT JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                     "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
+                     "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+                     "WHERE a.age_codigo = ?";
+        
+        Agendamento agendamento = null;
+        Map<Long, Servicos> servicosMap = new HashMap<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, agendamentoId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                if (agendamento == null) {
+                    agendamento = new Agendamento();
+                    agendamento.setId(rs.getLong("age_codigo"));
+                    agendamento.setStatus(rs.getString("age_status"));
+                    agendamento.setDataCriado(rs.getDate("age_data"));
+                    agendamento.setHoraSelecionada(rs.getTime("age_hora").toLocalTime());
+                    agendamento.setTipoCadastro(rs.getString("age_tipo_cadastro"));
+                    agendamento.setPago(rs.getString("age_pago"));
+
+                    Funcionario f = new Funcionario();
+                    f.setId(rs.getLong("fun_codigo"));
+                    f.setNome(rs.getString("fun_nome"));
+                    agendamento.setFuncionario(f);
+
+                    if (rs.getObject("cli_codigo") != null) {
+                        Cliente c = new Cliente();
+                        c.setId(rs.getLong("cli_codigo"));
+                        c.setNome(rs.getString("cli_nome"));
+                        agendamento.setCliente(c);
+                    } else {
+                        agendamento.setNomeClienteAvulso(rs.getString("age_nome_cliente"));
+                    }
+                }
+                if (rs.getObject("ser_codigo") != null) {
+                    Long serId = rs.getLong("ser_codigo");
+                    						if (!servicosMap.containsKey(serId)) {
+                    							Servicos servico = new Servicos();
+                    							servico.setId(serId);
+                    							servico.setNome(rs.getString("ser_nome"));
+                    							servico.setPreco(rs.getDouble("ser_preco"));
+                    							servico.setMinutos(rs.getInt("ser_minutos"));
+                    							servicosMap.put(serId, servico);
+                    						}                }
+            }
+            if (agendamento != null) {
+                agendamento.setServicos(new ArrayList<>(servicosMap.values()));
+            }
+        }
+        return agendamento;
     }
 
     public static void salvar(Agendamento agendamento, List<Long> servicos) {
-        String sql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro, age_pago) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        Connection conn = null;
+        try {
+            conn = DatabaseConnection.getConnection();
+            conn.setAutoCommit(false);
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            // 1. Calcular a duração total e o número de slots
+            int totalMinutos = 0;
+            List<Servicos> servicosCompletos = new ArrayList<>();
+            for (Long id : servicos) {
+                Servicos servico = ServicosDAO.buscarPorId(id);
+                if (servico != null) {
+                    totalMinutos += servico.getMinutos();
+                    servicosCompletos.add(servico);
+                }
+            }
+            int numeroDeSlots = (totalMinutos + 29) / 30;
+            if (numeroDeSlots == 0) numeroDeSlots = 1;
 
-            stmt.setString(1, agendamento.getStatus());
-            stmt.setDate(2, new java.sql.Date(agendamento.getDataCriado().getTime()));
-            stmt.setTime(3, java.sql.Time.valueOf(agendamento.getHoraSelecionada()));
-            stmt.setLong(4, agendamento.getFuncionario().getId());
 
-            if (agendamento.getCliente() != null) {
-                stmt.setLong(5, agendamento.getCliente().getId());
-                stmt.setNull(6, java.sql.Types.VARCHAR);
-            } else {
-                stmt.setNull(5, java.sql.Types.BIGINT);
-                stmt.setString(6, agendamento.getNomeClienteAvulso());
+            // 2. Salvar um agendamento para cada slot de 30 minutos
+            LocalTime horaAtual = agendamento.getHoraSelecionada();
+            Long primeiroAgendamentoId = null;
+
+            for (int i = 0; i < numeroDeSlots; i++) {
+                try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setString(1, agendamento.getStatus());
+                    stmt.setDate(2, new java.sql.Date(agendamento.getDataCriado().getTime()));
+                    stmt.setTime(3, java.sql.Time.valueOf(horaAtual));
+                    stmt.setLong(4, agendamento.getFuncionario().getId());
+
+                    if (agendamento.getCliente() != null) {
+                        stmt.setLong(5, agendamento.getCliente().getId());
+                        stmt.setNull(6, java.sql.Types.VARCHAR);
+                    } else {
+                        stmt.setNull(5, java.sql.Types.BIGINT);
+                        stmt.setString(6, agendamento.getNomeClienteAvulso());
+                    }
+                    stmt.setString(7, agendamento.getTipoCadastro());
+                    stmt.setString(8, "N"); // Default 'Não pago'
+                    stmt.executeUpdate();
+
+                    if (i == 0) {
+                        try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                            if (generatedKeys.next()) {
+                                primeiroAgendamentoId = generatedKeys.getLong(1);
+                                agendamento.setId(primeiroAgendamentoId); // Define o ID no objeto principal
+                            }
+                        }
+                    }
+                }
+                horaAtual = horaAtual.plusMinutes(30);
             }
 
-            stmt.setString(7, agendamento.getTipoCadastro());
-
-            stmt.executeUpdate();
-
-            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    agendamento.setId(generatedKeys.getLong(1));
+            // 3. Associar os serviços apenas ao primeiro agendamento
+            if (primeiroAgendamentoId != null) {
+                String sqlInsertServico = "INSERT INTO agendamento_servico (age_codigo, ser_codigo) VALUES (?, ?)";
+                try (PreparedStatement psServico = conn.prepareStatement(sqlInsertServico)) {
+                    for (Servicos servico : servicosCompletos) {
+                        psServico.setLong(1, primeiroAgendamentoId);
+                        psServico.setLong(2, servico.getId());
+                        psServico.addBatch();
+                    }
+                    psServico.executeBatch();
                 }
             }
 
-            String sqlInsertServico = "INSERT INTO agendamento_servico (age_codigo, ser_codigo) VALUES (?, ?)";
-            try (PreparedStatement psServico = conn.prepareStatement(sqlInsertServico)) {
-                for (Long id : servicos) {
-                    Servicos servico = ServicosDAO.buscarPorId(id);
-                    psServico.setLong(1, agendamento.getId());
-                    psServico.setLong(2, servico.getId());
-                    psServico.executeUpdate();
-                }
-            }
+            conn.commit();
 
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
+    private static Agendamento getAgendamentoComServicos(Connection conn, Long agendamentoId) throws SQLException {
+        String sql = "SELECT s.ser_minutos, a.age_hora FROM agendamento a " +
+                     "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+                     "JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                     "WHERE a.age_codigo = ?";
+        
+        Agendamento agendamento = new Agendamento();
+        agendamento.setHoraSelecionada(null);
+        agendamento.setServicos(new ArrayList<>());
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, agendamentoId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                if (agendamento.getHoraSelecionada() == null) {
+                    agendamento.setHoraSelecionada(rs.getTime("age_hora").toLocalTime());
+                }
+                Servicos servico = new Servicos();
+                servico.setMinutos(rs.getInt("ser_minutos"));
+                agendamento.getServicos().add(servico);
+            }
+        }
+        return agendamento;
+    }
+
+	// MÉTODO ATUALIZADO para ignorar um agendamento específico (útil na edição)
+    public static List<LocalTime> getHorariosOcupados(Long funcionarioId, java.util.Date data, Long agendamentoIdParaExcluir) {
+        List<LocalTime> horariosOcupados = new ArrayList<>();
+        String sql = "SELECT age_hora FROM agendamento WHERE fun_codigo = ? AND age_data = ? AND age_status = 'A'";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // Pega TODOS os horários ocupados para o funcionário e dia
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setLong(1, funcionarioId);
+                ps.setDate(2, new java.sql.Date(data.getTime()));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    horariosOcupados.add(rs.getTime("age_hora").toLocalTime());
+                }
+            }
+
+            // Se estiver editando um agendamento, remove os horários dele da lista de ocupados
+            if (agendamentoIdParaExcluir != null && agendamentoIdParaExcluir > 0) {
+                Agendamento agendamentoSendoEditado = getAgendamentoComServicos(conn, agendamentoIdParaExcluir);
+                
+                if (agendamentoSendoEditado != null && agendamentoSendoEditado.getHoraSelecionada() != null) {
+                    int totalMinutos = 0;
+                    for (Servicos servico : agendamentoSendoEditado.getServicos()) {
+                        totalMinutos += servico.getMinutos();
+                    }
+                    int numeroDeSlots = (totalMinutos + 29) / 30;
+                    if (numeroDeSlots == 0) numeroDeSlots = 1;
+
+                    LocalTime horaInicial = agendamentoSendoEditado.getHoraSelecionada();
+                    for (int i = 0; i < numeroDeSlots; i++) {
+                        horariosOcupados.remove(horaInicial);
+                        horaInicial = horaInicial.plusMinutes(30);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+		return horariosOcupados;
+    }
+        
+	public static void cancelarAgendamentosAtrasados() {
+	    String sql = "UPDATE agendamento SET age_status = 'I' WHERE age_status = 'A' AND age_data < CURDATE()";
+	    try (Connection conn = DatabaseConnection.getConnection();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        stmt.executeUpdate();
+	    } catch (SQLException e) {
+	        e.printStackTrace(); // Idealmente, logar isso em um sistema de logs
+	    }
+	}
 }

@@ -118,7 +118,7 @@ body .ui-datalist .ui-datalist-content {
 							</p:inputText>
 							<i class="fa-solid fa-magnifying-glass"></i>
 						</div>
-						<div class="col-md-2">
+						<div class="col-md-4">
 							<div class="content-filter ">
 								<i class="fa-solid fa-filter"></i>
 								<p:selectOneButton
@@ -138,7 +138,7 @@ body .ui-datalist .ui-datalist-content {
 				<div class="flex align-center mt15 mb15">
 					<p:commandButton
 						actionListener="#{funcionarioController.novoFuncionario()}"
-						update="form:dlgFunc" process="@form" class="btn-circle-green"
+						update="form:dlgFunc" process="@this" class="btn-circle-green"
 						icon="fa fa-plus" oncomplete="PF('dlgFunc').show()" />
 					<label class="title-button ml8">Novo funcionário</label>
 				</div>
@@ -238,34 +238,55 @@ body .ui-datalist .ui-datalist-content {
 					</div>
 				</div>
 
-				<div class="row flex align-center">
-					<div class="col-5">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Ínicio" />
-							<p:datePicker required="true" timeOnly="true"
-								validatorMessage="Hora inicial inválida. Use o formato HH:mm."
-								pattern="HH:mm" value="#{funcionarioController.dataInicial}"
-								styleClass="senha-login" />
-						</div>
-					</div>
-					<div class="col-5">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Fim" />
-							<p:datePicker timeOnly="true"
-								validatorMessage="Hora final inválida. Use o formato HH:mm."
-								pattern="HH:mm" value="#{funcionarioController.dataFinal}"
-								styleClass="senha-login" />
-						</div>
-					</div>
-					<div class="col-2">
-						<p:commandButton update="dttLstHorarios dlgFuncForm"
-							process="@form"
-							actionListener="#{funcionarioController.novoHorario()}"
-							class="btn btn-green" value="Adicionar" />
-					</div>
-				</div>
+				                								<div class="row flex align-center">
 
-				<label class="title-item mt30 mb25">Horários de Trabalho</label>
+				                									<div class="col-5">
+
+				                										<div class="input-combined">
+
+				                											<p:outputLabel styleClass="title-input" value="Ínicio" />
+
+				                											                											                											<p:datePicker required="true" timeOnly="true"
+				                											                											                											
+				                											                											                											                												validatorMessage="Hora inicial inválida. Use o formato HH:mm."
+				                											                											                											
+				                											                											                											                												pattern="HH:mm" value="#{funcionarioController.dataInicial}"
+				                											                											                											
+				                											                											                											                												styleClass="senha-login" />				                										</div>
+
+				                									</div>
+
+				                									<div class="col-5">
+
+				                										<div class="input-combined">
+
+				                											<p:outputLabel styleClass="title-input" value="Fim" />
+
+				                											<p:datePicker timeOnly="true"
+
+				                												validatorMessage="Hora final inválida. Use o formato HH:mm."
+
+				                												pattern="HH:mm" value="#{funcionarioController.dataFinal}"
+
+				                												styleClass="senha-login" />
+
+				                										</div>
+
+				                									</div>
+
+				                									<div class="col-2">
+
+				                										<p:commandButton update="dttLstHorarios dlgFuncForm"
+
+				                											process="@form"
+
+				                											actionListener="#{funcionarioController.novoHorario()}"
+
+				                											class="btn btn-green" value="Adicionar" />
+
+				                									</div>
+
+				                								</div>				<label class="title-item mt30 mb25">Horários de Trabalho</label>
 
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
 					<p:dataList id="dttLstHorariosAux" paginator="true"
@@ -370,7 +391,9 @@ body .ui-datalist .ui-datalist-content {
 			<div class="flex align-center justify-center">
 				<p:commandButton styleClass="btn medium btn-confirm"
 					value="Confirmar"
-					actionListener="#{funcionarioController.deletaHorario()}" />
+					actionListener="#{funcionarioController.deletaHorario()}" 
+					process="@this"
+					update="form:dlgFuncForm"/>
 				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
 					onclick="PF('dlgHora').hide()" />
 			</div>

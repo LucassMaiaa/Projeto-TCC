@@ -18,6 +18,7 @@ import javax.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @ManagedBean
@@ -41,6 +42,9 @@ public class Agendamento {
 	@Column
 	private String tipoCadastro;
 
+	@Column(name = "age_pago")
+	private String pago = "N";
+
 	@ManyToMany
 	@JoinTable(name = "agendamento_servico", joinColumns = @JoinColumn(name = "age_codigo"), inverseJoinColumns = @JoinColumn(name = "ser_codigo"))
 	private List<Servicos> servicos = new ArrayList<Servicos>();
@@ -52,5 +56,9 @@ public class Agendamento {
 	@ManyToOne
 	@JoinColumn(name = "cli_codigo")
 	private Cliente cliente;
+
+	@ManyToOne
+	@JoinColumn(name = "pag_codigo")
+	private Pagamento pagamento;
 
 }
