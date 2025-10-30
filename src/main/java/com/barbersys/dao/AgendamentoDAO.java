@@ -524,6 +524,85 @@ public class AgendamentoDAO {
         return agendamento;
     }
 
+    public static List<Agendamento> buscarAgendamentosPorClienteId(Long clienteId, String status, int first, int pageSize) {
+        Map<Long, Agendamento> mapaAgendamentos = new LinkedHashMap<>();
+
+        StringBuilder sql = new StringBuilder(
+            "SELECT " +
+            "a.age_codigo AS agendamento_id, " +
+            "a.age_status AS agendamento_status, " +
+            "a.age_data AS agendamento_data, " +
+            "a.age_hora AS agendamento_hora, " +
+            "a.age_tipo_cadastro AS agendamento_tipo, " +
+            "a.age_nome_cliente AS nome_cliente_avulso, " +
+            "s.ser_codigo AS servico_id, " +
+            "s.ser_nome AS servico_nome, " +
+            "s.ser_preco AS servico_preco, " +
+            "f.fun_codigo AS funcionario_id, " +
+            "f.fun_nome AS funcionario_nome, " +
+            "c.cli_codigo AS cliente_id, " +
+            "c.cli_nome AS cliente_nome " +
+            "FROM agendamento a " +
+            "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+            "JOIN servicos s ON s.ser_codigo = ags.ser_codigo " +
+            "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
+            "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+            "WHERE a.cli_codigo = ? AND a.age_status = ? " +
+            "ORDER BY a.age_data DESC, a.age_hora DESC LIMIT ?, ?");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            ps.setLong(1, clienteId);
+            ps.setString(2, status);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Long agendamentoId = rs.getLong("agendamento_id");
+                Agendamento agendamento = mapaAgendamentos.get(agendamentoId);
+
+                if (agendamento == null) {
+                    agendamento = new Agendamento();
+                    agendamento.setId(agendamentoId);
+                    agendamento.setStatus(rs.getString("agendamento_status"));
+                    agendamento.setDataCriado(rs.getDate("agendamento_data"));
+                    agendamento.setHoraSelecionada(rs.getTime("agendamento_hora").toLocalTime());
+                    agendamento.setTipoCadastro(rs.getString("agendamento_tipo"));
+                    agendamento.setNomeClienteAvulso(rs.getString("nome_cliente_avulso"));
+
+                    Funcionario funcionario = new Funcionario();
+                    funcionario.setId(rs.getLong("funcionario_id"));
+                    funcionario.setNome(rs.getString("funcionario_nome"));
+                    agendamento.setFuncionario(funcionario);
+
+                    if (rs.getObject("cliente_id") != null) {
+                        Cliente cliente = new Cliente();
+                        cliente.setId(rs.getLong("cliente_id"));
+                        cliente.setNome(rs.getString("cliente_nome"));
+                        agendamento.setCliente(cliente);
+                    }
+
+                    agendamento.setServicos(new ArrayList<>());
+                    mapaAgendamentos.put(agendamentoId, agendamento);
+                }
+
+                Servicos servico = new Servicos();
+                servico.setId(rs.getLong("servico_id"));
+                servico.setNome(rs.getString("servico_nome"));
+                servico.setPreco(rs.getDouble("servico_preco"));
+                agendamento.getServicos().add(servico);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>(mapaAgendamentos.values());
+    }
+
 	// MÉTODO ATUALIZADO para ignorar um agendamento específico (útil na edição)
     public static List<LocalTime> getHorariosOcupados(Long funcionarioId, java.util.Date data, Long agendamentoIdParaExcluir) {
         List<LocalTime> horariosOcupados = new ArrayList<>();

@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.sql.SQLException;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.model.FilterMeta;
@@ -19,9 +21,11 @@ import org.primefaces.model.SortMeta;
 
 import com.barbersys.dao.FuncionarioDAO;
 import com.barbersys.dao.HorarioDAO;
+import com.barbersys.dao.UsuarioDAO;
 import com.barbersys.model.Funcionario;
 import com.barbersys.model.Horario;
-import javax.faces.context.FacesContext;
+import com.barbersys.model.Perfil;
+import com.barbersys.model.Usuario;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -47,10 +51,10 @@ public class FuncionarioController {
 	@PostConstruct
 	public void init() {
 		lstFuncionario = new LazyDataModel<Funcionario>() {
+            private static final long serialVersionUID = 1L;
 
 			@Override
-			public List<Funcionario> load(int first, int pageSize, Map<String, SortMeta> sortBy,
-					Map<String, FilterMeta> filterBy) {
+			public List<Funcionario> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
 				return FuncionarioDAO.buscarFuncionario(nomeFuncionario, statusSelecionado, first, pageSize);
 			}
 
@@ -61,10 +65,19 @@ public class FuncionarioController {
 
 		};
 	}
+    
+    private void exibirAlerta(String icon, String title) {
+		String script = String.format(
+				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 2000, width: '350px' });",
+				icon, title);
+		PrimeFaces.current().executeScript(script);
+	}
 
 	public void carregarHorariosFuncionario() {
 		if (funcionarioModel != null && funcionarioModel.getId() != null && funcionarioModel.getId() > 0) {
 			lstHorarios = new LazyDataModel<Horario>() {
+                private static final long serialVersionUID = 1L;
+
 				@Override
 				public List<Horario> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 						Map<String, FilterMeta> filterBy) {
@@ -78,6 +91,8 @@ public class FuncionarioController {
 			};
 		} else {
 			lstHorarios = new LazyDataModel<Horario>() {
+                private static final long serialVersionUID = 1L;
+
 				@Override
 				public List<Horario> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 						Map<String, FilterMeta> filterBy) {
@@ -101,6 +116,9 @@ public class FuncionarioController {
 
 	public void funcionarioSelecionado(Funcionario event) {
 		funcionarioModel = event;
+        if (funcionarioModel.getUsuario() == null) {
+            funcionarioModel.setUsuario(new Usuario());
+        }
 		editarModel = "A";
 		dataInicial = null;
 		dataFinal = null;
@@ -112,6 +130,7 @@ public class FuncionarioController {
 		editarModel = "I";
 		funcionarioModel = new Funcionario();
 		horarioModel = new Horario();
+        funcionarioModel.setUsuario(new Usuario());
 
 	}
 
@@ -121,6 +140,25 @@ public class FuncionarioController {
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 						"Campo nome do funcionário obrigatório", "Erro!"));
 			} else {
+                if (funcionarioModel.getUsuario().getLogin() == null || funcionarioModel.getUsuario().getLogin().isEmpty()) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Login do usuário obrigatório", "Erro!"));
+                    return;
+                }
+                if (funcionarioModel.getUsuario().getSenha() == null || funcionarioModel.getUsuario().getSenha().isEmpty()) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Senha do usuário obrigatório", "Erro!"));
+                    return;
+                }
+
+                // Salvar o usuário primeiro
+                UsuarioDAO usuarioDAO = new UsuarioDAO();
+                Perfil perfil = new Perfil();
+                perfil.setId(2L); // 2 para funcionário
+                funcionarioModel.getUsuario().setPerfil(perfil);
+                Usuario usuarioSalvo = usuarioDAO.salvar(funcionarioModel.getUsuario());
+                funcionarioModel.setUsuario(usuarioSalvo);
+
 				FuncionarioDAO.salvar(funcionarioModel);
 
 				if (funcionarioModel.getId() != null) {
@@ -133,10 +171,8 @@ public class FuncionarioController {
 					lstHorarioAux.clear();
 					dataInicial = null;
 					dataFinal = null;
-					PrimeFaces.current().executeScript("Swal.fire({" + "  icon: 'success',"
-							+ "  title: '<span style=\"font-size: 14px\">Funcionário criado com sucesso!</span>',"
-							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-
+					exibirAlerta("success", "Funcionário criado com sucesso!");
+			
 					carregarHorariosFuncionario();
 				} else {
 					FacesContext.getCurrentInstance().addMessage(null,
@@ -146,29 +182,49 @@ public class FuncionarioController {
 				PrimeFaces.current().ajax().update("form");
 			}
 
-		} catch (Exception e) {
+		} catch (SQLException e) {
+            e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Erro inesperado ao salvar funcionário e horários: " + e.getMessage(), "Erro!"));
+					"Erro ao salvar funcionário: " + e.getMessage(), "Erro!"));
+		} catch (Exception e) {
+            e.printStackTrace();
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro inesperado ao salvar funcionário: " + e.getMessage(), "Erro!"));
 		}
 	}
 
 	public void atualizarFuncionario() {
-		if (funcionarioModel.getNome() != null) {
-			FuncionarioDAO.atualizar(funcionarioModel);
-			PrimeFaces.current()
-					.executeScript("Swal.fire({" + "  icon: 'success',"
-							+ "  title: '<span style=\"font-size: 14px\">Funcionário editado com sucesso!</span>',"
-							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-			PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
-			PrimeFaces.current().ajax().update("form");
-		} else {
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"O campo nome do funcionário é obrigatório.!", "Erro!"));
-		}
+		try {
+            if (funcionarioModel.getNome() != null) {
+                if (funcionarioModel.getUsuario().getLogin() == null || funcionarioModel.getUsuario().getLogin().isEmpty()) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Login do usuário obrigatório", "Erro!"));
+                    return;
+                }
+
+                FuncionarioDAO.atualizar(funcionarioModel);
+                exibirAlerta("success", "Funcionário editado com sucesso!");
+                PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
+                PrimeFaces.current().ajax().update("form");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro ao atualizar funcionário: " + e.getMessage(), "Erro!"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro inesperado ao atualizar funcionário: " + e.getMessage(), "Erro!"));
+        }
 
 	}
 
 	public void novoHorario() {
+		// Se os campos de data estiverem vazios, não faz nada para não validar ao salvar o funcionário
+		if (dataInicial == null && dataFinal == null) {
+			return;
+		}
+		
 		if (dataInicial == null || dataFinal == null || !dataInicial.before(dataFinal)) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"A hora inicial deve ser menor que a hora final!", "Erro!"));
@@ -201,10 +257,12 @@ public class FuncionarioController {
 			lstHorarioAux.add(horario);
 		}
 
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Horário adicionado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+		exibirAlerta("success", "Horário adicionado com sucesso!");
+		
+		// Limpa os campos após adicionar
+		dataInicial = null;
+		dataFinal = null;
+		
 		PrimeFaces.current().ajax().update("form:dlgFuncForm");
 	}
 
@@ -219,35 +277,35 @@ public class FuncionarioController {
 	}
 
 	public void deletaFuncionario() {
-		FuncionarioDAO.deletar(funcionarioModel);
+		try {
+            FuncionarioDAO.deletar(funcionarioModel);
 
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Funcionário deletado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-		PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
-		PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
-		PrimeFaces.current().ajax().update("form");
+            exibirAlerta("success", "Funcionário deletado com sucesso!");
+            PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
+            PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
+            PrimeFaces.current().ajax().update("form");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro ao deletar funcionário: " + e.getMessage(), "Erro!"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro inesperado ao deletar funcionário: " + e.getMessage(), "Erro!"));
+        }
 	}
 
 	public void deletaHorarioAux() {
 		lstHorarioAux.remove(indexListAux);
 		PrimeFaces.current().executeScript("PF('dlgHoraAux').hide();");
-		PrimeFaces.current().ajax().update("form:dlgFuncForm");
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+		PrimeFaces.current().ajax().update("form:dlgFuncForm");		exibirAlerta("success", "Horário deletado com sucesso!");
 	}
 
 	public void deletaHorario() {
 		HorarioDAO.deletar(horarioModel.getId());
 		PrimeFaces.current().executeScript("PF('dlgHora').hide();");
 		PrimeFaces.current().ajax().update("form:dlgFuncForm");
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Horário deletado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+		exibirAlerta("success", "Horário deletado com sucesso!");
 		carregarHorariosFuncionario();
 	}
 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<h:head>
+	<title><ui:insert name="title">BarberSys</ui:insert></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	
+	<!-- CSS adicional específico da página -->
+	<ui:insert name="extra-css" />
+</h:head>
+
+<h:body>
+
+	<h:form id="form" styleClass="main">
+		<!-- Grid com 2 colunas: menu lateral esquerdo e conteúdo central (SEM sidebar) -->
+		<div class="grid-content">
+
+			<!-- MENU LATERAL ESQUERDO -->
+			<ui:include src="/menu_lateral.xhtml" />
+
+			<!-- CONTEÚDO PRINCIPAL (ocupa 100% da largura restante) -->
+			<div class="content-dashboard full-width">
+				
+				<!-- HEADER COM PERFIL, NOTIFICAÇÕES E BOTÃO SAIR -->
+				<div class="content-perfil flex space-between">
+					<div class="flex align-center">
+						<div class="avatar-circle btn-circle mr8"></div>
+
+						<div class="content-title-perfil">
+							<h:outputText class="title-welcome-perfil" value="Olá" />
+							<h:outputText class="title-name-perfil" value="#{usuarioController.nomeUsuarioLogado}" />
+						</div>
+					</div>
+					<div class="flex">
+						<p:commandButton id="botaoNotificacao" class="btn-circle" icon="fa-solid fa-bell" />
+
+						<p:commandButton class="btn-sair-header" value="Sair"
+							icon="fa-solid fa-right-from-bracket" 
+							action="#{usuarioController.logout}" />
+					</div>
+				</div>
+
+				<!-- PAINEL DE NOTIFICAÇÕES -->
+				<p:overlayPanel id="painelNotificacoes" for="botaoNotificacao" style="width:350px" dismissable="true">
+					<div style="font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+						Notificações
+					</div>
+					<p:dataList value="#{notificacaoController.notificacoes}" var="notificacao" type="definition">
+						<f:facet name="description">
+							<div style="padding: 10px; border-radius: 5px; background: #f9f9f9; margin-bottom: 8px;">
+								<div>#{notificacao.mensagem}</div>
+								<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+									<span style="font-size: 0.8em; color: #888;">
+										<h:outputText value="#{notificacao.dataEnvio}">
+											<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+										</h:outputText>
+									</span>
+									<div>
+										<!-- Botão de Avaliar (só aparece para notificações de finalizado) -->
+										<p:commandButton rendered="#{notificacao.mensagem.contains('Avalie o serviço prestado')}"
+										                 icon="fa fa-star" 
+										                 actionListener="#{avaliacaoController.abrirModalAvaliacao(notificacao)}"
+										                 oncomplete="PF('dlgAvaliacao').show();"
+										                 update="@form:formAvaliacao"
+										                 title="Avaliar atendimento"
+										                 styleClass="ui-button-warning ui-button-flat"
+										                 style="margin-right: 5px;" />
+										
+										<!-- Botão de Remover (só aparece para notificações normais) -->
+										<p:commandButton rendered="#{!notificacao.mensagem.contains('Avalie o serviço prestado')}"
+										                 icon="fa fa-trash" 
+										                 actionListener="#{notificacaoController.remover(notificacao)}" 
+										                 update="@form:painelNotificacoes" 
+										                 title="Remover notificação"
+										                 styleClass="ui-button-danger ui-button-flat" />
+									</div>
+								</div>
+							</div>
+						</f:facet>
+					</p:dataList>
+				</p:overlayPanel>
+
+				<!-- MODAL DE AVALIAÇÃO -->
+				<p:dialog id="dlgAvaliacao" widgetVar="dlgAvaliacao" header="Avaliar Atendimento" 
+				          modal="true" resizable="false" width="500" responsive="true">
+				    
+				    <h:panelGroup id="formAvaliacao">
+				        
+				        <div style="text-align: center; margin-bottom: 20px;">
+				            <h3 style="margin: 10px 0; color: #333;">#{avaliacaoController.nomeFuncionario}</h3>
+				            <p style="color: #666; font-size: 14px;">Como foi seu atendimento?</p>
+				        </div>
+
+				        <!-- SISTEMA DE ESTRELAS -->
+				        <div style="text-align: center; margin: 30px 0;">
+				            <span onclick="document.getElementById('form:estrela1').click();" style="cursor: pointer;">
+				                <i class="#{avaliacaoController.getEstrelaClass(1)}" 
+				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                </i>
+				            </span>
+				            <p:commandButton id="estrela1" style="display:none;">
+				                <p:ajax listener="#{avaliacaoController.selecionarNota(1)}" 
+				                        update="formAvaliacao" />
+				            </p:commandButton>
+				            
+				            <span onclick="document.getElementById('form:estrela2').click();" style="cursor: pointer;">
+				                <i class="#{avaliacaoController.getEstrelaClass(2)}" 
+				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                </i>
+				            </span>
+				            <p:commandButton id="estrela2" style="display:none;">
+				                <p:ajax listener="#{avaliacaoController.selecionarNota(2)}" 
+				                        update="formAvaliacao" />
+				            </p:commandButton>
+				            
+				            <span onclick="document.getElementById('form:estrela3').click();" style="cursor: pointer;">
+				                <i class="#{avaliacaoController.getEstrelaClass(3)}" 
+				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                </i>
+				            </span>
+				            <p:commandButton id="estrela3" style="display:none;">
+				                <p:ajax listener="#{avaliacaoController.selecionarNota(3)}" 
+				                        update="formAvaliacao" />
+				            </p:commandButton>
+				            
+				            <span onclick="document.getElementById('form:estrela4').click();" style="cursor: pointer;">
+				                <i class="#{avaliacaoController.getEstrelaClass(4)}" 
+				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                </i>
+				            </span>
+				            <p:commandButton id="estrela4" style="display:none;">
+				                <p:ajax listener="#{avaliacaoController.selecionarNota(4)}" 
+				                        update="formAvaliacao" />
+				            </p:commandButton>
+				            
+				            <span onclick="document.getElementById('form:estrela5').click();" style="cursor: pointer;">
+				                <i class="#{avaliacaoController.getEstrelaClass(5)}" 
+				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                </i>
+				            </span>
+				            <p:commandButton id="estrela5" style="display:none;">
+				                <p:ajax listener="#{avaliacaoController.selecionarNota(5)}" 
+				                        update="formAvaliacao" />
+				            </p:commandButton>
+				        </div>
+
+				        <div style="margin-bottom: 20px;">
+				            <h:outputLabel value="Deixe seu comentário (opcional):" style="font-weight: bold; display: block; margin-bottom: 8px;" />
+				            <p:inputTextarea id="comentario" value="#{avaliacaoController.comentario}" 
+				                           rows="4" cols="50" maxlength="500"
+				                           placeholder="Compartilhe sua experiência..."
+				                           style="width: 100%;" />
+				        </div>
+
+				        <div style="text-align: center; margin-top: 20px;">
+				            <p:commandButton value="Avaliar" 
+				                           actionListener="#{avaliacaoController.salvarAvaliacao()}"
+				                           styleClass="ui-button-success"
+				                           style="margin-right: 10px;" 
+				                           update="@form:painelNotificacoes" />
+				            
+				            <p:commandButton value="Cancelar" 
+				                           onclick="PF('dlgAvaliacao').hide(); return false;"
+				                           styleClass="ui-button-secondary" />
+				        </div>
+
+				    </h:panelGroup>
+				</p:dialog>
+
+				<style>
+				    .estrela-link {
+				        text-decoration: none !important;
+				    }
+				    
+				    .estrela-selecionada {
+				        color: #FFD700 !important;
+				    }
+				    
+				    .estrela-vazia {
+				        color: #ddd !important;
+				    }
+				    
+				    .estrela-link i:hover {
+				        transform: scale(1.2);
+				        transition: transform 0.2s;
+				    }
+				    
+				    .notificacao-link:hover {
+				        background: #e8e8e8 !important;
+				    }
+				</style>
+
+				<!-- CONTEÚDO ESPECÍFICO DA PÁGINA -->
+				<ui:insert name="content">
+					<!-- Aqui vai o conteúdo de cada página -->
+				</ui:insert>
+
+			</div>
+		</div>
+	</h:form>
+
+</h:body>
+</html>

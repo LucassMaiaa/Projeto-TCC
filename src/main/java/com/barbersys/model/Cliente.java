@@ -2,9 +2,12 @@ package com.barbersys.model;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Getter;
@@ -30,5 +33,9 @@ public class Cliente implements Serializable{
 	
 	@Column
 	private String cpf;
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "usu_codigo")
+	private Usuario usuario = new Usuario(); // Inicialização direta aqui
 	
 }

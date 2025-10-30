@@ -6,6 +6,10 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 
 import com.barbersys.dao.UsuarioDAO;
+import com.barbersys.dao.ClienteDAO;
+import com.barbersys.dao.FuncionarioDAO;
+import com.barbersys.model.Cliente;
+import com.barbersys.model.Funcionario;
 import com.barbersys.model.Usuario;
 import java.io.Serializable;
 import lombok.Getter;
@@ -28,7 +32,17 @@ public class UsuarioController implements Serializable{
         Usuario usuarioAutenticado = usuarioDAO.autenticar(login, senha);
 
         if (usuarioAutenticado != null) {
-            // Adiciona usuário na sessão e redireciona para o dashboard
+            // Carregar Cliente ou Funcionário associado
+            if (usuarioAutenticado.getPerfil() != null) {
+                if (usuarioAutenticado.getPerfil().getId() == 3L) { // Cliente
+                    Cliente cliente = ClienteDAO.buscarClientePorUsuarioId(usuarioAutenticado.getId());
+                    usuarioAutenticado.setClienteAssociado(cliente);
+                } else if (usuarioAutenticado.getPerfil().getId() == 2L) { // Funcionário
+                    Funcionario funcionario = FuncionarioDAO.buscarFuncionarioPorUsuarioId(usuarioAutenticado.getId());
+                    usuarioAutenticado.setFuncionarioAssociado(funcionario);
+                }
+            }
+
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("usuarioLogado", usuarioAutenticado);
             loginFalhou = false; // Garante que o diálogo não abra
             return "dashboard.xhtml?faces-redirect=true";
@@ -42,6 +56,18 @@ public class UsuarioController implements Serializable{
 
             return null;
         }
+    }
+
+    public String getNomeUsuarioLogado() {
+        Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
+        if (usuarioLogado != null) {
+            if (usuarioLogado.getClienteAssociado() != null) {
+                return usuarioLogado.getClienteAssociado().getNome();
+            } else if (usuarioLogado.getFuncionarioAssociado() != null) {
+                return usuarioLogado.getFuncionarioAssociado().getNome();
+            }
+        }
+        return usuarioLogado != null ? usuarioLogado.getLogin() : "Visitante"; // Fallback
     }
 
     // Método para logout

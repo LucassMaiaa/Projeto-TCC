@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<!-- Usando o template com sidebar -->
+<ui:composition template="/WEB-INF/template-with-sidebar.xhtml">
+
+	<!-- Título da página -->
+	<ui:define name="title">Agendamento Cliente - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página -->
+	<ui:define name="extra-css">
+		<style>
+.content-top-visitas {
+	border: 1px solid #DDE3DF;
+	height: 281px;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
+
+.content-gastos-mes {
+	background-color: #C5D9BF;
+	height: 281px;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
+
+.content-faturado {
+	border-radius: 8px;
+	background: #D8E0E8;
+	padding: 14px 25px;
+}
+
+.content-top-func {
+	border: 1px solid #DDE3DF;
+	border-radius: 8px;
+	padding: 14px 25px;
+}
+
+.content-logo-system {
+	height: 132px;
+	width: 100%;
+	background: #F5F5F7;
+	background-image: url('resources/images/logo-com-imagem.svg');
+	background-repeat: no-repeat;
+	background-position: center top;
+}
+
+.content-btns {
+	width: 100%;
+	height: 54px;
+	display: flex;
+	justify-content: center;
+	padding: 8px;
+}
+
+.content-agendamentos {
+	height: 100vh;
+	background: #FCFCFF;
+	border-radius: 8px 8px 0 0;
+	padding: 20px;
+}
+
+.appointment-item-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 15px;
+	margin-bottom: 15px;
+	background-color: #fff;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.card-date-time {
+	font-size: 14px;
+	font-weight: bold;
+	color: #333;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+	margin-bottom: 10px;
+}
+
+.appointment-item-card .item-body {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+
+.appointment-item-card .item-details .label {
+	font-size: 11px;
+	color: #888;
+	text-transform: uppercase;
+}
+
+.appointment-item-card .item-details .value {
+	font-size: 14px;
+	color: #444;
+	font-weight: 500;
+}
+
+.appointment-item-card .item-time {
+	font-size: 18px;
+	font-weight: bold;
+	color: #007bff;
+}
+
+.appointment-item-card .item-actions .ui-button {
+	background-color: #ff4d4d !important;
+	border-color: #ff4d4d !important;
+	color: #fff !important;
+}
+		</style>
+	</ui:define>
+
+	<!-- Conteúdo CENTRAL da página -->
+	<ui:define name="content">
+	
+				<!-- Área de Agendamento -->
+				<p:messages id="msgs" closable="true" showIcon="true" autoUpdate="true" />
+				<p:outputPanel id="bookingAreaPanel">
+					<div class="booking-area"
+						style="padding: 20px; background-color: #FCFCFF; border-radius: 8px; margin-top: 20px;">
+						<div class="logo" style="text-align: center; margin-bottom: 20px;">
+							<h:graphicImage value="/resources/images/logo_grande.svg"
+								height="40" />
+						</div>
+
+						<div class="booking-form-cliente"
+							style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 15px;">
+							<div class="content-filter no-filter">
+								<p:selectOneButton id="tipoAgendamento"
+									value="#{agendamentoClienteController.tipoAgendamento}">
+									<f:selectItem itemLabel="Para mim" itemValue="proprio" />
+									<f:selectItem itemLabel="Para outro" itemValue="outro" />
+									<p:ajax event="change"
+										update="panelCliente datePickerWrapper barberSelectorWrapper horarioWrapper servicosWrapper"
+										listener="#{agendamentoClienteController.aoMudarTipoAgendamento}" />
+								</p:selectOneButton>
+							</div>
+						</div>
+
+						<div class="booking-form-cliente"
+							style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+							<p:outputPanel id="panelCliente" style="grid-column: 1 / -1;">
+								<div class="input-combined">
+									<p:outputLabel styleClass="title-input" value="Nome do cliente" />
+									<p:inputText id="nomeProprio"
+										rendered="#{agendamentoClienteController.tipoAgendamento eq 'proprio'}"
+										value="#{agendamentoClienteController.nomeClienteLogado}"
+										disabled="true" />
+									<p:inputText id="nomeOutro"
+										rendered="#{agendamentoClienteController.tipoAgendamento eq 'outro'}"
+										value="#{agendamentoClienteController.nomeClienteOutro}"
+										placeholder="Digite o nome do cliente">
+										<p:ajax event="keyup" update="datePickerWrapper" />
+									</p:inputText>
+								</div>
+							</p:outputPanel>
+
+							<p:outputPanel id="datePickerWrapper">
+								<div class="input-combined">
+									<p:outputLabel styleClass="title-input"
+										value="Selecione uma data" />
+														                    													<p:datePicker id="datePicker" value="#{agendamentoClienteController.dataSelecionada}" showIcon="true" pattern="dd/MM/yyyy" mindate="#{agendamentoClienteController.today}"
+														                    																  required="true" requiredMessage="O campo Data é obrigatório."
+														                    																  disabled="#{agendamentoClienteController.dataDesabilitada}">
+										<p:ajax event="dateSelect"
+											listener="#{agendamentoClienteController.aoSelecionarData}"
+											update="barberSelectorWrapper horarioWrapper servicosWrapper" />
+									</p:datePicker>
+								</div>
+							</p:outputPanel>
+							<p:outputPanel id="barberSelectorWrapper">
+
+								<div class="input-combined">
+
+									<p:outputLabel styleClass="title-input"
+										value="Nome do barbeiro" />
+
+														                    																				<p:selectOneMenu id="barberSelector" value="#{agendamentoClienteController.funcionarioId}" required="true" requiredMessage="O campo Barbeiro é obrigatório." filter="true" filterMatchMode="startsWith"
+
+														                    																									                    								
+
+														                    																									                    																 disabled="#{agendamentoClienteController.funcionarioDesabilitado}">
+
+										<f:selectItem itemLabel="Selecione um barbeiro" itemValue="" />
+
+										<f:selectItems
+											value="#{agendamentoClienteController.funcionariosDisponiveis}"
+											var="func" itemLabel="#{func.nome}" itemValue="#{func.id}" />
+
+										<p:ajax event="change"
+											listener="#{agendamentoClienteController.aoSelecionarFuncionario}"
+											update="horarioWrapper servicosWrapper" />
+
+									</p:selectOneMenu>
+								</div>
+
+							</p:outputPanel>
+
+
+
+							<p:outputPanel id="horarioWrapper">
+
+								<div class="input-combined">
+
+									<p:outputLabel styleClass="title-input"
+										value="Horários disponíveis" />
+
+														                    																				<p:selectOneMenu id="horarioSelector" value="#{agendamentoClienteController.horaSelecionada}" required="true" requiredMessage="O campo Horário é obrigatório." disabled="#{agendamentoClienteController.agendamentoDesabilitado}">
+
+										<f:selectItem itemLabel="Selecione um horário" itemValue="" />
+
+										<f:selectItems
+											value="#{agendamentoClienteController.horariosDisponiveis}"
+											var="h" itemLabel="#{h}" itemValue="#{h}" />
+
+									</p:selectOneMenu>
+
+								</div>
+
+							</p:outputPanel>
+
+						</div>
+
+
+						<p:outputPanel id="servicosWrapper">
+
+							<div class="services-grid-cliente">
+
+								<p:outputLabel value="Serviços disponíveis"
+									style="font-weight: bold; font-size: 18px; display: block; margin-bottom: 15px;" />
+
+													                    																				<p:selectManyCheckbox id="servicosGrid" value="#{agendamentoClienteController.servicosSelecionadosIds}" required="true" requiredMessage="Selecione ao menos um serviço." layout="custom" converter="javax.faces.Long" disabled="#{agendamentoClienteController.agendamentoDesabilitado}">
+
+									<f:selectItems
+										value="#{agendamentoClienteController.servicosDisponiveis}"
+										var="s" itemValue="#{s.id}" />
+
+									<p:ajax event="change"
+										listener="#{agendamentoClienteController.aoSelecionarServico}"
+										update="totalPriceOutput" />
+								</p:selectManyCheckbox>
+
+								<p:dataGrid var="servico"
+									value="#{agendamentoClienteController.servicosDisponiveis}"
+									columns="3" layout="grid" styleClass="ui-datagrid-content">
+
+									<p:outputPanel
+										styleClass="service-item-cliente #{agendamentoClienteController.agendamentoDesabilitado ? 'ui-state-disabled' : ''}"
+										onclick="#{!agendamentoClienteController.agendamentoDesabilitado ? '$(this).find(\'.ui-chkbox-box\').click()' : ''}">
+
+										<p:checkbox for=":form:servicosGrid"
+											itemIndex="#{agendamentoClienteController.servicosDisponiveis.indexOf(servico)}"
+											disabled="#{agendamentoClienteController.agendamentoDesabilitado}" />
+
+										<div class="service-details" style="margin-left: 10px;">
+
+											<h:outputText value="#{servico.nome}"
+												styleClass="title-obj uppercase" />
+
+											<h:outputText value="R$ #{servico.preco}"
+												styleClass="subtitle-obj" />
+
+										</div>
+
+									</p:outputPanel>
+
+								</p:dataGrid>
+
+							</div>
+
+						</p:outputPanel>
+
+
+
+						<div class="footer-actions"
+							style="text-align: center; margin-top: 20px;">
+
+							<div class="total-price" style="margin-bottom: 15px;">
+
+								<h:panelGroup id="totalPriceOutput">
+					                    												
+					                    																											Valor Total: <h:outputText
+										value="R$ #{agendamentoClienteController.valorTotal}"
+										style="font-weight: bold;" />
+
+								</h:panelGroup>
+
+							</div>
+									<p:commandButton value="AGENDAR" styleClass="btn btn-green" style="padding: 15px 50px;" actionListener="#{agendamentoClienteController.agendar}" process="@form" update="msgs bookingAreaPanel listaAgendamentosPanel" />
+						</div>
+					</div>
+				</p:outputPanel>
+				
+	</ui:define>
+
+	<!-- Conteúdo da SIDEBAR DIREITA -->
+	<ui:define name="sidebar">
+		<div class="content-agendamentos">
+					<div class="flex" style="margin-bottom: 15px;">
+						<div class="icon-circle">
+							<i class="fa-solid fa-clock"></i>
+						</div>
+						<div class="subtitle-info">
+							<label class="title-info">Seus agendamentos</label>
+						</div>
+					</div>
+
+					<div class="appointment-list">
+						                        						<p:dataList id="listaAgendamentosPanel" value="#{agendamentoClienteController.meusAgendamentos}" var="agend" emptyMessage="Nenhum agendamento futuro." styleClass="ui-datalist-noborder">
+						                        							<div class="appointment-item-card">
+						                        								<div class="card-date-time">
+						                        									<h:outputText value="#{agend.dataCriado}">
+						                        										<f:convertDateTime pattern="EEEE, dd 'de' MMMM" locale="pt_BR"/>
+						                        									</h:outputText>
+						                        								</div>
+						                        								<div class="item-body">
+						                        									<div class="item-details">
+						                        										<div>
+						                        											<div class="label">Funcionário</div>
+						                        											<div class="value">#{agend.funcionario.nome}</div>
+						                        										</div>
+						                        										<div style="margin-top: 10px;">
+						                        											<div class="label">Serviços contratados</div>
+						                        											<div class="value">#{agend.servicosConcatenados}</div>
+						                        										</div>
+						                        									</div>
+						                        									<div class="item-time-actions">
+						                        										<div class="item-time">#{agend.horaSelecionada}</div>
+						                        										<div class="item-actions" style="margin-top: 10px; text-align: right;">
+						                        											<p:commandButton icon="fa-solid fa-trash" actionListener="#{agendamentoClienteController.cancelarMeuAgendamento(agend.id)}" process="@this" update="listaAgendamentosPanel" styleClass="ui-button-danger"/>
+						                        										</div>
+						                        									</div>
+						                        								</div>
+						                        							</div>
+						                        						</p:dataList>					</div>
+				</div>
+	</ui:define>
+
+		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<div class="header-modal">
+				<div class="flex align-center">
+					<div class="icon-circle">
+						<i class="fa-solid fa-calendar-days"></i>
+
+					</div>
+					<label>Agendamento</label>
+				</div>
+				<div class="flex align-center">
+					<p:commandButton
+						actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
+						styleClass="btn btn-green" value="Agendar" />
+					<div>
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgAgendar').hide()" />
+					</div>
+				</div>
+
+
+			</div>
+
+			<div class="row">
+				<div class="col-md-6">
+					<div class="content-filter no-filter">
+						<p:selectOneButton value="#{agendamentoController.tipoCadastro}"
+							unselectable="false">
+							<f:selectItem itemLabel="Com cadastro" itemValue="c" />
+							<f:selectItem itemLabel="Sem cadastros" itemValue="s" />
+							<p:ajax update="dlgAttCliente" process="@this" />
+						</p:selectOneButton>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8">
+					<p:outputPanel id="dlgAttCliente">
+						<ui:fragment
+							rendered="#{agendamentoController.tipoCadastro eq 'c'}">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+								<p:selectOneMenu converter="#{countryConverter}" var="c"
+									filter="true" filterMatchMode="startsWith">
+
+									<f:selectItems var="country" />
+
+									<p:column>
+										<span class="flag" />
+									</p:column>
+
+									<p:column>
+										<f:facet name="header">
+											<h:outputText value="Name" />
+										</f:facet>
+										<h:outputText />
+									</p:column>
+
+									<f:facet name="footer">
+										<h:outputText />
+									</f:facet>
+								</p:selectOneMenu>
+							</div>
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.tipoCadastro eq 's'}">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Nome do Cliente" />
+								<p:inputText styleClass="senha-login" />
+							</div>
+						</ui:fragment>
+
+					</p:outputPanel>
+				</div>
+				<div class="col-md-4">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input" value="Selecione uma data" />
+						<p:datePicker showIcon="true" pattern="dd/MM/yyyy"
+							autocomplete="off" />
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-8">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input"
+							value="Nome do funcionário" />
+						<p:selectOneMenu>
+							<f:selectItem itemLabel="Selecione funcionário" itemValue="" />
+							<f:selectItems />
+							<f:facet name="footer">
+								<p:divider styleClass="mt-0" />
+								<h:outputText value="3 options" style="font-weight:bold;" />
+							</f:facet>
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+
+				<div class="col-md-4">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input"
+							value="Horários disponíveis" />
+						<p:selectOneMenu>
+							<f:selectItem itemLabel="Selecione horário" itemValue="" />
+							<f:selectItems />
+							<f:facet name="footer">
+								<p:divider styleClass="mt-0" />
+								<h:outputText value="3 options" style="font-weight:bold;" />
+							</f:facet>
+						</p:selectOneMenu>
+					</div>
+
+				</div>
+			</div>
+		</p:dialog>
+
+</ui:composition>
+</html>

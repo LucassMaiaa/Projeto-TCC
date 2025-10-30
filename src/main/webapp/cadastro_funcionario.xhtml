@@ -5,22 +5,16 @@
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-<h:head>
-	<title>BarberSys</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<link rel="stylesheet" type="text/css"
-		href="#{request.contextPath}/resources/css/global.css" />
-	<link rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-	<link rel="stylesheet"
-		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-	<h:outputScript library="primefaces" name="locales/locale-pt.js" />
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</h:head>
+<!-- Usando o template SEM sidebar -->
+<ui:composition template="/WEB-INF/template.xhtml">
 
-<h:body>
-
-	<style>
+	<!-- Título da página -->
+	<ui:define name="title">Cadastro de Funcionários - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página -->
+	<ui:define name="extra-css">
+		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+		<style>
 .content-info-lateral {
 	background: #FCFCFF;
 }
@@ -37,16 +31,21 @@
 }
 
 .dataList-custom.ui-datalist .ui-datalist-content {
-	min-height: 379px;
-	height: 379px;
+	min-height: calc(100vh - 400px);
+	max-height: calc(100vh - 400px);
+	overflow-y: auto;
 }
 
 body .dataList-dialog-custom.ui-datalist .ui-datalist-content {
 	min-height: 211px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 
 body .data-list-time.ui-datalist .ui-datalist-content {
 	min-height: 211px;
+	max-height: 250px;
+	overflow-y: auto;
 }
 
 body .ui-datalist .ui-datalist-content {
@@ -54,12 +53,8 @@ body .ui-datalist .ui-datalist-content {
 	padding: 0;
 }
 
-.grid-content {
-	grid-template-columns: 105px 1fr;
-}
-
 .dataList-custom.ui-datalist .ui-datalist-empty-message {
-	min-height: 379px;
+	min-height: calc(100vh - 400px);
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -75,98 +70,70 @@ body .ui-datalist .ui-datalist-content {
 	font-size: 14px;
 	font-weight: bold;
 }
-</style>
+		</style>
+	</ui:define>
 
-	<h:form id="form" styleClass="main">
-		<div class="grid-content">
+	<!-- Conteúdo da página -->
+	<ui:define name="content">
+	
+		<!-- Título da página -->
+		<div class="flex space-between">
+			<p:outputLabel class="title-page" value="Cadastro de Funcionários" />
+		</div>
 
-
-			<ui:include src="menu_lateral.xhtml"></ui:include>
-
-			<div class="content-dashboard">
-
-
-
-				<div class="content-perfil flex space-between">
-					<div class="flex align-center">
-						<div class="avatar-circle btn-circle mr8"></div>
-
-						<div class="content-title-perfil">
-							<h:outputText class="title-welcome-perfil" value="Olá" />
-							<h:outputText class="title-name-perfil"
-								value="#{usuarioController.login}" />
-						</div>
+		<div class="header-filters">
+			<div class="row">
+				<div class="col-md-3 input-combined-no-text">
+					<p:inputText value="#{funcionarioController.nomeFuncionario}" autocomplete="off"
+						placeholder="Pesquisar funcionário">
+						<p:ajax event="keyup" delay="100" update="@form" process="@this" />
+					</p:inputText>
+					<i class="fa-solid fa-magnifying-glass"></i>
+				</div>
+				<div class="col-md-4">
+					<div class="content-filter ">
+						<i class="fa-solid fa-filter"></i>
+						<p:selectOneButton
+							value="#{funcionarioController.statusSelecionado}"
+							unselectable="false">
+							<f:selectItem itemLabel="Todos" itemValue="" />
+							<f:selectItem itemLabel="Ativos" itemValue="A" />
+							<f:selectItem itemLabel="Inativos" itemValue="I" />
+							<p:ajax update="@form" process="@this" />
+						</p:selectOneButton>
 					</div>
-					<div class="flex">
-						<p:commandButton class="btn-circle" icon="fa-solid fa-bell" />
-
-						<p:commandButton class="btn-sair-header" value="Sair"
-							icon="fa-solid fa-right-from-bracket" />
-					</div>
 				</div>
-
-				<div class="flex space-between">
-					<p:outputLabel class="title-page" value="Cadastro de funcionários" />
-				</div>
-
-				<div class="header-filters">
-					<div class="row">
-						<div class="col-md-3 input-combined-no-text">
-							<p:inputText value="#{funcionarioController.nomeFuncionario}" autocomplete="off"
-								placeholder="Pesquisar funcionário">
-								<p:ajax event="keyup" delay="100" update="@form" process="@this" />
-							</p:inputText>
-							<i class="fa-solid fa-magnifying-glass"></i>
-						</div>
-						<div class="col-md-4">
-							<div class="content-filter ">
-								<i class="fa-solid fa-filter"></i>
-								<p:selectOneButton
-									value="#{funcionarioController.statusSelecionado}"
-									unselectable="false">
-									<f:selectItem itemLabel="Todos" itemValue="" />
-									<f:selectItem itemLabel="Ativos" itemValue="A" />
-									<f:selectItem itemLabel="Inativos" itemValue="I" />
-									<p:ajax update="@form" process="@this" />
-								</p:selectOneButton>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="flex align-center mt15 mb15">
-					<p:commandButton
-						actionListener="#{funcionarioController.novoFuncionario()}"
-						update="form:dlgFunc" process="@this" class="btn-circle-green"
-						icon="fa fa-plus" oncomplete="PF('dlgFunc').show()" />
-					<label class="title-button ml8">Novo funcionário</label>
-				</div>
-
-				<div>
-					<p:dataList id="datatableCaixas" rowIndexVar="row"
-						class="dataList-custom"
-						value="#{funcionarioController.lstFuncionario}" var="funcionario"
-						paginator="true" paginatorPosition="bottom" rows="16" lazy="true"
-						emptyMessage="Nenhum dado encontrado">
-						<p:commandLink
-							actionListener="#{funcionarioController.funcionarioSelecionado(funcionario)}"
-							update="form:dlgFunc" process="@this"
-							oncomplete="PF('dlgFunc').show()">
-							<div
-								class="card-list #{funcionario.status == 'I' ? 'inativo' : 'ativo'}">
-								<div>
-									<label class="title-list">Funcionário</label>
-									<p:outputLabel styleClass="subtitle-list"
-										value="#{funcionario.nome}" />
-								</div>
-							</div>
-						</p:commandLink>
-					</p:dataList>
-				</div>
-
 			</div>
+		</div>
 
+		<div class="flex align-center mt15 mb15">
+			<p:commandButton
+				actionListener="#{funcionarioController.novoFuncionario()}"
+				update="form:dlgFunc" process="@this" class="btn-circle-green"
+				icon="fa fa-plus" oncomplete="PF('dlgFunc').show()" />
+			<label class="title-button ml8">Novo funcionário</label>
+		</div>
+
+		<div>
+			<p:dataList id="datatableCaixas" rowIndexVar="row"
+				class="dataList-custom"
+				value="#{funcionarioController.lstFuncionario}" var="funcionario"
+				paginator="true" paginatorPosition="bottom" rows="16" lazy="true"
+				emptyMessage="Nenhum dado encontrado">
+				<p:commandLink
+					actionListener="#{funcionarioController.funcionarioSelecionado(funcionario)}"
+					update="form:dlgFunc" process="@this"
+					oncomplete="PF('dlgFunc').show()">
+					<div
+						class="card-list #{funcionario.status == 'I' ? 'inativo' : 'ativo'}">
+						<div>
+							<label class="title-list">Funcionário</label>
+							<p:outputLabel styleClass="subtitle-list"
+								value="#{funcionario.nome}" />
+						</div>
+					</div>
+				</p:commandLink>
+			</p:dataList>
 		</div>
 
 		<p:dialog id="dlgFunc" widgetVar="dlgFunc" modal="true"
@@ -227,6 +194,27 @@ body .ui-datalist .ui-datalist-content {
 
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
+
+                <div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Login" />
+							<p:inputText styleClass="senha-login" autocomplete="off"
+								value="#{funcionarioController.funcionarioModel.usuario.login}" />
+						</div>
+					</div>
+                    <div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Senha" />
+							<p:password styleClass="senha-login" autocomplete="off"
+								value="#{funcionarioController.funcionarioModel.usuario.senha}"
+								placeholder="#{funcionarioController.editarModel eq 'A' and funcionarioController.funcionarioModel.usuario.id != null ? 'Criar nova senha' : ''}" />
+						</div>
+					</div>
+				</div>
+
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
@@ -238,55 +226,36 @@ body .ui-datalist .ui-datalist-content {
 					</div>
 				</div>
 
-				                								<div class="row flex align-center">
+				<div class="row flex align-center">
+					<div class="col-5">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Ínicio" />
+							<p:datePicker id="inputHoraInicio" timeOnly="true"
+								validatorMessage="Hora inicial inválida. Use o formato HH:mm."
+								pattern="HH:mm" value="#{funcionarioController.dataInicial}"
+								styleClass="senha-login" />
+						</div>
+					</div>
 
-				                									<div class="col-5">
+					<div class="col-5">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Fim" />
+							<p:datePicker id="inputHoraFim" timeOnly="true"
+								validatorMessage="Hora final inválida. Use o formato HH:mm."
+								pattern="HH:mm" value="#{funcionarioController.dataFinal}"
+								styleClass="senha-login" />
+						</div>
+					</div>
 
-				                										<div class="input-combined">
-
-				                											<p:outputLabel styleClass="title-input" value="Ínicio" />
-
-				                											                											                											<p:datePicker required="true" timeOnly="true"
-				                											                											                											
-				                											                											                											                												validatorMessage="Hora inicial inválida. Use o formato HH:mm."
-				                											                											                											
-				                											                											                											                												pattern="HH:mm" value="#{funcionarioController.dataInicial}"
-				                											                											                											
-				                											                											                											                												styleClass="senha-login" />				                										</div>
-
-				                									</div>
-
-				                									<div class="col-5">
-
-				                										<div class="input-combined">
-
-				                											<p:outputLabel styleClass="title-input" value="Fim" />
-
-				                											<p:datePicker timeOnly="true"
-
-				                												validatorMessage="Hora final inválida. Use o formato HH:mm."
-
-				                												pattern="HH:mm" value="#{funcionarioController.dataFinal}"
-
-				                												styleClass="senha-login" />
-
-				                										</div>
-
-				                									</div>
-
-				                									<div class="col-2">
-
-				                										<p:commandButton update="dttLstHorarios dlgFuncForm"
-
-				                											process="@form"
-
-				                											actionListener="#{funcionarioController.novoHorario()}"
-
-				                											class="btn btn-green" value="Adicionar" />
-
-				                									</div>
-
-				                								</div>				<label class="title-item mt30 mb25">Horários de Trabalho</label>
+					<div class="col-2">
+						<p:commandButton update="dttLstHorarios dlgFuncForm"
+							process="@form"
+							actionListener="#{funcionarioController.novoHorario()}"
+							class="btn btn-green" value="Adicionar" />
+					</div>
+				</div>
+				
+				<label class="title-item mt30 mb25">Horários de Trabalho</label>
 
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
 					<p:dataList id="dttLstHorariosAux" paginator="true"
@@ -417,11 +386,8 @@ body .ui-datalist .ui-datalist-content {
 					onclick="PF('dlgHoraAux').hide()" />
 			</div>
 		</p:dialog>
+		
+	</ui:define>
 
-	</h:form>
-
-
-
-</h:body>
+</ui:composition>
 </html>
-

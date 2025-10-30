@@ -5,22 +5,16 @@
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
-<h:head>
-	<title>BarberSys</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<link rel="stylesheet" type="text/css"
-		href="#{request.contextPath}/resources/css/global.css" />
-	<link rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-	<link rel="stylesheet"
-		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-	<h:outputScript library="primefaces" name="locales/locale-pt.js" />
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</h:head>
+<!-- Usando o template com sidebar -->
+<ui:composition template="/WEB-INF/template-with-sidebar.xhtml">
 
-<h:body>
-
-	<style>
+	<!-- Título da página -->
+	<ui:define name="title">Agendamentos - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página -->
+	<ui:define name="extra-css">
+		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+		<style>
 .content-info-lateral {
 	background: #FCFCFF;
 }
@@ -76,33 +70,14 @@ body .ui-datatable .ui-datatable-even>td {
 .list-time>div:first-of-type .fa-solid {
 	left: 12px;
 }
-</style>
+		</style>
+	</ui:define>
 
-	<h:form id="form" styleClass="main">
-		<div class="grid-content">
-
-			<ui:include src="menu_lateral.xhtml"></ui:include>
-
-			<div class="content-dashboard">
-				<div class="content-perfil flex space-between">
-					<div class="flex align-center">
-						<div class="avatar-circle btn-circle mr8"></div>
-
-						<div class="content-title-perfil">
-							<h:outputText class="title-welcome-perfil" value="Olá" />
-							<h:outputText class="title-name-perfil"
-								value="#{usuarioController.login}" />
-						</div>
-					</div>
-					<div class="flex">
-						<p:commandButton class="btn-circle" icon="fa-solid fa-bell" />
-
-						<p:commandButton class="btn-sair-header" value="Sair"
-							icon="fa-solid fa-right-from-bracket" />
-					</div>
-				</div>
-
-				<div class="flex space-between align-items-center">
+	<!-- Conteúdo CENTRAL da página -->
+	<ui:define name="content">
+	
+		<!-- Título e Ações -->
+		<div class="flex space-between align-items-center">
 					<p:outputLabel class="title-page" value="Agendamentos" />
 					<div class="flex align-items-center">
 						<h:outputText value="#{agendamentoController.dataFiltro}" styleClass="mr-3">
@@ -215,162 +190,8 @@ body .ui-datatable .ui-datatable-even>td {
 						</p:column>
 					</p:dataTable>
 				</div>
-			</div>
 
-			<div class="content-info-lateral">
-				<ui:fragment
-					rendered="#{agendamentoController.clienteModel.id != null or agendamentoController.agendamentoModel.nomeClienteAvulso != null}">
-					<div class="content-logo-system">
-						<div class="flex space-between">
-							<div class="flex">
-								<div class="icon-circle">
-									<i class="fa-solid fa-user"></i>
-								</div>
-								<div class="subtitle-info flex space-between">
-									<label class="title-info">Cliente</label>
-								</div>
-							</div>
-							<div class="flex">
-								<p:commandButton update="dttDataSelect" process="@this"
-									actionListener="#{agendamentoController.editAgendamento()}"
-									oncomplete="PF('dlgAgendar').show();"
-									class="btn-circle btn-circle-info-lateral"
-									icon="fa-solid fa-pen"
-									rendered="#{agendamentoController.agendamentoModel.status eq 'A'}" />
-								<p:commandButton
-									actionListener="#{agendamentoController.fecharCliente()}"
-									class="btn-circle btn-circle-info-lateral"
-									icon="fa-solid fa-xmark" />
-							</div>
-						</div>
-					</div>
-					<div class="content-btns">
-						<div class="flex">
-							<div class="perfil-top-funcionario mr8"></div>
-							<div>
-								<label class="title-obj">Cliente</label>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.cliente.id eq null}">
-									<label class="subtitle-obj">#{agendamentoController.agendamentoModel.nomeClienteAvulso}</label>
-								</ui:fragment>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.cliente.id != null}">
-									<label class="subtitle-obj">#{agendamentoController.clienteModel.nome}</label>
-								</ui:fragment>
-							</div>
-						</div>
-
-						<p:outputPanel id="attCaixa">
-							<div>
-								<p:outputLabel class="title-date"
-									value="#{agendamentoController.agendamentoModel.dataCriado}">
-									<f:convertDateTime pattern="dd/MM/yyyy" />
-								</p:outputLabel>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.status eq 'I' and agendamentoController.agendamentoModel.pago ne 'E'}">
-									<p:outputLabel class="title-date" style="background: #C52323"
-										value="Cancelado" />
-								</ui:fragment>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.status eq 'A'}">
-									<p:outputLabel class="title-date" style="background: #FFC107 "
-										value="Pendente" />
-								</ui:fragment>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.status eq 'F'}">
-									<p:outputLabel class="title-date" style="background: #23C538"
-										value="Finalizado" />
-								</ui:fragment>
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.pago eq 'E'}">
-									<p:outputLabel class="title-date" style="background: #6c757d;"
-										value="Estornado" />
-								</ui:fragment>
-							</div>
-						</p:outputPanel>
-					</div>
-					<div class="content-valores">
-						<label class="title-obj">Funcionário a realizar serviços</label> <label
-							class="subtitle-obj">#{agendamentoController.agendamentoModel.funcionario.nome}</label>
-					</div>
-					<div class="content-agendamentos flex column space-between">
-						<div>
-							<label class="title-servicos mb15">Serviços contratados</label>
-							<p:dataList id="dttlstservicos" rows="4"
-								class="dataList-dialog-custom data-list-time"
-								value="#{agendamentoController.agendamentoModel.servicos}"
-								var="servico" rowIndexVar="index">
-								<div class="list-time">
-									<div>
-										<i class="fa-solid fa-scissors"></i>
-										<div>
-											<label class="title-obj uppercase">#{servico.nome}</label> <label
-												class="subtitle-obj"> <h:outputText
-													value="#{servico.preco}">
-													<f:convertNumber type="currency" currencySymbol="R$"
-														maxFractionDigits="2" />
-												</h:outputText>
-											</label>
-										</div>
-									</div>
-								</div>
-							</p:dataList>
-						</div>
-
-						<div>
-							<div class="fundo-valores-totais">
-								<label>Total</label> <label> <h:outputText
-										value="#{agendamentoController.totalGastoServicos}">
-										<f:convertNumber type="currency" currencySymbol="R$"
-											maxFractionDigits="2" />
-									</h:outputText>
-								</label>
-							</div>
-
-							<p:outputPanel id="painelAcoes">
-								<ui:fragment
-									rendered="#{agendamentoController.agendamentoModel.pago ne 'S' and agendamentoController.agendamentoModel.status ne 'I'}">
-									<div class="input-combined">
-										<p:outputLabel class="title-input" value="Método de pagamento" />
-										<p:selectOneMenu value="#{agendamentoController.idPagamento}">
-											<f:selectItem itemLabel="Selecione forma de pagamento"
-												itemValue="" noSelectionOption="false" />
-											<f:selectItems value="#{agendamentoController.lstPagamento}"
-												var="pag" itemLabel="#{pag.nome}" itemValue="#{pag.id}" />
-											<p:ajax update="@form" process="@this" />
-										</p:selectOneMenu>
-									</div>
-								</ui:fragment>
-
-								<div class="fundo-btns">
-									<ui:fragment
-										rendered="#{agendamentoController.agendamentoModel.pago ne 'S' and agendamentoController.agendamentoModel.status ne 'I'}">
-										<p:commandButton
-											actionListener="#{agendamentoController.confirmaPagamentoPedido()}"
-											class="btn btn-green" value="Confirmar pagamento"
-											update="form:attCaixa form:painelAcoes" process="@form" />
-									</ui:fragment>
-
-									<p:commandButton
-									    value="Estornar"
-									    styleClass="btn btn-danger medium"
-									    onclick="PF('dlgConfirmEstorno').show()"
-									    process="@this"
-									    rendered="#{agendamentoController.agendamentoModel.pago eq 'S' and agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pagamento != null}" />
-
-									<p:commandButton
-										actionListener="#{agendamentoController.finalizarPedido()}"
-										class="btn btn-blue medium" value="Finalizar" update="@form"
-										process="@this"
-										rendered="#{agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pago eq 'S'}" />
-								</div>
-							</p:outputPanel>
-						</div>
-					</div>
-				</ui:fragment>
-			</div>
-		</div>
-
+		<!-- Modais de agendamento, cancelamento e estorno -->
 		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false" focus="proximoButton">
@@ -606,6 +427,162 @@ body .ui-datatable .ui-datatable-even>td {
 				</div>
 			</h:panelGroup>
 		</p:dialog>
-	</h:form>
-</h:body>
+		
+	</ui:define>
+
+	<!-- Conteúdo da SIDEBAR DIREITA -->
+	<ui:define name="sidebar">
+		<ui:fragment
+			rendered="#{agendamentoController.clienteModel.id != null or agendamentoController.agendamentoModel.nomeClienteAvulso != null}">
+			<div class="content-logo-system">
+				<div class="flex space-between">
+					<div class="flex">
+						<div class="icon-circle">
+							<i class="fa-solid fa-user"></i>
+						</div>
+						<div class="subtitle-info flex space-between">
+							<label class="title-info">Cliente</label>
+						</div>
+					</div>
+					<div class="flex">
+						<p:commandButton update="dttDataSelect" process="@this"
+							actionListener="#{agendamentoController.editAgendamento()}"
+							oncomplete="PF('dlgAgendar').show();"
+							class="btn-circle btn-circle-info-lateral"
+							icon="fa-solid fa-pen"
+							rendered="#{agendamentoController.agendamentoModel.status eq 'A'}" />
+						<p:commandButton
+							actionListener="#{agendamentoController.fecharCliente()}"
+							class="btn-circle btn-circle-info-lateral"
+							icon="fa-solid fa-xmark" />
+					</div>
+				</div>
+			</div>
+			<div class="content-btns">
+				<div class="flex">
+					<div class="perfil-top-funcionario mr8"></div>
+					<div>
+						<label class="title-obj">Cliente</label>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.cliente.id eq null}">
+							<label class="subtitle-obj">#{agendamentoController.agendamentoModel.nomeClienteAvulso}</label>
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.cliente.id != null}">
+							<label class="subtitle-obj">#{agendamentoController.clienteModel.nome}</label>
+						</ui:fragment>
+					</div>
+				</div>
+
+				<p:outputPanel id="attCaixa">
+					<div>
+						<p:outputLabel class="title-date"
+							value="#{agendamentoController.agendamentoModel.dataCriado}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</p:outputLabel>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.status eq 'I' and agendamentoController.agendamentoModel.pago ne 'E'}">
+							<p:outputLabel class="title-date" style="background: #C52323"
+								value="Cancelado" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.status eq 'A'}">
+							<p:outputLabel class="title-date" style="background: #FFC107 "
+								value="Pendente" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.status eq 'F'}">
+							<p:outputLabel class="title-date" style="background: #23C538"
+								value="Finalizado" />
+						</ui:fragment>
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.pago eq 'E'}">
+							<p:outputLabel class="title-date" style="background: #6c757d;"
+								value="Estornado" />
+						</ui:fragment>
+					</div>
+				</p:outputPanel>
+			</div>
+			<div class="content-valores">
+				<label class="title-obj">Funcionário a realizar serviços</label> <label
+					class="subtitle-obj">#{agendamentoController.agendamentoModel.funcionario.nome}</label>
+			</div>
+			<div class="content-agendamentos flex column space-between">
+				<div>
+					<label class="title-servicos mb15">Serviços contratados</label>
+					<p:dataList id="dttlstservicos" rows="4"
+						class="dataList-dialog-custom data-list-time"
+						value="#{agendamentoController.agendamentoModel.servicos}"
+						var="servico" rowIndexVar="index">
+						<div class="list-time">
+							<div>
+								<i class="fa-solid fa-scissors"></i>
+								<div>
+									<label class="title-obj uppercase">#{servico.nome}</label> <label
+										class="subtitle-obj"> <h:outputText
+											value="#{servico.preco}">
+											<f:convertNumber type="currency" currencySymbol="R$"
+												maxFractionDigits="2" />
+										</h:outputText>
+									</label>
+								</div>
+							</div>
+						</div>
+					</p:dataList>
+				</div>
+
+				<div>
+					<div class="fundo-valores-totais">
+						<label>Total</label> <label> <h:outputText
+								value="#{agendamentoController.totalGastoServicos}">
+								<f:convertNumber type="currency" currencySymbol="R$"
+									maxFractionDigits="2" />
+							</h:outputText>
+						</label>
+					</div>
+
+					<p:outputPanel id="painelAcoes">
+						<ui:fragment
+							rendered="#{agendamentoController.agendamentoModel.pago ne 'S' and agendamentoController.agendamentoModel.status ne 'I'}">
+							<div class="input-combined">
+								<p:outputLabel class="title-input" value="Método de pagamento" />
+								<p:selectOneMenu value="#{agendamentoController.idPagamento}">
+									<f:selectItem itemLabel="Selecione forma de pagamento"
+										itemValue="" noSelectionOption="false" />
+									<f:selectItems value="#{agendamentoController.lstPagamento}"
+										var="pag" itemLabel="#{pag.nome}" itemValue="#{pag.id}" />
+									<p:ajax update="@form" process="@this" />
+								</p:selectOneMenu>
+							</div>
+						</ui:fragment>
+
+						<div class="fundo-btns">
+							<ui:fragment
+								rendered="#{agendamentoController.agendamentoModel.pago ne 'S' and agendamentoController.agendamentoModel.status ne 'I'}">
+								<p:commandButton
+									actionListener="#{agendamentoController.confirmaPagamentoPedido()}"
+									class="btn btn-green" value="Confirmar pagamento"
+									update="form:attCaixa form:painelAcoes" process="@form" />
+							</ui:fragment>
+
+							<p:commandButton
+							    value="Estornar"
+							    styleClass="btn btn-danger medium"
+							    onclick="PF('dlgConfirmEstorno').show()"
+							    process="@this"
+							    rendered="#{agendamentoController.agendamentoModel.pago eq 'S' and agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pagamento != null}" />
+
+							<p:commandButton
+								actionListener="#{agendamentoController.finalizarPedido()}"
+								class="btn btn-blue medium" value="Finalizar" update="@form"
+								process="@this"
+								rendered="#{agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pago eq 'S'}" />
+						</div>
+					</p:outputPanel>
+				</div>
+			</div>
+		</ui:fragment>
+	</ui:define>
+
+</ui:composition>
 </html>

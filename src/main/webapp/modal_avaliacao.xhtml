@@ -1,0 +1,102 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <!-- MODAL DE AVALIAÇÃO -->
+    <p:dialog id="dlgAvaliacao" widgetVar="dlgAvaliacao" header="Avaliar Atendimento" 
+              modal="true" resizable="false" width="500" responsive="true">
+        
+        <h:form id="formAvaliacao">
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="margin: 10px 0; color: #333;">#{avaliacaoController.nomeFuncionario}</h3>
+                <p style="color: #666; font-size: 14px;">Como foi seu atendimento?</p>
+            </div>
+
+            <!-- SISTEMA DE ESTRELAS -->
+            <div style="text-align: center; margin: 30px 0;">
+                <h:commandLink onclick="return false;" styleClass="estrela-link">
+                    <i class="#{avaliacaoController.getEstrelaClass(1)}" 
+                       style="font-size: 40px; margin: 0 5px; cursor: pointer;">
+                        <p:ajax event="click" listener="#{avaliacaoController.selecionarNota(1)}" 
+                                update="formAvaliacao" />
+                    </i>
+                </h:commandLink>
+                
+                <h:commandLink onclick="return false;" styleClass="estrela-link">
+                    <i class="#{avaliacaoController.getEstrelaClass(2)}" 
+                       style="font-size: 40px; margin: 0 5px; cursor: pointer;">
+                        <p:ajax event="click" listener="#{avaliacaoController.selecionarNota(2)}" 
+                                update="formAvaliacao" />
+                    </i>
+                </h:commandLink>
+                
+                <h:commandLink onclick="return false;" styleClass="estrela-link">
+                    <i class="#{avaliacaoController.getEstrelaClass(3)}" 
+                       style="font-size: 40px; margin: 0 5px; cursor: pointer;">
+                        <p:ajax event="click" listener="#{avaliacaoController.selecionarNota(3)}" 
+                                update="formAvaliacao" />
+                    </i>
+                </h:commandLink>
+                
+                <h:commandLink onclick="return false;" styleClass="estrela-link">
+                    <i class="#{avaliacaoController.getEstrelaClass(4)}" 
+                       style="font-size: 40px; margin: 0 5px; cursor: pointer;">
+                        <p:ajax event="click" listener="#{avaliacaoController.selecionarNota(4)}" 
+                                update="formAvaliacao" />
+                    </i>
+                </h:commandLink>
+                
+                <h:commandLink onclick="return false;" styleClass="estrela-link">
+                    <i class="#{avaliacaoController.getEstrelaClass(5)}" 
+                       style="font-size: 40px; margin: 0 5px; cursor: pointer;">
+                        <p:ajax event="click" listener="#{avaliacaoController.selecionarNota(5)}" 
+                                update="formAvaliacao" />
+                    </i>
+                </h:commandLink>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <h:outputLabel value="Deixe seu comentário (opcional):" style="font-weight: bold; display: block; margin-bottom: 8px;" />
+                <p:inputTextarea id="comentario" value="#{avaliacaoController.comentario}" 
+                               rows="4" cols="50" maxlength="500"
+                               placeholder="Compartilhe sua experiência..."
+                               style="width: 100%;" />
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <p:commandButton value="Avaliar" 
+                               actionListener="#{avaliacaoController.salvarAvaliacao()}"
+                               styleClass="ui-button-success"
+                               style="margin-right: 10px;" />
+                
+                <p:commandButton value="Cancelar" 
+                               onclick="PF('dlgAvaliacao').hide(); return false;"
+                               styleClass="ui-button-secondary" />
+            </div>
+
+        </h:form>
+    </p:dialog>
+
+    <style>
+        .estrela-link {
+            text-decoration: none !important;
+        }
+        
+        .estrela-selecionada {
+            color: #FFD700 !important;
+        }
+        
+        .estrela-vazia {
+            color: #ddd !important;
+        }
+        
+        .estrela-link i:hover {
+            transform: scale(1.2);
+            transition: transform 0.2s;
+        }
+    </style>
+
+</ui:composition>

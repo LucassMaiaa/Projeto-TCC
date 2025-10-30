@@ -5,19 +5,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.barbersys.model.CaixaData;
-import com.barbersys.model.ControleCaixa;
 import com.barbersys.model.Funcionario;
 import com.barbersys.model.Horario;
+import com.barbersys.model.Usuario;
 import com.barbersys.util.DatabaseConnection;
-import java.time.LocalTime;
 
 public class FuncionarioDAO {
 	
@@ -58,23 +52,37 @@ public class FuncionarioDAO {
 	    return total;
 	}
 
+	private static Funcionario mapResultSetToFuncionario(ResultSet rs) throws SQLException {
+		Funcionario funcionario = new Funcionario();
+		funcionario.setId(rs.getLong("fun_codigo"));
+		funcionario.setNome(rs.getString("fun_nome"));
+		funcionario.setStatus(rs.getString("fun_status"));
+
+		if (rs.getObject("usu_codigo") != null) {
+			Usuario usuario = new Usuario();
+			usuario.setId(rs.getLong("usu_codigo"));
+			usuario.setLogin(rs.getString("usu_login"));
+			funcionario.setUsuario(usuario);
+		}
+		return funcionario;
+	}
 
 	public static List<Funcionario> buscarFuncionario(String nome, String status, int first, int pageSize) {
 		List<Funcionario> lista = new ArrayList<>();
-		StringBuilder sql = new StringBuilder("SELECT * FROM funcionario WHERE 1=1");
+		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE 1=1";
 
 		if (nome != null && !nome.trim().isEmpty()) {
-			sql.append(" AND LOWER(fun_nome) LIKE ?");
+			sql += " AND LOWER(f.fun_nome) LIKE ?";
 		}
 
 		if (status != null && !status.isEmpty()) {
-			sql.append(" AND fun_status = ?");
+			sql += " AND f.fun_status = ?";
 		}
 
-		sql.append(" ORDER BY fun_codigo DESC LIMIT ?, ?");
+		sql += " ORDER BY f.fun_codigo DESC LIMIT ?, ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+				PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			int paramIndex = 1;
 
@@ -92,11 +100,7 @@ public class FuncionarioDAO {
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				Funcionario funcionario = new Funcionario();
-				funcionario.setId(rs.getLong("fun_codigo"));
-				funcionario.setNome(rs.getString("fun_nome"));
-				funcionario.setStatus(rs.getString("fun_status"));
-				lista.add(funcionario);
+				lista.add(mapResultSetToFuncionario(rs));
 			}
 
 		} catch (Exception e) {
@@ -130,6 +134,26 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
+	public static Funcionario buscarFuncionarioPorUsuarioId(Long usuarioId) {
+		Funcionario funcionario = null;
+		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.usu_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setLong(1, usuarioId);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				funcionario = mapResultSetToFuncionario(rs);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return funcionario;
+	}
+
 	public static List<Horario> buscarHorarioPorFuncionario(Funcionario funcionario) {
 		List<Horario> lista = new ArrayList<>();
 		String sql = "SELECT * FROM horario WHERE fun_codigo = ?";
@@ -155,7 +179,12 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
-	public static void atualizar(Funcionario funcionario) {
+	public static void atualizar(Funcionario funcionario) throws SQLException {
+        if (funcionario.getUsuario() != null && funcionario.getUsuario().getId() != null && funcionario.getUsuario().getId() > 0) {
+            UsuarioDAO usuarioDAO = new UsuarioDAO();
+            usuarioDAO.atualizar(funcionario.getUsuario());
+        }
+
 		String sql = "UPDATE funcionario SET fun_nome = ?, fun_status = ? WHERE fun_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
@@ -168,6 +197,7 @@ public class FuncionarioDAO {
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+            throw e;
 		}
 	}
 
@@ -180,12 +210,12 @@ public class FuncionarioDAO {
 			stmt.setLong(1, funcionario.getId());
 			stmt.executeUpdate();
 
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void deletar(Funcionario funcionario) {
+	public static void deletar(Funcionario funcionario) throws SQLException {
 		String sql = "DELETE FROM funcionario WHERE fun_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
@@ -196,18 +226,25 @@ public class FuncionarioDAO {
 			stmt.setLong(1, funcionario.getId());
 			stmt.executeUpdate();
 
+            if (funcionario.getUsuario() != null && funcionario.getUsuario().getId() != null && funcionario.getUsuario().getId() > 0) {
+                UsuarioDAO usuarioDAO = new UsuarioDAO();
+                usuarioDAO.deletar(funcionario.getUsuario());
+            }
+
 		} catch (SQLException e) {
 			e.printStackTrace();
+            throw e;
 		}
 	}
 
-	public static void salvar(Funcionario funcionario) {
-		String sql = "INSERT INTO funcionario (fun_nome, fun_status) VALUES (?, ?)";
+	public static void salvar(Funcionario funcionario) throws SQLException {
+		String sql = "INSERT INTO funcionario (fun_nome, fun_status, usu_codigo) VALUES (?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
 			stmt.setString(1, funcionario.getNome());
 			stmt.setString(2, funcionario.getStatus());
+            stmt.setLong(3, funcionario.getUsuario().getId());
 			stmt.executeUpdate();
 
 			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
@@ -218,6 +255,7 @@ public class FuncionarioDAO {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+            throw e;
 		}
 	}
 

@@ -61,4 +61,14 @@ public class Agendamento {
 	@JoinColumn(name = "pag_codigo")
 	private Pagamento pagamento;
 
+    public String getServicosConcatenados() {
+        if (servicos == null || servicos.isEmpty()) {
+            return "";
+        }
+        List<String> nomes = new ArrayList<>();
+        for (Servicos s : servicos) {
+            nomes.add(s.getNome());
+        }
+        return String.join(", ", nomes);
+    }
 }

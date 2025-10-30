@@ -184,6 +184,25 @@ public class AgendamentoController implements Serializable {
 			}
 			AgendamentoDAO.atualizar(agendamentoModel, servicosIds);
 			
+			// Cria notificação para o cliente avaliar o serviço (se houver cliente cadastrado)
+			if (agendamentoModel.getCliente() != null && agendamentoModel.getCliente().getId() != null) {
+				String nomeFuncionario = agendamentoModel.getFuncionario() != null 
+					? agendamentoModel.getFuncionario().getNome() 
+					: "Funcionário";
+
+				String mensagem = "Seu atendimento com " + nomeFuncionario 
+					+ " foi finalizado! Avalie o serviço prestado";
+
+				com.barbersys.model.Notificacao notificacao = new com.barbersys.model.Notificacao();
+				notificacao.setMensagem(mensagem);
+				notificacao.setDataEnvio(new java.util.Date());
+				notificacao.setAgendamento(agendamentoModel);
+				notificacao.setCliente(agendamentoModel.getCliente());
+
+				com.barbersys.dao.NotificacaoDAO notificacaoDAO = new com.barbersys.dao.NotificacaoDAO();
+				notificacaoDAO.salvar(notificacao);
+			}
+			
 			exibirAlerta("success", "Agendamento finalizado com sucesso!");
 			PrimeFaces.current().ajax().update("form");
 
@@ -514,8 +533,36 @@ public class AgendamentoController implements Serializable {
 
 	public void cancelarAgendamento() {
 		try {
+			// Cancela o agendamento no banco
 			AgendamentoDAO.cancelarAgendamento(agendamentoModel.getId());
 			agendamentoModel.setStatus("I"); // Atualiza o modelo na tela
+
+			// Cria notificação para o cliente (se houver cliente cadastrado)
+			if (agendamentoModel.getCliente() != null && agendamentoModel.getCliente().getId() != null) {
+				String nomeCliente = agendamentoModel.getCliente().getNome();
+				String nomeFuncionario = agendamentoModel.getFuncionario() != null 
+					? agendamentoModel.getFuncionario().getNome() 
+					: "Funcionário";
+
+				DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+				String horaFormatada = agendamentoModel.getHoraSelecionada().format(timeFormatter);
+				
+				// Converte java.util.Date para LocalDate de forma segura
+				java.text.SimpleDateFormat dateFormatter = new java.text.SimpleDateFormat("dd/MM/yyyy");
+				String dataFormatada = dateFormatter.format(agendamentoModel.getDataCriado());
+
+				String mensagem = "Seu agendamento do dia " + dataFormatada + " às " + horaFormatada 
+					+ " com " + nomeFuncionario + " foi CANCELADO";
+
+				com.barbersys.model.Notificacao notificacao = new com.barbersys.model.Notificacao();
+				notificacao.setMensagem(mensagem);
+				notificacao.setDataEnvio(new java.util.Date());
+				notificacao.setAgendamento(agendamentoModel);
+				notificacao.setCliente(agendamentoModel.getCliente());
+
+				com.barbersys.dao.NotificacaoDAO notificacaoDAO = new com.barbersys.dao.NotificacaoDAO();
+				notificacaoDAO.salvar(notificacao);
+			}
 
 			exibirAlerta("success", "Agendamento cancelado com sucesso!");
 			PrimeFaces.current().executeScript("PF('dlgAgendar').hide();");
