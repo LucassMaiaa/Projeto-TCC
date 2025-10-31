@@ -13,10 +13,13 @@ public class Notificacao {
     private String mensagem; // not_mensagem
     private Date dataEnvio; // not_data_envio
     private String status; // not_status
+    private String lida; // not_lida (S/N)
     private Agendamento agendamento; // age_codigo
     private Cliente cliente; // cli_codigo
 
-    public Notificacao() {}
+    public Notificacao() {
+        this.lida = "N"; // Por padrão, notificação não lida
+    }
 
     @Override
     public boolean equals(Object o) {

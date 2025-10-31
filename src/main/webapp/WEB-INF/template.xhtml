@@ -20,6 +20,12 @@
 <h:body>
 
 	<h:form id="form" styleClass="main">
+		<!-- Auto-refresh de notificações a cada 30 segundos -->
+		<p:poll interval="30" 
+		        listener="#{notificacaoController.atualizarNotificacoes()}" 
+		        update="notificationBadge" 
+		        autoStart="true" />
+		
 		<!-- Grid com 2 colunas: menu lateral esquerdo e conteúdo central (SEM sidebar) -->
 		<div class="grid-content">
 
@@ -40,7 +46,14 @@
 						</div>
 					</div>
 					<div class="flex">
-						<p:commandButton id="botaoNotificacao" class="btn-circle" icon="fa-solid fa-bell" />
+						<div style="position: relative; display: inline-block;">
+							<p:commandButton id="botaoNotificacao" class="btn-circle" icon="fa-solid fa-bell" />
+							<h:panelGroup id="notificationBadge">
+								<h:outputText styleClass="notification-badge" 
+								              value="#{notificacaoController.totalNaoLidas}"
+								              rendered="#{notificacaoController.totalNaoLidas > 0}" />
+							</h:panelGroup>
+						</div>
 
 						<p:commandButton class="btn-sair-header" value="Sair"
 							icon="fa-solid fa-right-from-bracket" 
@@ -50,12 +63,24 @@
 
 				<!-- PAINEL DE NOTIFICAÇÕES -->
 				<p:overlayPanel id="painelNotificacoes" for="botaoNotificacao" style="width:350px" dismissable="true">
-					<div style="font-weight: bold; font-size: 1.2em; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
-						Notificações
+					<p:ajax event="show" listener="#{notificacaoController.marcarTodasComoLidas()}" 
+					        update="@form:notificationBadge" />
+					<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
+						<span style="font-weight: bold; font-size: 1.2em;">Notificações</span>
+						<p:commandButton value="Limpar todas" 
+						                 icon="fa fa-trash-alt"
+						                 styleClass="ui-button-secondary ui-button-sm"
+						                 style="font-size: 11px; padding: 5px 10px;"
+						                 onclick="PF('dlgConfirmLimparTodas').show();"
+						                 process="@this"
+						                 rendered="#{notificacaoController.notificacoes.size() > 0}" />
 					</div>
-					<p:dataList value="#{notificacaoController.notificacoes}" var="notificacao" type="definition">
+					<p:dataList value="#{notificacaoController.notificacoes}" var="notificacao" type="definition"
+					            emptyMessage="Nenhuma notificação no momento 🔔"
+					            style="max-height: 400px; overflow-y: auto;">
 						<f:facet name="description">
-							<div style="padding: 10px; border-radius: 5px; background: #f9f9f9; margin-bottom: 8px;">
+							<div style="padding: 10px; border-radius: 5px; margin-bottom: 8px; 
+							            #{notificacao.lida eq 'N' ? 'background: #fff3cd; border-left: 3px solid #ffc107; font-weight: 500;' : 'background: #f9f9f9;'}">
 								<div>#{notificacao.mensagem}</div>
 								<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
 									<span style="font-size: 0.8em; color: #888;">
@@ -77,8 +102,9 @@
 										<!-- Botão de Remover (só aparece para notificações normais) -->
 										<p:commandButton rendered="#{!notificacao.mensagem.contains('Avalie o serviço prestado')}"
 										                 icon="fa fa-trash" 
-										                 actionListener="#{notificacaoController.remover(notificacao)}" 
-										                 update="@form:painelNotificacoes" 
+										                 actionListener="#{notificacaoController.selecionarNotificacao(notificacao)}"
+										                 oncomplete="PF('dlgConfirmNotificacao').show();"
+										                 update="@form:dlgConfirmNotificacaoForm"
 										                 title="Remover notificação"
 										                 styleClass="ui-button-danger ui-button-flat" />
 									</div>
@@ -175,6 +201,53 @@
 				    </h:panelGroup>
 				</p:dialog>
 
+				<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO DE NOTIFICAÇÃO -->
+				<p:dialog id="dlgConfirmNotificacao" widgetVar="dlgConfirmNotificacao" modal="true"
+					showEffect="fade" hideEffect="fade" closable="false"
+					draggable="false" resizable="false">
+					<h:panelGroup id="dlgConfirmNotificacaoForm">
+						<div class="header-modal-confirm">
+							<div>
+								<label>Realmente deseja excluir essa notificação?</label>
+							</div>
+						</div>
+
+						<div class="flex align-center justify-center">
+							<p:commandButton styleClass="btn medium btn-confirm"
+								value="Confirmar"
+								actionListener="#{notificacaoController.confirmarRemocao()}"
+								update="@form:painelNotificacoes @form:notificationBadge" />
+							<p:commandButton styleClass="btn medium btn-cancel"
+								value="Cancelar" onclick="PF('dlgConfirmNotificacao').hide()" />
+						</div>
+
+					</h:panelGroup>
+				</p:dialog>
+
+				<!-- MODAL DE CONFIRMAÇÃO PARA LIMPAR TODAS AS NOTIFICAÇÕES -->
+				<p:dialog id="dlgConfirmLimparTodas" widgetVar="dlgConfirmLimparTodas" modal="true"
+					showEffect="fade" hideEffect="fade" closable="false"
+					draggable="false" resizable="false">
+					<h:panelGroup id="dlgConfirmLimparTodasForm">
+						<div class="header-modal-confirm">
+							<div>
+								<label>Realmente deseja remover todas as notificações?</label>
+							</div>
+						</div>
+
+						<div class="flex align-center justify-center">
+							<p:commandButton styleClass="btn medium btn-confirm"
+								value="Confirmar"
+								actionListener="#{notificacaoController.limparTodas()}"
+								update="@form:painelNotificacoes @form:notificationBadge"
+								oncomplete="PF('dlgConfirmLimparTodas').hide();" />
+							<p:commandButton styleClass="btn medium btn-cancel"
+								value="Cancelar" onclick="PF('dlgConfirmLimparTodas').hide()" />
+						</div>
+
+					</h:panelGroup>
+				</p:dialog>
+
 				<style>
 				    .estrela-link {
 				        text-decoration: none !important;
@@ -195,6 +268,24 @@
 				    
 				    .notificacao-link:hover {
 				        background: #e8e8e8 !important;
+				    }
+				    
+				    .notification-badge {
+				        position: absolute;
+				        top: -5px;
+				        right: -5px;
+				        background-color: #E74A46;
+				        color: white;
+				        border-radius: 50%;
+				        width: 20px;
+				        height: 20px;
+				        display: flex;
+				        align-items: center;
+				        justify-content: center;
+				        font-size: 11px;
+				        font-weight: bold;
+				        border: 2px solid white;
+				        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 				    }
 				</style>
 
