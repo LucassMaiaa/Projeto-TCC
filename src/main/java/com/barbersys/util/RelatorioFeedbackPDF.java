@@ -115,12 +115,13 @@ public class RelatorioFeedbackPDF {
             // Preenchendo a tabela com os dados
             SimpleDateFormat dataTabela = new SimpleDateFormat("dd/MM/yyyy");
             int index = 0;
+            int codigo = 1;
             
             for (Avaliacao avaliacao : avaliacoes) {
                 Color bgColor = (index % 2 == 0) ? Color.WHITE : COLOR_ROW_EVEN;
                 
-                // Código
-                adicionarCelulaDados(table, String.valueOf(avaliacao.getId()), Element.ALIGN_CENTER, bgColor);
+                // Código (usa índice sequencial)
+                adicionarCelulaDados(table, String.valueOf(codigo++), Element.ALIGN_CENTER, bgColor);
                 
                 // Data
                 String dataFormatada = avaliacao.getDataCriacao() != null 

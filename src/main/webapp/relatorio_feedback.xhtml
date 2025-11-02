@@ -259,6 +259,7 @@ body .ui-datatable .ui-datatable-even>td {
 				id="datatableFeedbacks"
 				value="#{relatorioFeedbackController.lstAvaliacoes}" 
 				var="avaliacao"
+				varStatus="status"
 				rowKey="#{avaliacao.id}"
 				paginator="true" 
 				paginatorPosition="bottom"
@@ -267,7 +268,7 @@ body .ui-datatable .ui-datatable-even>td {
 				emptyMessage="Nenhum dado encontrado">
 
 				<p:column headerText="Código" style="text-align: center;">
-					<h:outputText value="#{avaliacao.id}" />
+					<h:outputText value="#{relatorioFeedbackController.lstAvaliacoes.rowIndex + status.index + 1}" />
 				</p:column>
 
 				<p:column headerText="Data" style="text-align: center;">

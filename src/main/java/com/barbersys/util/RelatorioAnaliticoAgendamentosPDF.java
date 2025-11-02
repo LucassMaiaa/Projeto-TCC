@@ -1,6 +1,6 @@
 package com.barbersys.util;
 
-import com.barbersys.model.AgendamentoSintetico;
+import com.barbersys.model.Agendamento;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class RelatorioAgendamentosPDF {
+public class RelatorioAnaliticoAgendamentosPDF {
 
     private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(44, 62, 80));
     private static final Font FONT_SUBTITLE = new Font(Font.HELVETICA, 12, Font.NORMAL, new Color(127, 140, 141));
@@ -26,10 +26,11 @@ public class RelatorioAgendamentosPDF {
     private static final Color COLOR_ROW_EVEN = new Color(246, 247, 251);
     private static final Color COLOR_BADGE_SUCCESS = new Color(16, 185, 129); // #10B981
     private static final Color COLOR_BADGE_DANGER = new Color(239, 68, 68); // #EF4444
-    private static final Color COLOR_BADGE_INFO = new Color(59, 130, 246); // #3B82F6
+    private static final Color COLOR_BADGE_WARNING = new Color(245, 158, 11); // #F59E0B
 
-    public static void gerar(List<AgendamentoSintetico> agendamentos, java.util.Date dataInicial, java.util.Date dataFinal) {
-        Document document = new Document(PageSize.A4, 40, 40, 50, 50);
+    public static void gerar(List<Agendamento> agendamentos, java.util.Date dataInicial, java.util.Date dataFinal,
+            Long clienteId, Long funcionarioId, String statusFiltro) {
+        Document document = new Document(PageSize.A4.rotate(), 40, 40, 50, 50); // Paisagem para mais colunas
 
         try {
             FacesContext facesContext = FacesContext.getCurrentInstance();
@@ -38,7 +39,7 @@ public class RelatorioAgendamentosPDF {
             externalContext.responseReset();
             externalContext.setResponseContentType("application/pdf");
             externalContext.setResponseHeader("Content-Disposition", 
-                "attachment; filename=\"relatorio-agendamentos-" + System.currentTimeMillis() + ".pdf\"");
+                "attachment; filename=\"relatorio-analitico-agendamentos-" + System.currentTimeMillis() + ".pdf\"");
 
             OutputStream outputStream = externalContext.getResponseOutputStream();
             PdfWriter.getInstance(document, outputStream);
@@ -46,7 +47,7 @@ public class RelatorioAgendamentosPDF {
             document.open();
 
             // Título do relatório
-            Paragraph titulo = new Paragraph("Relatório Sintético de Agendamentos", FONT_TITLE);
+            Paragraph titulo = new Paragraph("Relatório Analítico de Agendamentos", FONT_TITLE);
             titulo.setAlignment(Element.ALIGN_CENTER);
             titulo.setSpacingAfter(10);
             document.add(titulo);
@@ -74,6 +75,30 @@ public class RelatorioAgendamentosPDF {
                 temFiltro = true;
             }
             
+            if (clienteId != null) {
+                if (temFiltro) filtrosTexto.append(" | ");
+                filtrosTexto.append("Cliente selecionado");
+                temFiltro = true;
+            }
+            
+            if (funcionarioId != null) {
+                if (temFiltro) filtrosTexto.append(" | ");
+                filtrosTexto.append("Funcionário selecionado");
+                temFiltro = true;
+            }
+            
+            if (statusFiltro != null && !statusFiltro.trim().isEmpty()) {
+                if (temFiltro) filtrosTexto.append(" | ");
+                String statusDesc = "";
+                switch (statusFiltro) {
+                    case "F": statusDesc = "Finalizados"; break;
+                    case "I": statusDesc = "Cancelados"; break;
+                    case "A": statusDesc = "Pendentes"; break;
+                }
+                filtrosTexto.append("Status: ").append(statusDesc);
+                temFiltro = true;
+            }
+            
             if (temFiltro) {
                 Paragraph filtros = new Paragraph("Filtros aplicados: " + filtrosTexto.toString(), FONT_SUBTITLE);
                 filtros.setAlignment(Element.ALIGN_CENTER);
@@ -85,78 +110,87 @@ public class RelatorioAgendamentosPDF {
             }
 
             // Total de registros
-            Paragraph total = new Paragraph("Total de dias: " + agendamentos.size(), FONT_CELL_BOLD);
+            Paragraph total = new Paragraph("Total de agendamentos: " + agendamentos.size(), FONT_CELL_BOLD);
             total.setSpacingAfter(15);
             document.add(total);
 
             // Criação da tabela
-            PdfPTable table = new PdfPTable(5);
+            PdfPTable table = new PdfPTable(6);
             table.setWidthPercentage(100);
-            table.setWidths(new float[]{0.7f, 1.2f, 1.5f, 1.8f, 1.3f});
+            table.setWidths(new float[]{0.7f, 2.0f, 2.0f, 1.0f, 0.8f, 1.2f});
             table.setSpacingBefore(10);
 
             // Cabeçalho da tabela
             adicionarCelulaCabecalho(table, "Cód.");
+            adicionarCelulaCabecalho(table, "Cliente");
+            adicionarCelulaCabecalho(table, "Funcionário");
             adicionarCelulaCabecalho(table, "Data");
-            adicionarCelulaCabecalho(table, "Total Agend.");
-            adicionarCelulaCabecalho(table, "Finalizados");
-            adicionarCelulaCabecalho(table, "Cancelados");
+            adicionarCelulaCabecalho(table, "Hora");
+            adicionarCelulaCabecalho(table, "Status");
 
             // Preenchendo a tabela com os dados
             SimpleDateFormat dataTabela = new SimpleDateFormat("dd/MM/yyyy");
             int index = 0;
             int codigo = 1;
             
-            int totalGeral = 0;
-            int finalizadosGeral = 0;
-            int canceladosGeral = 0;
+            int totalFinalizado = 0;
+            int totalCancelado = 0;
+            int totalPendente = 0;
             
-            for (AgendamentoSintetico agendamento : agendamentos) {
+            for (Agendamento agendamento : agendamentos) {
                 Color bgColor = (index % 2 == 0) ? Color.WHITE : COLOR_ROW_EVEN;
                 
                 // Código (usa índice sequencial)
                 adicionarCelulaDados(table, String.valueOf(codigo++), Element.ALIGN_CENTER, bgColor);
                 
+                // Cliente
+                String nomeCliente = agendamento.getCliente() != null && agendamento.getCliente().getNome() != null
+                    ? agendamento.getCliente().getNome()
+                    : (agendamento.getNomeClienteAvulso() != null ? agendamento.getNomeClienteAvulso() : "-");
+                adicionarCelulaDados(table, nomeCliente, Element.ALIGN_LEFT, bgColor);
+                
+                // Funcionário
+                String nomeFuncionario = agendamento.getFuncionario() != null 
+                    ? agendamento.getFuncionario().getNome() 
+                    : "-";
+                adicionarCelulaDados(table, nomeFuncionario, Element.ALIGN_LEFT, bgColor);
+                
                 // Data
-                String dataFormatada = agendamento.getData() != null 
-                    ? dataTabela.format(agendamento.getData()) 
+                String dataFormatada = agendamento.getDataCriado() != null 
+                    ? dataTabela.format(agendamento.getDataCriado()) 
                     : "-";
                 adicionarCelulaDados(table, dataFormatada, Element.ALIGN_CENTER, bgColor);
                 
-                // Total de Agendamentos
-                String totalAgend = String.valueOf(agendamento.getTotalAgendamentos());
-                PdfPCell cellTotal = new PdfPCell(new Phrase(totalAgend, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_INFO)));
-                cellTotal.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cellTotal.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellTotal.setPadding(8);
-                cellTotal.setBackgroundColor(bgColor);
-                cellTotal.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cellTotal);
+                // Hora
+                String hora = agendamento.getHoraSelecionada() != null ? agendamento.getHoraSelecionada().toString() : "-";
+                adicionarCelulaDados(table, hora, Element.ALIGN_CENTER, bgColor);
                 
-                // Finalizados
-                String finalizados = String.valueOf(agendamento.getFinalizados());
-                PdfPCell cellFinalizado = new PdfPCell(new Phrase(finalizados, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_SUCCESS)));
-                cellFinalizado.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cellFinalizado.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellFinalizado.setPadding(8);
-                cellFinalizado.setBackgroundColor(bgColor);
-                cellFinalizado.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cellFinalizado);
+                // Status
+                String status = agendamento.getStatus();
+                String statusDesc = "";
+                Color statusColor = COLOR_BADGE_SUCCESS;
                 
-                // Cancelados
-                String cancelados = String.valueOf(agendamento.getCancelados());
-                PdfPCell cellCancelado = new PdfPCell(new Phrase(cancelados, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_DANGER)));
-                cellCancelado.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cellCancelado.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellCancelado.setPadding(8);
-                cellCancelado.setBackgroundColor(bgColor);
-                cellCancelado.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cellCancelado);
+                if ("F".equals(status)) {
+                    statusDesc = "FINALIZADO";
+                    statusColor = COLOR_BADGE_SUCCESS;
+                    totalFinalizado++;
+                } else if ("I".equals(status)) {
+                    statusDesc = "CANCELADO";
+                    statusColor = COLOR_BADGE_DANGER;
+                    totalCancelado++;
+                } else if ("A".equals(status)) {
+                    statusDesc = "PENDENTE";
+                    statusColor = COLOR_BADGE_WARNING;
+                    totalPendente++;
+                }
                 
-                // Acumular totais
-                totalGeral += agendamento.getTotalAgendamentos();
-                finalizadosGeral += agendamento.getFinalizados();
-                canceladosGeral += agendamento.getCancelados();
+                PdfPCell cellStatus = new PdfPCell(new Phrase(statusDesc, new Font(Font.HELVETICA, 8, Font.BOLD, statusColor)));
+                cellStatus.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cellStatus.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cellStatus.setPadding(8);
+                cellStatus.setBackgroundColor(bgColor);
+                cellStatus.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cellStatus);
                 
                 index++;
             }
@@ -166,9 +200,9 @@ public class RelatorioAgendamentosPDF {
             // Totalizadores
             document.add(new Paragraph(" "));
             Paragraph totalizadores = new Paragraph(
-                "TOTAIS: Agendamentos: " + totalGeral + 
-                " | Finalizados: " + finalizadosGeral + 
-                " | Cancelados: " + canceladosGeral, 
+                "TOTAIS: Finalizados: " + totalFinalizado + 
+                " | Cancelados: " + totalCancelado + 
+                " | Pendentes: " + totalPendente, 
                 FONT_CELL_BOLD
             );
             totalizadores.setAlignment(Element.ALIGN_RIGHT);

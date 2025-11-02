@@ -20,10 +20,11 @@ public class AgendamentoSinteticoDAO {
         StringBuilder sql = new StringBuilder(
             "SELECT " +
             "    DATE(a.age_data) as data, " +
-            "    COUNT(*) as total_agendamentos, " +
+            "    COUNT(DISTINCT a.age_codigo) as total_agendamentos, " +
             "    SUM(CASE WHEN a.age_status = 'F' THEN 1 ELSE 0 END) as finalizados, " +
             "    SUM(CASE WHEN a.age_status = 'I' THEN 1 ELSE 0 END) as cancelados " +
             "FROM agendamento a " +
+            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         
@@ -75,6 +76,7 @@ public class AgendamentoSinteticoDAO {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(DISTINCT DATE(a.age_data)) as total " +
             "FROM agendamento a " +
+            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         
@@ -116,10 +118,11 @@ public class AgendamentoSinteticoDAO {
         StringBuilder sql = new StringBuilder(
             "SELECT " +
             "    DATE(a.age_data) as data, " +
-            "    COUNT(*) as total_agendamentos, " +
+            "    COUNT(DISTINCT a.age_codigo) as total_agendamentos, " +
             "    SUM(CASE WHEN a.age_status = 'F' THEN 1 ELSE 0 END) as finalizados, " +
             "    SUM(CASE WHEN a.age_status = 'I' THEN 1 ELSE 0 END) as cancelados " +
             "FROM agendamento a " +
+            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         
