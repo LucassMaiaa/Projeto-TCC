@@ -116,6 +116,26 @@ public class ClienteDAO {
 		return lista;
 	}
 
+	public static Cliente buscarPorId(Long id) {
+		Cliente cliente = null;
+		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.cli_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setLong(1, id);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				cliente = mapResultSetToCliente(rs);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return cliente;
+	}
+	
 	public static Cliente buscarClientePorUsuarioId(Long usuarioId) {
 		Cliente cliente = null;
 		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.usu_codigo = ?";

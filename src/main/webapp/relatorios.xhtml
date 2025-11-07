@@ -88,7 +88,7 @@
 			<h:commandLink action="/relatorio_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
 				<div class="relatorio-card">
 					<i class="fa-solid fa-calendar-check"></i>
-					<h3>Agendamentos</h3>
+					<h3>Agendamentos Sintéticos</h3>
 					<p>Relatório sintético por dia</p>
 				</div>
 			</h:commandLink>
@@ -97,24 +97,37 @@
 			<h:commandLink action="/relatorio_analitico_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
 				<div class="relatorio-card">
 					<i class="fa-solid fa-list-check"></i>
-					<h3>Agendamentos Analítico</h3>
+					<h3>Agendamentos Analíticos</h3>
 					<p>Detalhado por agendamento</p>
 				</div>
 			</h:commandLink>
 
-			<!-- Card Relatório Financeiro (futuro) -->
-			<div class="relatorio-card" style="opacity: 0.5; cursor: not-allowed;">
-				<i class="fa-solid fa-chart-line"></i>
-				<h3>Relatório Financeiro</h3>
-				<p>Em breve</p>
-			</div>
+			<!-- Card Relatório de Pagamentos -->
+			<h:commandLink action="/relatorio_pagamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="relatorio-card">
+					<i class="fa-solid fa-dollar-sign"></i>
+					<h3>Relatório de Pagamentos</h3>
+					<p>Pagamentos e pendências</p>
+				</div>
+			</h:commandLink>
 
-			<!-- Card Relatório de Funcionários (futuro) -->
-			<div class="relatorio-card" style="opacity: 0.5; cursor: not-allowed;">
-				<i class="fa-solid fa-users"></i>
-				<h3>Desempenho de Funcionários</h3>
-				<p>Em breve</p>
-			</div>
+			<!-- Card Relatório de Faturamento Mensal -->
+			<h:commandLink action="/relatorio_faturamento?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="relatorio-card">
+					<i class="fa-solid fa-chart-line"></i>
+					<h3>Faturamento Mensal</h3>
+					<p>Faturamento por serviço</p>
+				</div>
+			</h:commandLink>
+
+			<!-- Card Relatório de Produtividade -->
+			<h:commandLink action="/relatorio_produtividade?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="relatorio-card">
+					<i class="fa-solid fa-user-check"></i>
+					<h3>Produtividade dos Funcionários</h3>
+					<p>Desempenho e avaliações</p>
+				</div>
+			</h:commandLink>
 
 		</div>
 	

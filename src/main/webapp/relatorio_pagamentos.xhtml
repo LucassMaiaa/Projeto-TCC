@@ -9,7 +9,7 @@
 <ui:composition template="/WEB-INF/template.xhtml">
 
 	<!-- Título da página -->
-	<ui:define name="title">Relatório de Agendamentos - BarberSys</ui:define>
+	<ui:define name="title">Relatório de Pagamentos - BarberSys</ui:define>
 	
 	<!-- CSS específico desta página -->
 	<ui:define name="extra-css">
@@ -22,21 +22,21 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), 
 body .ui-datatable tbody tr:not(.ui-datatable-empty-message) {
 	display: grid;
-	grid-template-columns: 80px 130px 1fr 1fr 1fr;
+	grid-template-columns: 90px 2fr 1.5fr 120px 130px 120px;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
 body .ui-datatable tbody td:first-child:not(.ui-datatable-empty-message),
-body .ui-datatable thead th:nth-child(3):not(.ui-datatable-empty-message),
-body .ui-datatable tbody td:nth-child(3):not(.ui-datatable-empty-message),
 body .ui-datatable thead th:nth-child(4):not(.ui-datatable-empty-message),
 body .ui-datatable tbody td:nth-child(4):not(.ui-datatable-empty-message),
 body .ui-datatable thead th:nth-child(5):not(.ui-datatable-empty-message),
-body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message) {
+body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message),
+body .ui-datatable thead th:nth-child(6):not(.ui-datatable-empty-message),
+body .ui-datatable tbody td:nth-child(6):not(.ui-datatable-empty-message) {
 	text-align: center !important;
 }
 
-body .ui-datatable .ui-datatable-data>tr>td[colspan="5"] {
+body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 	height: 514px;
 	font-size: 17px;
 }
@@ -131,16 +131,6 @@ body .ui-datatable .ui-datatable-even>td {
 	color: #333;
 }
 
-.badge-danger {
-	background: #DC3545;
-	color: white;
-}
-
-.badge-info {
-	background: #17A2B8;
-	color: white;
-}
-
 .badge-secondary {
 	background: #6C757D;
 	color: white;
@@ -212,34 +202,24 @@ body .ui-datatable .ui-datatable-even>td {
 	background: #CACACA !important;
 }
 
-.badge-success {
-	background: #10B981;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
+/* Estilo para input de texto dos filtros */
+.input-text-filter {
+	height: 46px !important;
+	padding-left: 12px !important;
+	width: 100% !important;
+	font-size: 14px !important;
+	color: #656464 !important;
+	font-weight: 600 !important;
+	font-family: "Barlow" !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	border: 1px solid #ced4da !important;
 }
 
-.badge-danger {
-	background: #EF4444;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
+.input-text-filter::placeholder {
+	color: #656464 !important;
+	opacity: 0.7;
 }
-
-.badge-info {
-	background: #3B82F6;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
-}
-
-
 		</style>
 	</ui:define>
 
@@ -251,32 +231,66 @@ body .ui-datatable .ui-datatable-even>td {
 	
 		<!-- Título e Ações -->
 		<div class="flex space-between align-items-center">
-			<p:outputLabel class="title-page" value="Relatório Sintético de Agendamentos" />
+			<p:outputLabel class="title-page" value="Relatório de Pagamentos" />
 			<p:commandButton 
 				value="Exportar"
 				icon="fa-solid fa-file-pdf" 
 				styleClass="btn-exportar"
 				title="Gerar PDF"
-				actionListener="#{relatorioAgendamentosController.gerarPDF()}"
+				actionListener="#{relatorioPagamentosController.exportarPDF()}"
 				ajax="false" />
 		</div>
 
 		<!-- Filtros -->
 		<div class="header-filters">
 			<div class="row">
-				<div class="col-md-3 input-combined-no-text">
+				<div class="col-md-2 input-combined-no-text">
+					<p:inputText 
+						value="#{relatorioPagamentosController.nomeClienteFiltro}" 
+						placeholder="Pesquisar Cliente"
+						styleClass="input-text-filter">
+						<p:ajax event="keyup" update="@form" delay="500" />
+					</p:inputText>
+				</div>
+				<div class="col-md-2 input-combined-no-text">
+					<p:selectOneMenu
+						value="#{relatorioPagamentosController.formaPagamentoFiltro}"
+						filter="true"
+						filterMatchMode="contains"
+						panelStyle="width: auto;">
+						<f:selectItem itemLabel="Pesquisar Forma Pagamento" itemValue="#{null}" />
+						<f:selectItems 
+							value="#{relatorioPagamentosController.lstFormasPagamento}" 
+							var="pagamento"
+							itemLabel="#{pagamento.nome}" 
+							itemValue="#{pagamento.id}" />
+						<p:ajax listener="#{relatorioPagamentosController.filtrar()}" update="@form" />
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-2 input-combined-no-text">
+					<p:selectOneMenu
+						value="#{relatorioPagamentosController.statusPagamentoFiltro}"
+						filter="false"
+						panelStyle="width: auto;">
+						<f:selectItem itemLabel="Pesquisar Status" itemValue="" />
+						<f:selectItem itemLabel="Pagos" itemValue="S" />
+						<f:selectItem itemLabel="Pendentes" itemValue="N" />
+						<p:ajax listener="#{relatorioPagamentosController.filtrar()}" update="@form" />
+					</p:selectOneMenu>
+				</div>
+				<div class="col-md-2 input-combined-no-text">
 					<p:datePicker 
 						showIcon="true"
-						value="#{relatorioAgendamentosController.dataInicial}" 
+						value="#{relatorioPagamentosController.dataInicial}" 
 						pattern="dd/MM/yyyy"
 						placeholder="Data Inicial">
 						<p:ajax update="@form" process="@this" />
 					</p:datePicker>
 				</div>
-				<div class="col-md-3 input-combined-no-text">
+				<div class="col-md-2 input-combined-no-text">
 					<p:datePicker 
 						showIcon="true"
-						value="#{relatorioAgendamentosController.dataFinal}" 
+						value="#{relatorioPagamentosController.dataFinal}" 
 						pattern="dd/MM/yyyy"
 						placeholder="Data Final">
 						<p:ajax update="@form" process="@this" />
@@ -286,21 +300,21 @@ body .ui-datatable .ui-datatable-even>td {
 					<p:commandButton 
 						value="Limpar" 
 						styleClass="btn-limpar"
-						actionListener="#{relatorioAgendamentosController.limparFiltros()}"
+						actionListener="#{relatorioPagamentosController.limparFiltros()}"
 						update="@form"
 						process="@this" />
 				</div>
 			</div>
 		</div>
 
-		<!-- Tabela de Agendamentos -->
+		<!-- Tabela de Pagamentos -->
 		<div>
 			<p:dataTable 
-				id="datatableAgendamentos"
-				value="#{relatorioAgendamentosController.lstAgendamentos}" 
-				var="agendamento"
+				id="datatablePagamentos"
+				value="#{relatorioPagamentosController.lstPagamentos}" 
+				var="pagamento"
 				varStatus="status"
-				rowKey="#{agendamento.id}"
+				rowKey="#{pagamento.id}"
 				paginator="true" 
 				paginatorPosition="bottom"
 				rows="13" 
@@ -308,33 +322,40 @@ body .ui-datatable .ui-datatable-even>td {
 				emptyMessage="Nenhum dado encontrado">
 
 				<p:column headerText="Código" style="text-align: center;">
-					<h:outputText value="#{relatorioAgendamentosController.lstAgendamentos.rowIndex + status.index + 1}" />
+					<h:outputText value="#{relatorioPagamentosController.lstPagamentos.rowIndex + status.index + 1}" />
+				</p:column>
+
+				<p:column headerText="Cliente">
+					<h:outputText value="#{pagamento.nomeCliente}" />
+				</p:column>
+
+				<p:column headerText="Forma de Pagamento">
+					<h:outputText value="#{pagamento.formaPagamento != null ? pagamento.formaPagamento : 'Não definido'}" />
+				</p:column>
+
+				<p:column headerText="Valor" style="text-align: right;">
+					<h:outputText value="#{pagamento.valor}">
+						<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
+					</h:outputText>
 				</p:column>
 
 				<p:column headerText="Data" style="text-align: center;">
-					<h:outputText value="#{agendamento.data}">
+					<h:outputText value="#{pagamento.data}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Total de Agendamentos" style="text-align: center;">
-					<span class="badge badge-info">
-						<h:outputText value="#{agendamento.totalAgendamentos}" />
-					</span>
+				<p:column headerText="Status" style="text-align: center;">
+					<h:panelGroup rendered="#{pagamento.statusPagamento == 'S'}">
+						<span class="badge badge-success">Pago</span>
+					</h:panelGroup>
+					<h:panelGroup rendered="#{pagamento.statusPagamento == 'N'}">
+						<span class="badge badge-warning">Pendente</span>
+					</h:panelGroup>
+					<h:panelGroup rendered="#{pagamento.statusPagamento != 'S' and pagamento.statusPagamento != 'N'}">
+						<span class="badge badge-secondary">-</span>
+					</h:panelGroup>
 				</p:column>
-
-				<p:column headerText="Atendimentos Finalizados" style="text-align: center;">
-					<span class="badge badge-success">
-						<h:outputText value="#{agendamento.finalizados}" />
-					</span>
-				</p:column>
-
-				<p:column headerText="Cancelamentos" style="text-align: center;">
-					<span class="badge badge-danger">
-						<h:outputText value="#{agendamento.cancelados}" />
-					</span>
-				</p:column>
-
 			</p:dataTable>
 		</div>
 	

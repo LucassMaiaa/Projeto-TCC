@@ -647,7 +647,7 @@ public class AgendamentoDAO {
 	}
 
 	public static List<Agendamento> buscarAgendamentosRelatorioAnalitico(java.util.Date dataInicial,
-			java.util.Date dataFinal, Long clienteId, Long funcionarioId, String status, int first, int pageSize) {
+			java.util.Date dataFinal, String nomeCliente, Long funcionarioId, String status, int first, int pageSize) {
 
 		List<Agendamento> resultado = new ArrayList<>();
 
@@ -664,8 +664,8 @@ public class AgendamentoDAO {
 		if (dataFinal != null) {
 			sql.append("AND DATE(a.age_data) <= ? ");
 		}
-		if (clienteId != null) {
-			sql.append("AND a.cli_codigo = ? ");
+		if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+			sql.append("AND ((a.cli_codigo IS NOT NULL AND LOWER(c.cli_nome) LIKE ?) OR (a.cli_codigo IS NULL AND LOWER(a.age_nome_cliente) LIKE ?)) ");
 		}
 		if (funcionarioId != null) {
 			sql.append("AND a.fun_codigo = ? ");
@@ -687,8 +687,10 @@ public class AgendamentoDAO {
 			if (dataFinal != null) {
 				stmt.setDate(paramIndex++, new java.sql.Date(dataFinal.getTime()));
 			}
-			if (clienteId != null) {
-				stmt.setLong(paramIndex++, clienteId);
+			if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+				String nomeParam = "%" + nomeCliente.toLowerCase() + "%";
+				stmt.setString(paramIndex++, nomeParam);
+				stmt.setString(paramIndex++, nomeParam);
 			}
 			if (funcionarioId != null) {
 				stmt.setLong(paramIndex++, funcionarioId);
@@ -746,10 +748,11 @@ public class AgendamentoDAO {
 	 * Conta agendamentos para o relatório analítico
 	 */
 	public static int contarAgendamentosRelatorioAnalitico(java.util.Date dataInicial, java.util.Date dataFinal,
-			Long clienteId, Long funcionarioId, String status) {
+			String nomeCliente, Long funcionarioId, String status) {
 
 		StringBuilder sql = new StringBuilder("SELECT COUNT(DISTINCT a.age_codigo) as total " + "FROM agendamento a "
-				+ "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " + "WHERE 1=1 ");
+				+ "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo "
+				+ "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " + "WHERE 1=1 ");
 
 		if (dataInicial != null) {
 			sql.append("AND DATE(a.age_data) >= ? ");
@@ -757,8 +760,8 @@ public class AgendamentoDAO {
 		if (dataFinal != null) {
 			sql.append("AND DATE(a.age_data) <= ? ");
 		}
-		if (clienteId != null) {
-			sql.append("AND a.cli_codigo = ? ");
+		if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+			sql.append("AND ((a.cli_codigo IS NOT NULL AND LOWER(c.cli_nome) LIKE ?) OR (a.cli_codigo IS NULL AND LOWER(a.age_nome_cliente) LIKE ?)) ");
 		}
 		if (funcionarioId != null) {
 			sql.append("AND a.fun_codigo = ? ");
@@ -777,8 +780,10 @@ public class AgendamentoDAO {
 			if (dataFinal != null) {
 				stmt.setDate(paramIndex++, new java.sql.Date(dataFinal.getTime()));
 			}
-			if (clienteId != null) {
-				stmt.setLong(paramIndex++, clienteId);
+			if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+				String nomeParam = "%" + nomeCliente.toLowerCase() + "%";
+				stmt.setString(paramIndex++, nomeParam);
+				stmt.setString(paramIndex++, nomeParam);
 			}
 			if (funcionarioId != null) {
 				stmt.setLong(paramIndex++, funcionarioId);
@@ -802,7 +807,7 @@ public class AgendamentoDAO {
 	 * Busca todos os agendamentos para o relatório analítico (para PDF)
 	 */
 	public static List<Agendamento> buscarTodosAgendamentosRelatorioAnalitico(java.util.Date dataInicial,
-			java.util.Date dataFinal, Long clienteId, Long funcionarioId, String status) {
+			java.util.Date dataFinal, String nomeCliente, Long funcionarioId, String status) {
 
 		List<Agendamento> resultado = new ArrayList<>();
 
@@ -819,8 +824,8 @@ public class AgendamentoDAO {
 		if (dataFinal != null) {
 			sql.append("AND DATE(a.age_data) <= ? ");
 		}
-		if (clienteId != null) {
-			sql.append("AND a.cli_codigo = ? ");
+		if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+			sql.append("AND ((a.cli_codigo IS NOT NULL AND LOWER(c.cli_nome) LIKE ?) OR (a.cli_codigo IS NULL AND LOWER(a.age_nome_cliente) LIKE ?)) ");
 		}
 		if (funcionarioId != null) {
 			sql.append("AND a.fun_codigo = ? ");
@@ -841,8 +846,10 @@ public class AgendamentoDAO {
 			if (dataFinal != null) {
 				stmt.setDate(paramIndex++, new java.sql.Date(dataFinal.getTime()));
 			}
-			if (clienteId != null) {
-				stmt.setLong(paramIndex++, clienteId);
+			if (nomeCliente != null && !nomeCliente.trim().isEmpty()) {
+				String nomeParam = "%" + nomeCliente.toLowerCase() + "%";
+				stmt.setString(paramIndex++, nomeParam);
+				stmt.setString(paramIndex++, nomeParam);
 			}
 			if (funcionarioId != null) {
 				stmt.setLong(paramIndex++, funcionarioId);

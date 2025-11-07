@@ -106,6 +106,41 @@ body .ui-datatable .ui-datatable-even>td {
 	padding: 0 !important;
 }
 
+.badge {
+	padding: 4px 12px;
+	border-radius: 12px;
+	font-size: 11px !important;
+	font-weight: 600;
+	text-transform: uppercase;
+	display: inline-block;
+	line-height: 1.2;
+}
+
+.badge * {
+	font-size: 11px !important;
+	font-weight: 600;
+}
+
+.badge-success {
+	background: #28A745;
+	color: white;
+}
+
+.badge-warning {
+	background: #FFC107;
+	color: #333;
+}
+
+.badge-danger {
+	background: #DC3545;
+	color: white;
+}
+
+.badge-secondary {
+	background: #6C757D;
+	color: white;
+}
+
 /* Estilo para o datePicker nos filtros */
 .input-combined-no-text .p-datepicker,
 .input-combined-no-text .ui-calendar,
@@ -201,6 +236,8 @@ body .ui-datatable .ui-datatable-even>td {
 	font-size: 13px;
 	display: inline-block;
 }
+
+
 		</style>
 	</ui:define>
 
@@ -244,17 +281,11 @@ body .ui-datatable .ui-datatable-even>td {
 					</p:datePicker>
 				</div>
 				<div class="col-md-2 input-combined-no-text">
-					<p:selectOneMenu
-						value="#{relatorioAnaliticoAgendamentosController.clienteFiltro}"
-						filter="true" 
-						filterMatchMode="startsWith"
-						panelStyle="width: auto;">
-						<f:selectItem itemLabel="Pesquisar Cliente" itemValue="" />
-						<f:selectItems var="cli"
-							value="#{relatorioAnaliticoAgendamentosController.lstClientes}"
-							itemLabel="#{cli.nome}" itemValue="#{cli.id}" />
-						<p:ajax update="@form" process="@this" />
-					</p:selectOneMenu>
+					<p:inputText value="#{relatorioAnaliticoAgendamentosController.nomeClienteFiltro}"
+						autocomplete="off" placeholder="Pesquisar cliente">
+						<p:ajax event="keyup" delay="100" update="@form" process="@this" />
+					</p:inputText>
+					<i class="fa-solid fa-magnifying-glass"></i>
 				</div>
 				<div class="col-md-2 input-combined-no-text">
 					<p:selectOneMenu

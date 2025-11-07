@@ -9,7 +9,7 @@
 <ui:composition template="/WEB-INF/template.xhtml">
 
 	<!-- Título da página -->
-	<ui:define name="title">Relatório de Agendamentos - BarberSys</ui:define>
+	<ui:define name="title">Relatório de Produtividade - BarberSys</ui:define>
 	
 	<!-- CSS específico desta página -->
 	<ui:define name="extra-css">
@@ -22,7 +22,7 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), 
 body .ui-datatable tbody tr:not(.ui-datatable-empty-message) {
 	display: grid;
-	grid-template-columns: 80px 130px 1fr 1fr 1fr;
+	grid-template-columns: 90px 2fr 120px 150px 150px 120px;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -32,11 +32,13 @@ body .ui-datatable tbody td:nth-child(3):not(.ui-datatable-empty-message),
 body .ui-datatable thead th:nth-child(4):not(.ui-datatable-empty-message),
 body .ui-datatable tbody td:nth-child(4):not(.ui-datatable-empty-message),
 body .ui-datatable thead th:nth-child(5):not(.ui-datatable-empty-message),
-body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message) {
+body .ui-datatable tbody td:nth-child(5):not(.ui-datatable-empty-message),
+body .ui-datatable thead th:nth-child(6):not(.ui-datatable-empty-message),
+body .ui-datatable tbody td:nth-child(6):not(.ui-datatable-empty-message) {
 	text-align: center !important;
 }
 
-body .ui-datatable .ui-datatable-data>tr>td[colspan="5"] {
+body .ui-datatable .ui-datatable-data>tr>td[colspan="6"] {
 	height: 514px;
 	font-size: 17px;
 }
@@ -212,31 +214,62 @@ body .ui-datatable .ui-datatable-even>td {
 	background: #CACACA !important;
 }
 
-.badge-success {
-	background: #10B981;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
+/* Estilo para input de texto dos filtros */
+.input-text-filter {
+	height: 46px !important;
+	padding-left: 12px !important;
+	padding-right: 12px !important;
+	font-size: 14px !important;
+	color: #656464 !important;
+	font-weight: 600 !important;
+	font-family: "Barlow" !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	border: 1px solid #ced4da !important;
 }
 
-.badge-danger {
-	background: #EF4444;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
+/* Estilo para selectOneMenu nos filtros */
+.input-combined-no-text .ui-selectonemenu {
+	height: 46px !important;
+	width: 100% !important;
 }
 
-.badge-info {
-	background: #3B82F6;
-	color: white;
-	padding: 4px 12px;
-	border-radius: 12px;
-	font-weight: 600;
-	font-size: 13px;
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger {
+	width: 24px !important;
+	height: 24px !important;
+	border-radius: 8px !important;
+	background: #DEDEDE !important;
+	border: none !important;
+	position: absolute !important;
+	right: 8px !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger .ui-icon {
+	font-size: 12px !important;
+	color: black !important;
+	margin: 0 !important;
+	position: absolute !important;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%) !important;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-label {
+	height: 46px !important;
+	line-height: 46px !important;
+	padding: 0 40px 0 12px !important;
+	font-size: 14px !important;
+	color: #656464 !important;
+	font-weight: 600 !important;
+	font-family: "Barlow" !important;
+}
+
+.input-combined-no-text .ui-selectonemenu.ui-state-focus,
+.input-combined-no-text .ui-selectonemenu.ui-state-hover {
+	border-color: #ced4da !important;
+	box-shadow: none !important;
 }
 
 
@@ -246,97 +279,111 @@ body .ui-datatable .ui-datatable-even>td {
 	<!-- Conteúdo CENTRAL da página -->
 	<ui:define name="content">
 	
-		<!-- Mensagens de feedback -->
-		<p:messages id="messages" showDetail="true" closable="true" />
-	
-		<!-- Título e Ações -->
-		<div class="flex space-between align-items-center">
-			<p:outputLabel class="title-page" value="Relatório Sintético de Agendamentos" />
+		<!-- Título e Botão de Exportar -->
+		<div class="flex space-between align-center">
+			<p:outputLabel class="title-page" value="Relatório de Produtividade dos Funcionários" />
 			<p:commandButton 
-				value="Exportar"
-				icon="fa-solid fa-file-pdf" 
+				value="Exportar PDF" 
+				icon="fa-solid fa-file-pdf"
 				styleClass="btn-exportar"
-				title="Gerar PDF"
-				actionListener="#{relatorioAgendamentosController.gerarPDF()}"
+				actionListener="#{relatorioProdutividadeController.gerarPDF()}"
 				ajax="false" />
 		</div>
 
-		<!-- Filtros -->
-		<div class="header-filters">
-			<div class="row">
-				<div class="col-md-3 input-combined-no-text">
-					<p:datePicker 
-						showIcon="true"
-						value="#{relatorioAgendamentosController.dataInicial}" 
-						pattern="dd/MM/yyyy"
-						placeholder="Data Inicial">
-						<p:ajax update="@form" process="@this" />
-					</p:datePicker>
-				</div>
-				<div class="col-md-3 input-combined-no-text">
-					<p:datePicker 
-						showIcon="true"
-						value="#{relatorioAgendamentosController.dataFinal}" 
-						pattern="dd/MM/yyyy"
-						placeholder="Data Final">
-						<p:ajax update="@form" process="@this" />
-					</p:datePicker>
-				</div>
-				<div class="col-md-2">
-					<p:commandButton 
-						value="Limpar" 
-						styleClass="btn-limpar"
-						actionListener="#{relatorioAgendamentosController.limparFiltros()}"
-						update="@form"
-						process="@this" />
+			<!-- Filtros -->
+			<div class="header-filters">
+				<div class="row">
+					<div class="col-md-3 input-combined-no-text">
+						<p:datePicker 
+							showIcon="true"
+							value="#{relatorioProdutividadeController.dataInicial}" 
+							pattern="dd/MM/yyyy"
+							placeholder="Data Inicial">
+							<p:ajax update="@form" process="@this" />
+						</p:datePicker>
+					</div>
+					<div class="col-md-3 input-combined-no-text">
+						<p:datePicker 
+							showIcon="true"
+							value="#{relatorioProdutividadeController.dataFinal}" 
+							pattern="dd/MM/yyyy"
+							placeholder="Data Final">
+							<p:ajax update="@form" process="@this" />
+						</p:datePicker>
+					</div>
+					<div class="col-md-4 input-combined-no-text">
+						<p:selectOneMenu
+							value="#{relatorioProdutividadeController.funcionarioFiltro}"
+							filter="true" 
+							filterMatchMode="startsWith"
+							panelStyle="width: auto;">
+							<f:selectItem itemLabel="Pesquisar Funcionário" itemValue="" />
+							<f:selectItems var="func"
+								value="#{relatorioProdutividadeController.lstFuncionarios}"
+								itemLabel="#{func.nome}" itemValue="#{func.id}" />
+							<p:ajax update="@form" process="@this" />
+						</p:selectOneMenu>
+					</div>
+					<div class="col-md-2">
+						<p:commandButton 
+							value="Limpar" 
+							styleClass="btn-limpar"
+							actionListener="#{relatorioProdutividadeController.limparFiltros()}"
+							update="@form"
+							process="@this" />
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Tabela de Agendamentos -->
-		<div>
-			<p:dataTable 
-				id="datatableAgendamentos"
-				value="#{relatorioAgendamentosController.lstAgendamentos}" 
-				var="agendamento"
-				varStatus="status"
-				rowKey="#{agendamento.id}"
-				paginator="true" 
-				paginatorPosition="bottom"
-				rows="13" 
-				lazy="true" 
-				emptyMessage="Nenhum dado encontrado">
+			<!-- Tabela de Produtividade -->
+			<div>
+				<p:dataTable 
+					id="datatableProdutividade"
+					value="#{relatorioProdutividadeController.lstProdutividade}" 
+					var="prod"
+					varStatus="status"
+					paginator="true" 
+					paginatorPosition="bottom"
+					rows="13" 
+					lazy="true" 
+					emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Código" style="text-align: center;">
-					<h:outputText value="#{relatorioAgendamentosController.lstAgendamentos.rowIndex + status.index + 1}" />
-				</p:column>
+					<p:column headerText="Código" style="text-align: center;">
+						<h:outputText value="#{relatorioProdutividadeController.lstProdutividade.rowIndex + status.index + 1}" />
+					</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
-					<h:outputText value="#{agendamento.data}">
-						<f:convertDateTime pattern="dd/MM/yyyy" />
-					</h:outputText>
-				</p:column>
+					<p:column headerText="Funcionário">
+						<h:outputText value="#{prod.funcionarioNome}" />
+					</p:column>
 
-				<p:column headerText="Total de Agendamentos" style="text-align: center;">
-					<span class="badge badge-info">
-						<h:outputText value="#{agendamento.totalAgendamentos}" />
-					</span>
-				</p:column>
+					<p:column headerText="Data" style="text-align: center;">
+						<h:outputText value="#{prod.data}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</p:column>
 
-				<p:column headerText="Atendimentos Finalizados" style="text-align: center;">
-					<span class="badge badge-success">
-						<h:outputText value="#{agendamento.finalizados}" />
-					</span>
-				</p:column>
+					<p:column headerText="Atendimentos Realizados" style="text-align: center;">
+						<span class="badge badge-info">
+							<h:outputText value="#{prod.atendimentosRealizados}" />
+						</span>
+					</p:column>
 
-				<p:column headerText="Cancelamentos" style="text-align: center;">
-					<span class="badge badge-danger">
-						<h:outputText value="#{agendamento.cancelados}" />
-					</span>
-				</p:column>
+					<p:column headerText="Taxa de Cancelamento" style="text-align: center;">
+						<h:outputText value="#{prod.taxaCancelamento}">
+							<f:convertNumber type="number" minFractionDigits="2" maxFractionDigits="2" />
+						</h:outputText>%
+					</p:column>
 
-			</p:dataTable>
-		</div>
+					<p:column headerText="Média de Avaliações" style="text-align: center;">
+						<span class="badge badge-warning">
+							<h:outputText value="#{prod.mediaAvaliacoes}">
+								<f:convertNumber type="number" minFractionDigits="1" maxFractionDigits="1" />
+							</h:outputText>
+						</span>
+					</p:column>
+
+				</p:dataTable>
+			</div>
 	
 	</ui:define>
 

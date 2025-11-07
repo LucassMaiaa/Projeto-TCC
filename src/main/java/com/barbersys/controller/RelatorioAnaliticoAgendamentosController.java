@@ -33,7 +33,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
     
     private java.util.Date dataInicial;
     private java.util.Date dataFinal;
-    private Long clienteFiltro;
+    private String nomeClienteFiltro;
     private Long funcionarioFiltro;
     private String statusFiltro = "";
     private LazyDataModel<Agendamento> lstAgendamentos;
@@ -55,14 +55,14 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
             public List<Agendamento> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
                 return AgendamentoDAO.buscarAgendamentosRelatorioAnalitico(
-                    dataInicial, dataFinal, clienteFiltro, funcionarioFiltro, 
+                    dataInicial, dataFinal, nomeClienteFiltro, funcionarioFiltro, 
                     statusFiltro, first, pageSize);
             }
 
             @Override
             public int count(Map<String, FilterMeta> filterBy) {
                 return AgendamentoDAO.contarAgendamentosRelatorioAnalitico(
-                    dataInicial, dataFinal, clienteFiltro, funcionarioFiltro, statusFiltro);
+                    dataInicial, dataFinal, nomeClienteFiltro, funcionarioFiltro, statusFiltro);
             }
         };
     }
@@ -78,14 +78,14 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
     public void limparFiltros() {
         dataInicial = null;
         dataFinal = null;
-        clienteFiltro = null;
+        nomeClienteFiltro = null;
         funcionarioFiltro = null;
         statusFiltro = "";
     }
 
     private List<Agendamento> obterTodosAgendamentosFiltrados() {
         return AgendamentoDAO.buscarTodosAgendamentosRelatorioAnalitico(
-            dataInicial, dataFinal, clienteFiltro, funcionarioFiltro, statusFiltro);
+            dataInicial, dataFinal, nomeClienteFiltro, funcionarioFiltro, statusFiltro);
     }
 
     public void gerarPDF() {
@@ -101,7 +101,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
             
             System.out.println("[INFO] Gerando PDF com " + todosAgendamentos.size() + " agendamentos...");
             RelatorioAnaliticoAgendamentosPDF.gerar(todosAgendamentos, dataInicial, dataFinal, 
-                clienteFiltro, funcionarioFiltro, statusFiltro);
+                nomeClienteFiltro, funcionarioFiltro, statusFiltro);
             System.out.println("[SUCESSO] PDF gerado com sucesso!");
             
         } catch (Exception e) {
@@ -123,9 +123,9 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
     public String getStatusClass(String status) {
         if (status == null) return "";
         switch (status) {
-            case "F": return "badge-success";
-            case "I": return "badge-danger";
-            case "A": return "badge-warning";
+            case "F": return "badge badge-success";
+            case "I": return "badge badge-danger";
+            case "A": return "badge badge-warning";
             default: return "";
         }
     }

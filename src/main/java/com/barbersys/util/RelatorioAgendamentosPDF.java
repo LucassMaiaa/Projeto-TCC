@@ -16,7 +16,7 @@ import java.util.List;
 
 public class RelatorioAgendamentosPDF {
 
-    private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(44, 62, 80));
+    private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(231, 74, 70));
     private static final Font FONT_SUBTITLE = new Font(Font.HELVETICA, 12, Font.NORMAL, new Color(127, 140, 141));
     private static final Font FONT_HEADER = new Font(Font.HELVETICA, 9, Font.BOLD, Color.WHITE);
     private static final Font FONT_CELL = new Font(Font.HELVETICA, 9, Font.NORMAL, new Color(52, 73, 94));
