@@ -14,32 +14,39 @@
 	<!-- CSS específico desta página -->
 	<ui:define name="extra-css">
 		<style>
+/* Container do gráfico de visitas - Seguindo padrão do sistema */
 .content-top-visitas {
 	border: 1px solid #DDE3DF;
-	height: 281px;
 	border-radius: 8px;
+	height: 281px;
 	padding: 14px 25px;
 	display: flex;
 	flex-direction: column;
 }
 
-/* Estilos do gráfico de visitas por dia - Estilo coluna vertical */
+/* Wrapper do gráfico - estilo padrão do sistema */
 .grafico-visitas-wrapper {
 	background: rgba(255, 255, 255, 0.3);
 	border-radius: 8px;
 	padding: 15px 10px 8px;
 	position: relative;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 
+/* Container das colunas */
 .grafico-visitas-container {
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
-	height: 160px;
+	height: 145px;
 	position: relative;
-	gap: 6px;
+	gap: 8px;
+	padding: 0 4px;
 }
 
+/* Coluna individual do dia */
 .dia-visita-coluna {
 	display: flex;
 	flex-direction: column-reverse;
@@ -47,27 +54,55 @@
 	flex: 1;
 	position: relative;
 	height: 100%;
+	animation: slideUpVisitas 0.6s ease-out backwards;
 }
 
+/* Animação de entrada escalonada - mantendo a animação bonita */
+.dia-visita-coluna:nth-child(1) { animation-delay: 0.05s; }
+.dia-visita-coluna:nth-child(2) { animation-delay: 0.1s; }
+.dia-visita-coluna:nth-child(3) { animation-delay: 0.15s; }
+.dia-visita-coluna:nth-child(4) { animation-delay: 0.2s; }
+.dia-visita-coluna:nth-child(5) { animation-delay: 0.25s; }
+.dia-visita-coluna:nth-child(6) { animation-delay: 0.3s; }
+.dia-visita-coluna:nth-child(7) { animation-delay: 0.35s; }
+
+@keyframes slideUpVisitas {
+	0% {
+		opacity: 0;
+		transform: translateY(30px) scale(0.8);
+	}
+	60% {
+		opacity: 1;
+		transform: translateY(-5px) scale(1.05);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* Barra vertical - estilo clean do sistema */
 .dia-barra-vertical {
 	width: 100%;
 	max-width: 30px;
-	background: linear-gradient(180deg, #7B9ECC 0%, #5A7BA8 100%);
+	background: linear-gradient(180deg, #EF9A9A 0%, #E57373 100%);
 	border-radius: 4px 4px 0 0;
 	position: relative;
-	transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow: 0 2px 6px rgba(90, 123, 168, 0.25);
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 6px rgba(239, 83, 80, 0.25);
 	cursor: pointer;
-	    max-height: 130px;
-	        bottom: 20px;
+	max-height: 130px;
+	bottom: 20px;
 }
 
+/* Efeito hover suave */
 .dia-barra-vertical:hover {
-	background: linear-gradient(180deg, #8CAED6 0%, #6B8CB8 100%);
-	box-shadow: 0 3px 10px rgba(90, 123, 168, 0.4);
+	background: linear-gradient(180deg, #F48FB1 0%, #EC407A 100%);
+	box-shadow: 0 3px 10px rgba(239, 83, 80, 0.4);
 	transform: translateY(-2px);
 }
 
+/* Número de visitas no topo da barra */
 .dia-count-visitas {
 	position: absolute;
 	top: -20px;
@@ -79,6 +114,7 @@
 	white-space: nowrap;
 }
 
+/* Label do dia da semana */
 .dia-label-visitas {
 	position: absolute;
 	left: 50%;
@@ -107,14 +143,6 @@
 	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
-.content-gastos-mes .title-info {
-	font-size: 14px !important;
-	font-weight: 600 !important;
-	color: #5A6C5A !important;
-	margin-bottom: 8px !important;
-	display: block !important;
-}
-
 .content-gastos-mes .sub-info {
 	font-size: 42px !important;
 	font-weight: 800 !important;
@@ -127,7 +155,110 @@
 .icon-circle-green {
 	background: linear-gradient(135deg, #4EB458 0%, #3EA048 100%) !important;
 	box-shadow: 0 4px 12px rgba(78, 180, 88, 0.3);
-	animation: pulse-icon 2s ease-in-out infinite;
+	animation: pulse-icon-green 2.5s ease-in-out infinite;
+	position: relative;
+}
+
+.icon-circle-green::after {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: linear-gradient(135deg, #4EB458, #66BB6A);
+	border-radius: 50%;
+	opacity: 0;
+	z-index: -1;
+	animation: pulse-ring-green 2.5s ease-in-out infinite;
+}
+
+/* Ícone vermelho com animação premium */
+.icon-circle-red {
+	background: linear-gradient(135deg, #EF5350 0%, #E53935 100%) !important;
+	box-shadow: 0 4px 12px rgba(239, 83, 80, 0.35);
+	animation: pulse-icon-red 2.5s ease-in-out infinite;
+	position: relative;
+}
+
+.icon-circle-red::after {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: linear-gradient(135deg, #EF5350, #EC407A);
+	border-radius: 50%;
+	opacity: 0;
+	z-index: -1;
+	animation: pulse-ring 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.15);
+		opacity: 0.3;
+	}
+}
+
+@keyframes pulse-icon-red {
+	0%, 100% {
+		transform: scale(1);
+		box-shadow: 0 4px 12px rgba(239, 83, 80, 0.35);
+	}
+	50% {
+		transform: scale(1.08);
+		box-shadow: 0 6px 18px rgba(239, 83, 80, 0.5);
+	}
+}
+
+@keyframes pulse-icon-green {
+	0%, 100% {
+		transform: scale(1);
+		box-shadow: 0 4px 12px rgba(78, 180, 88, 0.3);
+	}
+	50% {
+		transform: scale(1.08);
+		box-shadow: 0 6px 18px rgba(78, 180, 88, 0.5);
+	}
+}
+
+@keyframes pulse-ring-green {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.15);
+		opacity: 0.3;
+	}
+}
+
+@keyframes pulse-icon-blue {
+	0%, 100% {
+		transform: scale(1);
+		box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+	}
+	50% {
+		transform: scale(1.08);
+		box-shadow: 0 6px 18px rgba(74, 144, 226, 0.5);
+	}
+}
+
+@keyframes pulse-ring-blue {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.15);
+		opacity: 0.3;
+	}
 }
 
 .content-faturado {
@@ -146,7 +277,22 @@
 .icon-circle-blue {
 	background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%) !important;
 	box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-	animation: pulse-icon 2s ease-in-out infinite;
+	animation: pulse-icon-blue 2.5s ease-in-out infinite;
+	position: relative;
+}
+
+.icon-circle-blue::after {
+	content: '';
+	position: absolute;
+	top: -2px;
+	left: -2px;
+	right: -2px;
+	bottom: -2px;
+	background: linear-gradient(135deg, #4A90E2, #64B5F6);
+	border-radius: 50%;
+	opacity: 0;
+	z-index: -1;
+	animation: pulse-ring-blue 2.5s ease-in-out infinite;
 }
 
 @keyframes pulse-icon {
@@ -160,9 +306,11 @@
 	}
 }
 
+
+
 /* Área do gráfico com fundo sutil */
 .content-grafic {
-	background: rgba(255, 255, 255, 0.4);
+	background: rgba(255, 255, 255, 0.1);
 	border-radius: 8px;
 	padding: 15px 8px 8px;
 	position: relative;
@@ -235,60 +383,78 @@
 	}
 }
 
-/* Tooltip com design do sistema - tema vermelho suave */
+/* Tooltip com design premium do sistema */
 #chartTooltip {
 	position: fixed !important;
 	z-index: 999999 !important;
 	pointer-events: none !important;
-	background: linear-gradient(135deg, #3A3A3A 0%, #2A2A2A 100%) !important;
-	color: #fff !important;
-	padding: 10px 18px !important;
-	border-radius: 8px !important;
-	border: 1px solid #D44242 !important;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3),
-	            0 1px 4px rgba(212, 66, 66, 0.2) !important;
-	min-width: 110px !important;
-	text-align: center !important;
-	transition: none !important;
+	padding: 0 !important;
+	transition: opacity 0.2s ease, visibility 0.2s ease !important;
+	filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.15));
 }
 
 #chartTooltip::before {
 	content: '';
 	position: absolute;
+	left: -8px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-top: 8px solid transparent;
+	border-bottom: 8px solid transparent;
+	border-right: 8px solid #FFFFFF;
+	filter: drop-shadow(-2px 0 3px rgba(0, 0, 0, 0.1));
+}
+
+.tooltip-inner {
+	background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+	border: 2px solid #E8EEF5;
+	border-radius: 10px;
+	padding: 10px 16px;
+	min-width: 100px;
+	text-align: center;
+	position: relative;
+	overflow: hidden;
+}
+
+.tooltip-inner::before {
+	content: '';
+	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
-	bottom: 0;
-	background: radial-gradient(circle at 50% 0%, 
-	            rgba(212, 66, 66, 0.08) 0%, 
-	            transparent 70%);
-	border-radius: 8px;
-	pointer-events: none;
+	height: 3px;
+	background: linear-gradient(90deg, #4A90E2, #64B5F6, #4A90E2);
+	background-size: 200% 100%;
+	animation: shimmerTooltip 2s linear infinite;
 }
 
-#chartTooltip span {
-	color: #FFFFFF !important;
-	font-size: 15px !important;
-	font-weight: 700 !important;
-	letter-spacing: 0.5px !important;
-	position: relative;
-	z-index: 1;
+@keyframes shimmerTooltip {
+	0% { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
 }
 
-.content-faturado .title-info {
-	font-size: 12px !important;
+#tooltipText {
+	display: block;
+	font-size: 11px !important;
 	font-weight: 600 !important;
-	color: #5A6C7D !important;
-	margin-bottom: 4px !important;
-	display: block !important;
+	color: #6A7A8A !important;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 4px;
 }
 
-.content-faturado .sub-info {
-	font-size: 24px !important;
-	font-weight: 700 !important;
+.tooltip-value {
+	display: block;
+	font-size: 16px !important;
+	font-weight: 800 !important;
 	color: #2C3E50 !important;
-	display: block !important;
-	letter-spacing: -0.3px;
+	letter-spacing: -0.5px;
+	background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
 }
 
 .content-top-func {
@@ -314,11 +480,248 @@
 	padding: 8px;
 }
 
-.content-agendamentos {
-	height: calc(100vh - 186px);
+.content-resumo {
+	width: calc(100% - 24px);
+	margin: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.resumo-card {
+	background: linear-gradient(135deg, #C5D9BF 0%, #D4E5CE 100%);
+	border-radius: 8px;
+	padding: 10px 12px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.resumo-card.card-faturamento {
+	background: linear-gradient(135deg, #D8E0E8 0%, #E8EEF5 100%);
+}
+
+.resumo-card-header {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+.resumo-icon {
+	width: 22px;
+	height: 22px;
+	background: rgba(255, 255, 255, 0.5);
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 11px;
+	color: #4A5A4A;
+}
+
+.card-faturamento .resumo-icon {
+	color: #4A5A6A;
+}
+
+.resumo-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #5A6A5A;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: 3px;
+}
+
+.card-faturamento .resumo-label {
+	color: #5A6A7A;
+}
+
+.resumo-valor {
+	font-size: 18px;
+	font-weight: 700;
+	color: #2C4A2C;
+	line-height: 1;
+}
+
+.card-faturamento .resumo-valor {
+	color: #2C3E50;
+}
+
+.resumo-proximo {
+	background: linear-gradient(135deg, #E8F0E8 0%, #F0F8F0 100%);
+	border-radius: 8px;
+	padding: 10px 12px;
+	border-left: 3px solid #66BB6A;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.resumo-proximo-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #5A7A5A;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block;
+}
+.resumo-proximo-info {
+	font-size: 14px;
+	font-weight: 600;
+	color: #2C4A2C;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.resumo-proximo-info i {
+	color: #66BB6A;
+	    font-size: 17px;
+}
+
+.resumo-vazio {
+    font-size: 14px;
+    color: #7A8A7A;
+    display: block;
+    font-weight: 500;
+}
+
+.content-servicos {
+	height: calc(100vh - 341px);
 	background: #FCFCFF;
 	border-radius: 8px 8px 0 0;
 	padding: 20px;
+}
+
+/* Cards de serviços mais solicitados */
+.servico-card {
+	background: #FFFFFF;
+	border: 1px solid #E8EEF3;
+	border-radius: 8px;
+	padding: 14px 16px;
+	margin-bottom: 12px;
+	transition: all 0.3s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+.servico-card::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 4px;
+	background: linear-gradient(180deg, #66BB6A 0%, #4CAF50 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.servico-card:hover::before {
+	opacity: 1;
+}
+
+.servico-card:hover {
+	box-shadow: 0 4px 12px rgba(102, 187, 106, 0.15);
+	transform: translateY(-2px);
+	border-color: #C8E6C9;
+}
+
+.servico-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 10px;
+}
+
+.servico-info {
+	flex: 1;
+}
+
+.servico-nome {
+	font-size: 13px;
+	font-weight: 600;
+	color: #2C3E50;
+	margin-bottom: 4px;
+	display: block;
+}
+
+.servico-preco {
+	font-size: 14px;
+	font-weight: 600;
+	color: #66BB6A;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.servico-preco i {
+	font-size: 10px;
+}
+
+.servico-quantidade {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+}
+
+.servico-total {
+	font-size: 20px;
+	font-weight: 700;
+	color: #2C4A2C;
+	line-height: 1;
+	margin-bottom: 2px;
+}
+
+.servico-label {
+	font-size: 12px;
+	font-weight: 600;
+	color: #7A8A9A;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.servico-barra-container {
+	margin-top: 10px;
+	height: 6px;
+	background: #F0F4F8;
+	border-radius: 3px;
+	overflow: hidden;
+	position: relative;
+}
+
+.servico-barra-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #66BB6A 0%, #81C784 100%);
+	border-radius: 3px;
+	transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+}
+
+.servico-porcentagem {
+	position: absolute;
+	right: 8px;
+	top: -18px;
+	font-size: 10px;
+	font-weight: 700;
+	color: #66BB6A;
+}
+
+.servicos-vazio {
+	text-align: center;
+	padding: 40px 20px;
+	color: #999;
+}
+
+.servicos-vazio i {
+	font-size: 40px;
+	margin-bottom: 12px;
+	color: #DDD;
+	display: block;
+}
+
+.servicos-vazio p {
+	font-size: 12px;
+	color: #999;
+	margin: 0;
 }
 
 /* Estilos do gráfico de agendamentos */
@@ -353,17 +756,17 @@
 }
 
 .progress-label-text {
-	font-size: 11px;
-	font-weight: 600;
-	color: #5A6A5A;
-	text-transform: uppercase;
-	letter-spacing: 0.3px;
-	white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
 }
 
 .progress-bar-container {
 	flex: 1;
-	height: 18px;
+	height: 26px;
 	background-color: #E8F0E3;
 	border-radius: 9px;
 	overflow: hidden;
@@ -372,7 +775,7 @@
 
 .progress-bar-fill {
 	height: 100%;
-	border-radius: 9px;
+	border-radius: 12px;
 	transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 	position: relative;
 	display: flex;
@@ -382,7 +785,7 @@
 }
 
 .progress-bar-fill.finalizados {
-	background: linear-gradient(90deg, #6B8E5A 0%, #7FA368 100%);
+	background: linear-gradient(90deg, #6B8E5A 0%, #97AC95 100%);
 }
 
 .progress-bar-fill.cancelados {
@@ -390,11 +793,10 @@
 }
 
 .progress-percentage {
-	font-size: 11px;
-	font-weight: 700;
-	color: #FFFFFF;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-	white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+    color: black;
+    white-space: nowrap;
 }
 
 .total-agendamentos-section {
@@ -414,12 +816,19 @@
 }
 
 .total-agendamentos-number {
-	font-size: 48px;
+	font-size: 30px;
 	font-weight: 800;
 	color: #2C4A2C;
 	line-height: 1;
 	display: block;
 	letter-spacing: -2px;
+}
+
+.cardsServicos{
+    overflow-y: auto;
+        max-height: 52vh;
+    display: inline-block;
+    width: 100%;
 }
 		</style>
 	</ui:define>
@@ -454,8 +863,11 @@
 				</div>
 
 				<!-- Tooltip flutuante FORA de tudo -->
-				<div id="chartTooltip" class="tooltip-valor-flutuante" style="visibility: hidden; opacity: 0;">
-					<span id="tooltipText">R$ 0,00</span>
+				<div id="chartTooltip" style="visibility: hidden; opacity: 0;">
+					<div class="tooltip-inner">
+						<span id="tooltipText"></span>
+						<span class="tooltip-value" id="tooltipValue">R$ 0,00</span>
+					</div>
 				</div>
 
 				<div class="grid-top-grafico">
@@ -467,7 +879,7 @@
 							<div class="subtitle-info">
 								<h:panelGroup id="lblFaturado">
 									<h:outputLabel class="title-info" 
-									               value="Faturado no #{homeController.dataSelecionada == 'm' ? 'mês' : 'ano'}" />
+									               value="Faturado no - #{homeController.dataSelecionada == 'm' ? 'mês' : 'ano'}" />
 									<h:outputLabel class="sub-info" 
 									               value="#{homeController.totalFaturadoFormatado}" />
 								</h:panelGroup>
@@ -498,26 +910,31 @@
 						// Variáveis globais para o tooltip
 						var chartTooltip = null;
 						var tooltipTextElement = null;
+						var tooltipValueElement = null;
 						var isTooltipVisible = false;
 						
 						// Inicializa quando o DOM estiver pronto
 						window.addEventListener('load', function() {
 						    chartTooltip = document.getElementById('chartTooltip');
 						    tooltipTextElement = document.getElementById('tooltipText');
+						    tooltipValueElement = document.getElementById('tooltipValue');
 						});
 						
 						function showTooltip(event, element) {
 						    // Garante que os elementos existem
 						    if (!chartTooltip) chartTooltip = document.getElementById('chartTooltip');
 						    if (!tooltipTextElement) tooltipTextElement = document.getElementById('tooltipText');
+						    if (!tooltipValueElement) tooltipValueElement = document.getElementById('tooltipValue');
 						    
-						    if (!chartTooltip || !tooltipTextElement) return;
+						    if (!chartTooltip || !tooltipTextElement || !tooltipValueElement) return;
 						    
-						    // Pega o valor do atributo
+						    // Pega os valores dos atributos
 						    var valor = element.getAttribute('data-valor');
+						    var mes = element.getAttribute('data-mes');
 						    
-						    // Atualiza o texto
-						    tooltipTextElement.textContent = valor;
+						    // Atualiza o texto do mês e valor
+						    tooltipTextElement.textContent = mes ? mes.toUpperCase() : '';
+						    tooltipValueElement.textContent = valor;
 						    
 						    // Mostra o tooltip IMEDIATAMENTE
 						    chartTooltip.style.visibility = 'visible';
@@ -620,7 +1037,7 @@
 				<div class="grid-bottom-grafico">
 					<div class="content-top-visitas">
 						<div class="flex" style="margin-bottom: 18px;">
-							<div class="icon-circle">
+							<div class="icon-circle icon-circle-red">
 								<i class="fa-solid fa-people-group"></i>
 							</div>
 							<div class="subtitle-info">
@@ -645,6 +1062,25 @@
 								</div>
 							</div>
 						</h:panelGroup>
+						
+						<script>
+						//<![CDATA[
+						// Anima as barras de visitas ao carregar
+						function animarBarrasVisitas() {
+							setTimeout(function() {
+								var barras = document.querySelectorAll('#form\\:graficoVisitas .dia-barra-vertical');
+								barras.forEach(function(barra, index) {
+									setTimeout(function() {
+										barra.style.height = barra.style.height;
+									}, index * 50);
+								});
+							}, 100);
+						}
+						
+						// Executa ao carregar a página
+						window.addEventListener('load', animarBarrasVisitas);
+						//]]>
+						</script>
 					</div>
 					<div class="content-gastos-mes">
 						<div class="flex" style="margin-bottom: 20px;">
@@ -882,20 +1318,113 @@
 	<!-- Conteúdo da SIDEBAR DIREITA -->
 	<ui:define name="sidebar">
 		<div class="content-logo-system"></div>
-		<div class="content-btns">
-			<p:commandButton class="btn btn-green" value="Agendar Cliente"
-				onclick="PF('dlgAgendar').show()" />
+		
+		<!-- Resumo de Hoje -->
+		<div>
+			<h:panelGroup id="resumoHoje" class="content-resumo">
+				<!-- Card Agendamentos -->
+				<div class="resumo-card">
+					<div class="resumo-card-header">
+						<div class="resumo-icon">
+							<i class="fa-solid fa-calendar-check"></i>
+						</div>
+						<span class="resumo-label">Agendamentos de Hoje</span>
+					</div>
+					<div class="resumo-valor">#{homeController.agendamentosHoje}</div>
+				</div>
+				
+				<!-- Card Faturamento -->
+				<div class="resumo-card card-faturamento">
+					<div class="resumo-card-header">
+						<div class="resumo-icon">
+							<i class="fa-solid fa-hand-holding-dollar"></i>
+						</div>
+						<span class="resumo-label">Faturamento de Hoje</span>
+					</div>
+					<div class="resumo-valor">#{homeController.faturamentoHojeFormatado}</div>
+				</div>
+				
+				<!-- Card Próximo -->
+				<h:panelGroup rendered="#{not empty homeController.proximoAgendamento}">
+					<div class="resumo-proximo">
+						<span class="resumo-proximo-label">Próximo Agendamento</span>
+						<div class="resumo-proximo-info">
+							<i class="fa-solid fa-clock"></i>
+							#{homeController.proximoAgendamentoFormatado}
+						</div>
+					</div>
+				</h:panelGroup>
+				
+				<h:panelGroup rendered="#{empty homeController.proximoAgendamento}">
+					<div class="resumo-proximo">
+						<span class="resumo-vazio">Sem agendamentos pendentes</span>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
 		</div>
-		<div class="content-agendamentos">
-			<div class="flex">
-				<div class="icon-circle">
-					<i class="fa-solid fa-clock"></i>
+		
+		<div class="content-servicos">
+			<div class="flex" style="margin-bottom: 16px;">
+				<div class="icon-circle" >
+					<i class="fa-solid fa-scissors"></i>
 				</div>
 				<div class="subtitle-info">
-					<label class="title-info">Últimos Agendamentos</label>
+					<label class="title-info">Top 5 Serviços do Mês</label>
 				</div>
 			</div>
+			
+			<!-- Cards de serviços -->
+			<h:panelGroup id="cardsServicos">
+				<div class="cardsServicos">
+					<ui:repeat value="#{homeController.topServicosMes}" var="servico">
+					<div class="servico-card">
+						<div class="servico-header">
+							<div class="servico-info">
+								<span class="servico-nome">#{servico.nome}</span>
+								<span class="servico-preco">
+									<i class="fa-solid fa-tag"></i>
+									#{homeController.formatarPreco(servico.preco)}
+								</span>
+							</div>
+							<div class="servico-quantidade">
+								<span class="servico-total">#{servico.total}</span>
+								<span class="servico-label">Solicitações</span>
+							</div>
+						</div>
+						
+						<div class="servico-barra-container">
+							<div class="servico-barra-fill" style="width: #{servico.porcentagem}%;">
+								<span class="servico-porcentagem">#{servico.porcentagem}%</span>
+							</div>
+						</div>
+					</div>
+				</ui:repeat>
+				</div>
+				
+				
+				<!-- Mensagem quando não há serviços -->
+				<h:panelGroup rendered="#{empty homeController.topServicosMes}">
+					<div class="servicos-vazio">
+						<i class="fa-solid fa-chart-simple"></i>
+						<p>Nenhum serviço solicitado este mês</p>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
 		</div>
+		
+		<script>
+		//<![CDATA[
+		// Anima as barras de progresso dos serviços ao carregar
+		window.addEventListener('load', function() {
+			setTimeout(function() {
+				var barras = document.querySelectorAll('.servico-barra-fill');
+				barras.forEach(function(barra) {
+					barra.style.width = barra.style.width;
+				});
+			}, 300);
+		});
+		//]]>
+		</script>
 	</ui:define>
 
 </ui:composition>

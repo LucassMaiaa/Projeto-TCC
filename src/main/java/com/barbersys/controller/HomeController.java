@@ -3,6 +3,7 @@ package com.barbersys.controller;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -37,6 +38,14 @@ public class HomeController implements Serializable {
     
     // Dados de visitas por dia da semana
     private Map<Integer, Integer> visitasPorDia;
+    
+    // Dados dos top serviços do mês
+    private List<Map<String, Object>> topServicosMes;
+    
+    // Dados do resumo de hoje
+    private int agendamentosHoje;
+    private double faturamentoHoje;
+    private String proximoAgendamento;
     
     // Labels dos meses
     private static final String[] MESES = {
@@ -78,6 +87,14 @@ public class HomeController implements Serializable {
         
         // Busca visitas por dia da semana
         visitasPorDia = DashboardDAO.buscarVisitasPorDiaSemana();
+        
+        // Busca top 5 serviços mais solicitados do mês
+        topServicosMes = DashboardDAO.buscarTopServicosMesAtual(5);
+        
+        // Busca dados do resumo de hoje
+        agendamentosHoje = DashboardDAO.buscarAgendamentosHoje();
+        faturamentoHoje = DashboardDAO.buscarFaturamentoHoje();
+        proximoAgendamento = DashboardDAO.buscarProximoAgendamento();
         
         // Calcula o valor máximo para normalizar o gráfico
         valorMaximo = 0.0;
@@ -272,5 +289,120 @@ public class HomeController implements Serializable {
             return dias[diaSemana - 1];
         }
         return "";
+    }
+    
+    /**
+     * Formata data para exibição (dd/MM)
+     */
+    public String formatarData(Date data) {
+        if (data == null) return "";
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM");
+        return sdf.format(data);
+    }
+    
+    /**
+     * Formata o faturamento de hoje
+     */
+    public String getFaturamentoHojeFormatado() {
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("pt", "BR"));
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        
+        DecimalFormat df = new DecimalFormat("###,###,##0.00", symbols);
+        return "R$ " + df.format(faturamentoHoje);
+    }
+    
+    /**
+     * Retorna a cor do status do agendamento
+     */
+    public String getCorStatus(String status) {
+        if (status == null || status.trim().isEmpty()) return "#999";
+        
+        status = status.trim().toUpperCase();
+        
+        switch (status) {
+            case "A":
+            case "P":
+            case "PENDENTE":
+                return "#FFA726"; // Pendente - Laranja
+            case "F":
+            case "FINALIZADO":
+                return "#66BB6A"; // Finalizado - Verde
+            case "I":
+            case "C":
+            case "CANCELADO":
+                return "#EF5350"; // Cancelado - Vermelho
+            case "CONFIRMADO":
+                return "#42A5F5"; // Confirmado - Azul
+            default: 
+                return "#999";
+        }
+    }
+    
+    /**
+     * Retorna o texto do status do agendamento
+     */
+    public String getTextoStatus(String status) {
+        if (status == null || status.trim().isEmpty()) return "Desconhecido";
+        
+        status = status.trim().toUpperCase();
+        
+        switch (status) {
+            case "A":
+            case "P":
+            case "PENDENTE":
+                return "Pendente";
+            case "F":
+            case "FINALIZADO":
+                return "Finalizado";
+            case "I":
+            case "C":
+            case "CANCELADO":
+                return "Cancelado";
+            case "CONFIRMADO":
+                return "Confirmado";
+            default: 
+                return status; // Retorna o valor original se não reconhecer
+        }
+    }
+    
+    /**
+     * Retorna o próximo agendamento com horário formatado
+     */
+    public String getProximoAgendamentoFormatado() {
+        if (proximoAgendamento == null || proximoAgendamento.trim().isEmpty()) {
+            return null;
+        }
+        
+        // O formato vindo do banco é algo como "14:30:00 - Nome do Cliente"
+        // Vamos formatar para "14:30 - Nome do Cliente"
+        if (proximoAgendamento.contains(" - ")) {
+            String[] partes = proximoAgendamento.split(" - ", 2);
+            String horario = partes[0].trim();
+            String nomeCliente = partes.length > 1 ? partes[1].trim() : "";
+            
+            // Remove os segundos do horário (14:30:00 -> 14:30)
+            if (horario.length() >= 8) {
+                horario = horario.substring(0, 5);
+            }
+            
+            return horario + " - " + nomeCliente;
+        }
+        
+        return proximoAgendamento;
+    }
+    
+    /**
+     * Formata o preço em Real (R$)
+     */
+    public String formatarPreco(Double preco) {
+        if (preco == null) return "R$ 0,00";
+        
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("pt", "BR"));
+        symbols.setGroupingSeparator('.');
+        symbols.setDecimalSeparator(',');
+        
+        DecimalFormat df = new DecimalFormat("###,###,##0.00", symbols);
+        return "R$ " + df.format(preco);
     }
 }

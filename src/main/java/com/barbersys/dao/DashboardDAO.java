@@ -282,6 +282,124 @@ public class DashboardDAO {
     }
     
     /**
+     * Busca total de agendamentos de hoje
+     */
+    public static int buscarAgendamentosHoje() {
+        String sql = "SELECT COUNT(*) as total FROM agendamento WHERE age_data = CURDATE()";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    
+    /**
+     * Busca faturamento de hoje (apenas finalizados e pagos)
+     */
+    public static double buscarFaturamentoHoje() {
+        String sql = "SELECT COALESCE(SUM(s.ser_preco), 0) as total " +
+                     "FROM agendamento a " +
+                     "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+                     "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                     "WHERE a.age_data = CURDATE() " +
+                     "AND a.age_status = 'F' " +
+                     "AND a.age_pago = 'S'";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+    
+    /**
+     * Busca o próximo agendamento de hoje
+     */
+    public static String buscarProximoAgendamento() {
+        String sql = "SELECT CONCAT(a.age_hora, ' - ', COALESCE(c.cli_nome, a.age_nome_cliente)) as info " +
+                     "FROM agendamento a " +
+                     "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+                     "WHERE a.age_data = CURDATE() " +
+                     "AND a.age_hora >= CURTIME() " +
+                     "AND a.age_status != 'I' " +
+                     "ORDER BY a.age_hora ASC " +
+                     "LIMIT 1";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getString("info");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Busca os últimos N agendamentos (para dashboard)
+     */
+    public static List<Map<String, Object>> buscarUltimosAgendamentos(int limite) {
+        List<Map<String, Object>> agendamentos = new ArrayList<>();
+        
+        String sql = "SELECT " +
+                     "a.age_codigo, " +
+                     "a.age_data, " +
+                     "a.age_hora, " +
+                     "a.age_status, " +
+                     "COALESCE(c.cli_nome, a.age_nome_cliente) as cliente_nome, " +
+                     "f.fun_nome as funcionario_nome, " +
+                     "GROUP_CONCAT(s.ser_nome SEPARATOR ', ') as servicos " +
+                     "FROM agendamento a " +
+                     "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+                     "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
+                     "LEFT JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+                     "LEFT JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                     "GROUP BY a.age_codigo, a.age_data, a.age_hora, a.age_status, cliente_nome, f.fun_nome " +
+                     "ORDER BY a.age_data DESC, a.age_hora DESC " +
+                     "LIMIT ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, limite);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Map<String, Object> agendamento = new HashMap<>();
+                agendamento.put("id", rs.getLong("age_codigo"));
+                agendamento.put("data", rs.getDate("age_data"));
+                agendamento.put("hora", rs.getString("age_hora"));
+                agendamento.put("status", rs.getString("age_status"));
+                agendamento.put("clienteNome", rs.getString("cliente_nome"));
+                agendamento.put("funcionarioNome", rs.getString("funcionario_nome"));
+                agendamento.put("servicos", rs.getString("servicos"));
+                agendamentos.add(agendamento);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return agendamentos;
+    }
+    
+    /**
      * Busca o total de visitas (agendamentos) por dia da semana atual
      * Retorna Map com dia da semana (1=Domingo, 7=Sábado) e total de agendamentos
      */
@@ -368,5 +486,60 @@ public class DashboardDAO {
         }
         
         return dados;
+    }
+    
+    /**
+     * Busca os 5 serviços mais solicitados do mês atual
+     * Retorna: [servico_nome, total_solicitacoes, preco_medio]
+     */
+    public static List<Map<String, Object>> buscarTopServicosMesAtual(int limite) {
+        List<Map<String, Object>> servicos = new ArrayList<>();
+        
+        String sql = "SELECT " +
+                     "s.ser_nome as nome, " +
+                     "COUNT(ags.ser_codigo) as total, " +
+                     "s.ser_preco as preco " +
+                     "FROM agendamento_servico ags " +
+                     "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                     "INNER JOIN agendamento a ON ags.age_codigo = a.age_codigo " +
+                     "WHERE YEAR(a.age_data) = YEAR(CURDATE()) " +
+                     "AND MONTH(a.age_data) = MONTH(CURDATE()) " +
+                     "AND a.age_status != 'I' " +
+                     "GROUP BY s.ser_codigo, s.ser_nome, s.ser_preco " +
+                     "ORDER BY total DESC " +
+                     "LIMIT ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, limite);
+            ResultSet rs = ps.executeQuery();
+            
+            int totalGeral = 0;
+            List<Map<String, Object>> temp = new ArrayList<>();
+            
+            // Primeira passagem: coletar dados e calcular total
+            while (rs.next()) {
+                Map<String, Object> servico = new HashMap<>();
+                servico.put("nome", rs.getString("nome"));
+                servico.put("total", rs.getInt("total"));
+                servico.put("preco", rs.getDouble("preco"));
+                temp.add(servico);
+                totalGeral += rs.getInt("total");
+            }
+            
+            // Segunda passagem: calcular porcentagens
+            for (Map<String, Object> servico : temp) {
+                int total = (Integer) servico.get("total");
+                int porcentagem = totalGeral > 0 ? (int) Math.round((total * 100.0) / totalGeral) : 0;
+                servico.put("porcentagem", porcentagem);
+                servicos.add(servico);
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return servicos;
     }
 }

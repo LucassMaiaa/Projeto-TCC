@@ -1065,7 +1065,7 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 .fluxo-grafico {
   width: 100%;
   max-width: 40px;
-  background: linear-gradient(180deg, #7B7FE8 0%, #6367D9 100%);
+  background: #6367D9;
   border-radius: 20px 20px 0 0;
   align-self: center;
   min-height: 5px;
@@ -1089,29 +1089,29 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 
 /* Barra sem dados - pontinha discreta */
 .barra-wrapper.sem-dados .fluxo-grafico {
-  background: linear-gradient(180deg, #D1D3E0 0%, #B8BBC9 100%);
-  opacity: 0.4;
-  box-shadow: none;
+    background: #6367D9;
+    opacity: 0.4;
+    box-shadow: none;
 }
-
 .barra-wrapper.sem-dados:hover .fluxo-grafico {
   opacity: 0.6;
 }
 
 /* Barra com dados - hover effect */
 .barra-wrapper.com-dados:hover .fluxo-grafico {
-  background: linear-gradient(180deg, #8F93F0 0%, #7579E5 100%);
+  background: #6367D9;
   box-shadow: 0 4px 16px rgba(99, 103, 217, 0.5);
   transform: scaleX(1.1);
 }
 
 /* Barra do mês atual - DESTAQUE */
 .barra-wrapper.active .fluxo-grafico {
-  background: linear-gradient(180deg, #BDE746 0%, #A6CF3A 100%);
+  background: #A6CF3A;
   border: 2px solid #869A26;
   box-shadow: 0 4px 16px rgba(189, 231, 70, 0.5);
   max-width: 44px;
 }
+
 
 .barra-wrapper.active:hover .fluxo-grafico {
   background: linear-gradient(180deg, #C9F055 0%, #B5DC45 100%);
