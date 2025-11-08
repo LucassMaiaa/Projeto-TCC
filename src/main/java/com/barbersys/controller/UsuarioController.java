@@ -44,16 +44,13 @@ public class UsuarioController implements Serializable{
             }
 
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("usuarioLogado", usuarioAutenticado);
-            loginFalhou = false; // Garante que o diálogo não abra
+            loginFalhou = false;
+            PrimeFaces.current().ajax().addCallbackParam("loginFalhou", false);
             return "dashboard.xhtml?faces-redirect=true";
         } else {
-            // Exibe mensagem de erro e abre o diálogo
+            // Marca que o login falhou para exibir SweetAlert2
             loginFalhou = true;
-            FacesMessage mensagem = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Usuário ou senha inválidos");
-            FacesContext.getCurrentInstance().addMessage(null, mensagem);
-            PrimeFaces.current().ajax().update("dlgErro"); // Atualiza os componentes
-            PrimeFaces.current().executeScript("PF('dlgErro').show();"); // Abre o diálogo
-
+            PrimeFaces.current().ajax().addCallbackParam("loginFalhou", true);
             return null;
         }
     }

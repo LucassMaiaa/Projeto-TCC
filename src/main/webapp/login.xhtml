@@ -5,9 +5,11 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
 
     <h:head>
-        <title>Dashboard</title>
+        <title>Login</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </h:head>
 
     <h:body>
@@ -38,21 +40,20 @@
 	 		background-image: linear-gradient(270deg, #fbfbfb, #e7f3f5);
 	 	}
 	 	
-	 	.content-desc{
-            box-shadow: 0 0px 5px #d3d3d3;
-		    border-radius: 8px;
-		    background: #fbfbfb;
-		    height: 100%;
-		    background-image: url(#{request.contextPath}/resources/images/background-login.svg);
-		    background-repeat: no-repeat;
-		    background-position: top right;
-		    background-size: contain;
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: space-between;
-		    padding: 14.5em 5.625em 5.625em;
-		    clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
-	 	}
+.content-desc {
+    box-shadow: 0 0px 5px #d3d3d3;
+    border-radius: 8px;
+    height: 100%;
+    background-image: url(/BarberSys/resources/images/login-barber.svg);
+    background-repeat: no-repeat;
+    background-position: top right;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14.5em 5.625em 5.625em;
+    clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+}
 	 	
 	 	.content-login {
 		    flex-grow: 1;
@@ -92,6 +93,7 @@
 		.input-combined .title-input{
 			position: absolute;
 			z-index: 1;
+			    left: 49px;
 		}
 		
 		.input-combined .ui-outputlabel .ui-outputlabel-label {
@@ -121,48 +123,61 @@
 			justify-content: center;
 		}
 		
-		.text-links{
-			font-weight: bold;
-			color: black !important;
-			font-size: 0.75em !important;
-		}
+		.text-links {
+    font-weight: bold;
+    color: white !important;
+    font-size: 17px !important;
+}
+
+	.text-links-black {
+    font-weight: bold;
+    color: black !important;
+    font-size: 14px !important;
+}
+
+.text-links-black:hover {
+   text-decoration: underline !important;
+}
 		
-		.text-desc{
-			font-size: 2.1875em !important;
-		    text-shadow: 0 0px 1px #1C1E39;
-		    width: 22ch;
-		    display: inline-block;
-		    font-family: 'New Order', sans-serif !important;
-		}
+		.text-desc {
+    font-size: 55px !important;
+    text-shadow: 0 0px 1px #1C1E39;
+    width: 24ch;
+    display: inline-block;
+    font-family: 'New Order', sans-serif !important;
+    color: white;
+    font-weight: 500;
+}
 		
 		.btn-login.ui-button{
 		    height: 3.125em;
-		    background: #6367D9;
+		    background: #E74A46;
 		    border-radius: 1.5625em;
 		    margin-top: 2.8125em;
 		    margin-bottom: 4.375em;
 		    font-weight: bold;
 		    font-size: 1.0625em;
 		    border: none;
+		    min-height: 54px;
 		    transition: all .3s;
 		}
 		
 		.btn-login:hover.ui-button {
 		    background: transparent;
 		    color: black;
-		    border: 1px solid #6367D9;
+		    border: 1px solid #E74A46;
 		}
 		
-		.content-sobre-sistem{
-		    width: 8.9em;
-		    height: 5em;
-		    border: 1px solid #E9E8E8;
-		    border-radius: 8px;
-		    padding: 0.5em;
-		    display: flex;
-		    flex-direction: column;
-		    justify-content: space-between;
-		}
+		.content-sobre-sistem {
+    width: 11.9em;
+    height: 7em;
+    border: 2px solid #E9E8E8;
+    border-radius: 8px;
+    padding: 0.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 		
 		.content-sobre-sistem:nth-last-child(2) {
 			margin: 0 30px;
@@ -173,6 +188,22 @@
 		    filter: drop-shadow(0 0px 5px #d3d3d3);
 		}
 		
+		.img-custom{
+		    width: 34px;
+		}
+		
+		.icon-input-custom {
+    position: absolute;
+    z-index: 2;
+    font-size: 20px;
+    top: 20px;
+    left: 15px;
+    color: #0D1657;
+}
+
+.input-combined .ui-inputfield {
+    padding: 22px 7px 0 47px;
+}
   	</style>
         
          <h:form styleClass="main">
@@ -187,19 +218,19 @@
             <!-- Conteúdo sobre o sistema -->
             <div class="content-sobre-sistem">
               <div>
-                <img src="#{request.contextPath}/resources/images/icon-agendamento.svg" />
+                <img class="img-custom" src="#{request.contextPath}/resources/images/icon-agendamento.svg" />
               </div>
               <p:outputLabel styleClass="text-links" value="Controle de agendamentos" />
             </div>
             <div class="content-sobre-sistem">
               <div>
-                <img src="#{request.contextPath}/resources/images/icon-inteligente.svg" />
+                <img class="img-custom" src="#{request.contextPath}/resources/images/icon-inteligente.svg" />
               </div>
               <p:outputLabel styleClass="text-links" value="Sistema inteligente e prático" />
             </div>
             <div class="content-sobre-sistem">
               <div>
-                <img src="#{request.contextPath}/resources/images/icon-faturar.svg" />
+                <img class="img-custom" src="#{request.contextPath}/resources/images/icon-faturar.svg" />
               </div>
               <p:outputLabel styleClass="text-links" value="Equipe e faturamento em um só lugar" />
             </div>
@@ -208,47 +239,57 @@
       </div>
       	
       <div class="content-login">
-        <img src="#{request.contextPath}/resources/images/logo_grande.svg" />
+        <img src="#{request.contextPath}/resources/images/logo-login.svg" />
             <p:growl id="mensagens" showDetail="true" life="3000" />
         <div class="input-combined">
+        	<i class="icon-input-custom fa-solid fa-envelope"></i>
           <p:outputLabel styleClass="title-input" value="Email" />
           <!-- Vinculando ao atributo 'login' do Managed Bean -->
           <p:inputText styleClass="user-login" value="#{usuarioController.login}" required="true" requiredMessage="Email é obrigatório"/>
         </div>	
       		
         <div class="input-combined">
+        <i class="icon-input-custom fa-solid fa-lock"></i>
           <p:outputLabel styleClass="title-input" value="Senha" />
           <!-- Vinculando ao atributo 'senha' do Managed Bean -->
           <p:password styleClass="senha-login" value="#{usuarioController.senha}" required="true" requiredMessage="Senha é obrigatória"/>
         </div>	
       		
         <div class="flex flex-end">
-          <p:commandLink styleClass="text-links" value="Esqueceu a senha? clique aqui " />
+          <p:commandLink styleClass="text-links-black" value="Esqueceu a senha? clique aqui " />
         </div>
       		
         <!-- Botão de login: chama o método efetuarLogin no Managed Bean -->
-        <p:commandButton styleClass="btn-login" value="Entrar" action="#{usuarioController.efetuarLogin()}" update="@form" />
+        <p:commandButton styleClass="btn-login" value="Entrar" 
+                         action="#{usuarioController.efetuarLogin()}" 
+                         update="@form"
+                         oncomplete="handleLoginResponse(args)" />
       		
         <hr/>
       		
         <div class="flex flex-center">
-            <p:commandLink styleClass="text-links" value="É novo? cadastre-se clicando aqui "  />
+            <p:commandLink styleClass="text-links-black" value="É novo? cadastre-se clicando aqui "  />
         </div>
-        
-        <p:dialog id="dlgErro" header="Erro de Login" widgetVar="dlgErro" modal="true" showEffect="fade" hideEffect="fade" closable="false" draggable="false" onShow="fecharDialogo()">
-            <h:outputText value="erro" style="color: red;" />
-            <p:commandButton value="OK" onclick="PF('dlgErro').hide()" />
-        </p:dialog>
       		
       </div>
     </h:form>
         
         <script>
-            function fecharDialogo() {
-                setTimeout(function() {
-                    PF('dlgErro').hide();
-                }, 1000); // 3000ms = 3 segundos
+            //<![CDATA[
+            function handleLoginResponse(args) {
+                if (args && args.loginFalhou === true) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erro de Login',
+                        text: 'Usuário ou senha inválidos!',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#E74A46',
+                        background: '#fff',
+                        backdrop: true
+                    });
+                }
             }
+            //]]>
         </script>
         
     </h:body>
