@@ -620,6 +620,17 @@ a {
     grid-template-columns: 105px 1fr 374px;
 }
 
+/* Sidebar fixa - SEM SCROLL */
+.content-info-lateral {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 374px;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 100;
+}
+
 /* Inputs */
 
 .input-combined-no-text{

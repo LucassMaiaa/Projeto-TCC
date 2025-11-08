@@ -585,10 +585,11 @@
 }
 
 .content-servicos {
-	height: calc(100vh - 341px);
+	    height: calc(100vh - 342px) !important;
 	background: #FCFCFF;
 	border-radius: 8px 8px 0 0;
 	padding: 20px;
+	    overflow: auto;
 }
 
 /* Cards de serviços mais solicitados */
@@ -824,11 +825,456 @@
 	letter-spacing: -2px;
 }
 
-.cardsServicos{
+/* Container de serviços com altura calculada - ajuste final */
+.content-servicos {
+	height: calc(100vh - 342px) !important;
+	background: #FCFCFF;
+	border-radius: 8px 8px 0 0;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	    overflow: auto;
+}
+
+.content-servicos .flex {
+	flex-shrink: 0;
+	margin-bottom: 16px;
+}
+
+.cardsServicos {
     overflow-y: auto;
-        max-height: 52vh;
-    display: inline-block;
-    width: 100%;
+    overflow-x: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Scrollbar customizada APENAS para a listagem de serviços */
+.cardsServicos::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cardsServicos::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.cardsServicos::-webkit-scrollbar-thumb {
+    background: #CCC;
+    border-radius: 3px;
+}
+
+.cardsServicos::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+
+
+/* ============================================ */
+/* RESPONSIVIDADE - DASHBOARD                  */
+/* ============================================ */
+
+/* Tablets e Laptops menores (até 1200px) */
+@media (max-width: 1200px) {
+	.grid-top-grafico {
+		grid-template-columns: 1fr !important;
+		gap: 16px !important;
+	}
+	
+	.grid-bottom-grafico {
+		grid-template-columns: 1fr !important;
+		gap: 16px !important;
+	}
+	
+	.content-faturado,
+	.content-top-func,
+	.content-top-visitas,
+	.content-gastos-mes {
+		height: auto !important;
+		min-height: 250px;
+	}
+}
+
+/* Tablets (até 992px) */
+@media (max-width: 992px) {
+	.title-page {
+		font-size: 20px !important;
+	}
+	
+	.content-grafic {
+		padding: 12px 6px 8px !important;
+	}
+	
+	.fluxo-grafico {
+		min-width: 18px !important;
+		max-width: 28px !important;
+	}
+	
+	.label-mes {
+		font-size: 9px !important;
+	}
+	
+	.grafico-visitas-container {
+		height: 120px !important;
+	}
+	
+	.dia-barra-vertical {
+		max-width: 24px !important;
+		max-height: 100px !important;
+	}
+	
+	.dia-count-visitas {
+		font-size: 10px !important;
+	}
+}
+
+/* Mobile Landscape e Tablets pequenos (até 768px) */
+@media (max-width: 768px) {
+	/* Ajustes gerais */
+	.content-faturado,
+	.content-top-func,
+	.content-top-visitas,
+	.content-gastos-mes {
+		padding: 16px 20px !important;
+	}
+	
+	/* Ícones menores */
+	.icon-circle {
+		width: 36px !important;
+		height: 36px !important;
+		min-width: 36px !important;
+	}
+	
+	.icon-circle i {
+		font-size: 16px !important;
+	}
+	
+	/* Títulos */
+	.title-info {
+		font-size: 12px !important;
+	}
+	
+	.sub-info {
+		font-size: 32px !important;
+	}
+	
+	/* Gráfico de faturamento */
+	.content-grafic {
+		padding: 10px 4px 6px !important;
+	}
+	
+	.fluxo-grafico {
+		min-width: 14px !important;
+		max-width: 22px !important;
+	}
+	
+	.label-mes {
+		font-size: 8px !important;
+	}
+	
+	/* Top Funcionário */
+	.perfil-top-funcionario {
+		width: 60px !important;
+		height: 60px !important;
+	}
+	
+	.title-name-top-func {
+		font-size: 14px !important;
+	}
+	
+	.title-obj {
+		font-size: 10px !important;
+	}
+	
+	.subtitle-obj {
+		font-size: 16px !important;
+	}
+	
+	/* Gráfico de visitas */
+	.grafico-visitas-container {
+		height: 100px !important;
+		gap: 4px !important;
+	}
+	
+	.dia-barra-vertical {
+		max-width: 20px !important;
+		max-height: 80px !important;
+	}
+	
+	.dia-count-visitas {
+		font-size: 9px !important;
+		top: -18px !important;
+	}
+	
+	.dia-label-visitas {
+		font-size: 8px !important;
+	}
+	
+	/* Progress bars */
+	.progress-bar-container {
+		height: 14px !important;
+	}
+	
+	.progress-percentage {
+		font-size: 9px !important;
+	}
+	
+	.total-agendamentos-number {
+		font-size: 24px !important;
+	}
+}
+
+/* Mobile Portrait (até 576px) */
+@media (max-width: 576px) {
+	/* Header */
+	.title-page {
+		font-size: 18px !important;
+	}
+	
+	.header-filters {
+		margin-bottom: 16px !important;
+	}
+	
+	/* Cards */
+	.content-faturado,
+	.content-top-func,
+	.content-top-visitas,
+	.content-gastos-mes {
+		padding: 14px 16px !important;
+		margin-bottom: 12px;
+	}
+	
+	/* Ícones ainda menores */
+	.icon-circle {
+		width: 32px !important;
+		height: 32px !important;
+		min-width: 32px !important;
+	}
+	
+	.icon-circle i {
+		font-size: 14px !important;
+	}
+	
+	/* Títulos compactos */
+	.title-info {
+		font-size: 11px !important;
+	}
+	
+	.sub-info {
+		font-size: 28px !important;
+	}
+	
+	/* Gráfico de faturamento compacto */
+	.content-grafic {
+		padding: 8px 3px 4px !important;
+		overflow-x: auto;
+	}
+	
+	.fluxo-grafico {
+		min-width: 12px !important;
+		max-width: 18px !important;
+	}
+	
+	.label-mes {
+		font-size: 7px !important;
+		letter-spacing: 0px !important;
+	}
+	
+	.barra-wrapper.active .fluxo-grafico {
+		max-width: 20px !important;
+	}
+	
+	.barra-wrapper.active::before {
+		border-left: 6px solid transparent !important;
+		border-right: 6px solid transparent !important;
+		border-top: 10px solid #869A26 !important;
+		top: -16px !important;
+	}
+	
+	/* Top Funcionário */
+	.perfil-top-funcionario {
+		width: 50px !important;
+		height: 50px !important;
+	}
+	
+	.title-name-top-func {
+		font-size: 13px !important;
+	}
+	
+	.content-obj {
+		flex-direction: column !important;
+		gap: 8px !important;
+	}
+	
+	.title-obj {
+		font-size: 9px !important;
+	}
+	
+	.subtitle-obj {
+		font-size: 14px !important;
+	}
+	
+	/* Gráfico de visitas */
+	.grafico-visitas-wrapper {
+		padding: 12px 8px 6px !important;
+	}
+	
+	.grafico-visitas-container {
+		height: 80px !important;
+		gap: 3px !important;
+	}
+	
+	.dia-barra-vertical {
+		max-width: 16px !important;
+		max-height: 60px !important;
+		border-radius: 3px 3px 0 0 !important;
+	}
+	
+	.dia-count-visitas {
+		font-size: 8px !important;
+		top: -16px !important;
+	}
+	
+	.dia-label-visitas {
+		font-size: 7px !important;
+		letter-spacing: 0.2px !important;
+	}
+	
+	/* Agendamentos */
+	.progress-label-text {
+		font-size: 9px !important;
+	}
+	
+	.progress-bar-container {
+		height: 12px !important;
+	}
+	
+	.progress-percentage {
+		font-size: 8px !important;
+		padding-right: 6px !important;
+	}
+	
+	.total-agendamentos-label {
+		font-size: 9px !important;
+	}
+	
+	.total-agendamentos-number {
+		font-size: 20px !important;
+	}
+	
+	/* Tooltip responsivo */
+	#chartTooltip {
+		font-size: 12px !important;
+	}
+	
+	.tooltip-inner {
+		padding: 8px 12px !important;
+		min-width: 80px !important;
+	}
+	
+	#tooltipText {
+		font-size: 9px !important;
+	}
+	
+	.tooltip-value {
+		font-size: 13px !important;
+	}
+}
+
+/* Mobile Extra Small (até 375px) */
+@media (max-width: 375px) {
+	.title-page {
+		font-size: 16px !important;
+	}
+	
+	.content-faturado,
+	.content-top-func,
+	.content-top-visitas,
+	.content-gastos-mes {
+		padding: 12px 14px !important;
+	}
+	
+	.sub-info {
+		font-size: 24px !important;
+	}
+	
+	.fluxo-grafico {
+		min-width: 10px !important;
+		max-width: 16px !important;
+	}
+	
+	.dia-barra-vertical {
+		max-width: 14px !important;
+	}
+	
+	.total-agendamentos-number {
+		font-size: 18px !important;
+	}
+}
+
+/* Mobile Mini (320px - menor suportado) */
+@media (max-width: 320px) {
+	.title-page {
+		font-size: 14px !important;
+	}
+	
+	.icon-circle {
+		width: 28px !important;
+		height: 28px !important;
+		min-width: 28px !important;
+	}
+	
+	.icon-circle i {
+		font-size: 12px !important;
+	}
+	
+	.title-info {
+		font-size: 10px !important;
+	}
+	
+	.sub-info {
+		font-size: 22px !important;
+	}
+	
+	.content-faturado,
+	.content-top-func,
+	.content-top-visitas,
+	.content-gastos-mes {
+		padding: 10px 12px !important;
+	}
+	
+	.fluxo-grafico {
+		min-width: 8px !important;
+		max-width: 14px !important;
+	}
+	
+	.label-mes {
+		font-size: 6px !important;
+	}
+	
+	.dia-barra-vertical {
+		max-width: 12px !important;
+		max-height: 50px !important;
+	}
+	
+	.dia-count-visitas {
+		font-size: 7px !important;
+	}
+	
+	.dia-label-visitas {
+		font-size: 6px !important;
+	}
+	
+	.grafico-visitas-container {
+		height: 60px !important;
+	}
+	
+	.progress-percentage,
+	.progress-label-text {
+		font-size: 7px !important;
+	}
+	
+	.total-agendamentos-number {
+		font-size: 16px !important;
+	}
 }
 		</style>
 	</ui:define>
