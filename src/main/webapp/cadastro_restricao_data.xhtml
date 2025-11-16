@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<ui:composition template="/WEB-INF/template.xhtml">
+
+	<ui:define name="title">Restrições de Data - BarberSys</ui:define>
+	
+	<ui:define name="extra-css">
+		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+		<style>
+.content-info-lateral {
+	background: #FCFCFF;
+}
+
+.header-filters {
+	margin-top: 9px;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-content {
+	min-height: calc(100vh - 400px);
+	max-height: calc(100vh - 400px);
+	overflow-y: auto;
+}
+
+body .ui-datalist .ui-datalist-content {
+	border: none;
+	padding: 0;
+}
+
+.dataList-custom.ui-datalist .ui-datalist-empty-message {
+	min-height: calc(100vh - 400px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 17px !important;
+	font-weight: bold;
+}
+
+.restricao-tipo-badge {
+	display: inline-block;
+	padding: 4px 12px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.restricao-tipo-badge.geral {
+	background-color: #FFC107;
+	color: #000;
+}
+
+.restricao-tipo-badge.funcionario {
+	background-color: #17A2B8;
+	color: #FFF;
+}
+		</style>
+	</ui:define>
+
+	<ui:define name="content">
+	
+		<div class="flex space-between">
+			<p:outputLabel class="title-page" value="Restrições de Data" />
+		</div>
+
+		<div class="header-filters">
+			<div class="row">
+				<div class="col-md-4 input-combined-no-text">
+					<p:inputText value="#{restricaoDataController.descricaoFiltro}" autocomplete="off"
+						placeholder="Pesquisar por descrição">
+						<p:ajax event="keyup" delay="100" update="@form" process="@this" />
+					</p:inputText>
+					<i class="fa-solid fa-magnifying-glass"></i>
+				</div>
+			</div>
+		</div>
+
+		<div class="flex align-center mt15 mb15">
+			<p:commandButton
+				actionListener="#{restricaoDataController.novaRestricao()}"
+				update="form:dlgRestricao" process="@this" class="btn-circle-green"
+				icon="fa fa-plus" oncomplete="PF('dlgRestricao').show()" />
+			<label class="title-button ml8">Nova restrição</label>
+		</div>
+
+		<div>
+			<p:dataList id="datatableRestricoes" rowIndexVar="row"
+				class="dataList-custom"
+				value="#{restricaoDataController.lstRestricoes}" var="restricao"
+				paginator="true" paginatorPosition="bottom" rows="16" lazy="true"
+				emptyMessage="Nenhuma restrição encontrada">
+				<p:commandLink
+					actionListener="#{restricaoDataController.restricaoSelecionada(restricao)}"
+					update="form:dlgRestricao" process="@this"
+					oncomplete="PF('dlgRestricao').show()">
+					<div class="card-list">
+						<div style="flex: 1;">
+							<label class="title-list">Data</label>
+							<h:outputText styleClass="subtitle-list" value="#{restricao.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</div>
+						<div style="flex: 2;">
+							<label class="title-list">Descrição</label>
+							<p:outputLabel styleClass="subtitle-list"
+								value="#{restricao.descricao}" />
+						</div>
+						<div style="flex: 1;">
+							<label class="title-list">Tipo</label>
+							<span class="restricao-tipo-badge #{restricao.tipo == 'G' ? 'geral' : 'funcionario'}">
+								#{restricao.tipo == 'G' ? 'Geral' : restricao.funcionario.nome}
+							</span>
+						</div>
+					</div>
+				</p:commandLink>
+			</p:dataList>
+		</div>
+
+		<p:dialog id="dlgRestricao" widgetVar="dlgRestricao" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgRestricaoForm">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<ui:fragment rendered="#{restricaoDataController.editarModel eq 'A'}">
+								<i class="fa-solid fa-pen"></i>
+							</ui:fragment>
+							<ui:fragment rendered="#{restricaoDataController.editarModel eq 'I'}">
+								<i class="fa-solid fa-calendar-xmark"></i>
+							</ui:fragment>
+						</div>
+						<label>#{restricaoDataController.editarModel eq 'A' ?
+							'Editar Restrição' : 'Nova Restrição'}</label>
+					</div>
+					<div class="flex align-center">
+						<ui:fragment rendered="#{restricaoDataController.editarModel eq 'A'}">
+							<p:commandButton update="@form" process="@this"
+								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
+								icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgRestricaoForm" process="@form"
+								actionListener="#{restricaoDataController.atualizarRestricao()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+						<ui:fragment rendered="#{restricaoDataController.editarModel eq 'I'}">
+							<p:commandButton update="dlgRestricaoForm" process="@form"
+								actionListener="#{restricaoDataController.adicionarNovaRestricao()}"
+								styleClass="btn btn-green" value="Salvar" />
+						</ui:fragment>
+
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgRestricao').hide()" />
+					</div>
+				</div>
+
+				<p:messages id="msgs" closable="true" showIcon="true" autoUpdate="true" />
+
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Data *" />
+							<p:datePicker value="#{restricaoDataController.restricaoModel.data}"
+								pattern="dd/MM/yyyy"
+								styleClass="senha-login"
+								locale="pt"
+								showIcon="true" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Tipo *" />
+							<p:selectOneMenu value="#{restricaoDataController.restricaoModel.tipo}"
+								styleClass="senha-login">
+								<f:selectItem itemLabel="Geral (Todos)" itemValue="G" />
+								<f:selectItem itemLabel="Funcionário Específico" itemValue="F" />
+								<p:ajax event="change" update="dlgRestricaoForm" 
+									listener="#{restricaoDataController.onTipoChange()}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+
+				<div class="row" rendered="#{restricaoDataController.restricaoModel.tipo == 'F'}">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Funcionário *" />
+							<p:selectOneMenu value="#{restricaoDataController.funcionarioId}"
+								styleClass="senha-login">
+								<f:selectItem itemLabel="Selecione..." itemValue="" />
+								<f:selectItems value="#{restricaoDataController.lstFuncionario}"
+									var="func" itemLabel="#{func.nome}" itemValue="#{func.id}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Descrição *" />
+							<p:inputTextarea value="#{restricaoDataController.restricaoModel.descricao}"
+								rows="3"
+								styleClass="senha-login"
+								placeholder="Ex: Feriado Nacional - Natal" />
+						</div>
+					</div>
+				</div>
+
+			</h:panelGroup>
+		</p:dialog>
+
+		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<h:panelGroup id="dlgConfirmForm">
+				<div class="header-modal-confirm">
+					<div>
+						<label>Realmente deseja excluir essa restrição?</label>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center">
+					<p:commandButton styleClass="btn medium btn-confirm"
+						value="Confirmar"
+						actionListener="#{restricaoDataController.deletarRestricao()}" />
+					<p:commandButton styleClass="btn medium btn-cancel"
+						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+		
+	</ui:define>
+
+</ui:composition>
+</html>

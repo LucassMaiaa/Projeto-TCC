@@ -57,6 +57,22 @@ public class FuncionarioDAO {
 		funcionario.setId(rs.getLong("fun_codigo"));
 		funcionario.setNome(rs.getString("fun_nome"));
 		funcionario.setStatus(rs.getString("fun_status"));
+		funcionario.setTelefone(rs.getString("fun_telefone"));
+		funcionario.setCpf(rs.getString("fun_cpf"));
+		funcionario.setEndereco(rs.getString("fun_endereco"));
+		
+		// Novos campos
+		funcionario.setSexo(rs.getString("fun_sexo"));
+		funcionario.setDataNascimento(rs.getDate("fun_data_nascimento"));
+		funcionario.setDataAdmissao(rs.getDate("fun_data_admissao"));
+		funcionario.setObservacoes(rs.getString("fun_observacoes"));
+		funcionario.setCep(rs.getString("fun_cep"));
+		funcionario.setRua(rs.getString("fun_rua"));
+		funcionario.setNumero(rs.getString("fun_numero"));
+		funcionario.setComplemento(rs.getString("fun_complemento"));
+		funcionario.setBairro(rs.getString("fun_bairro"));
+		funcionario.setCidade(rs.getString("fun_cidade"));
+		funcionario.setEstado(rs.getString("fun_estado"));
 
 		if (rs.getObject("usu_codigo") != null) {
 			Usuario usuario = new Usuario();
@@ -169,6 +185,13 @@ public class FuncionarioDAO {
 				horario.setId(rs.getLong("hor_codigo"));
 				horario.setHoraInicial(rs.getTime("hor_hora_inicio").toLocalTime());
 				horario.setHoraFinal(rs.getTime("hor_hora_fim").toLocalTime());
+				horario.setDomingo(rs.getBoolean("hor_domingo"));
+				horario.setSegunda(rs.getBoolean("hor_segunda"));
+				horario.setTerca(rs.getBoolean("hor_terca"));
+				horario.setQuarta(rs.getBoolean("hor_quarta"));
+				horario.setQuinta(rs.getBoolean("hor_quinta"));
+				horario.setSexta(rs.getBoolean("hor_sexta"));
+				horario.setSabado(rs.getBoolean("hor_sabado"));
 				lista.add(horario);
 			}
 
@@ -185,14 +208,46 @@ public class FuncionarioDAO {
             usuarioDAO.atualizar(funcionario.getUsuario());
         }
 
-		String sql = "UPDATE funcionario SET fun_nome = ?, fun_status = ? WHERE fun_codigo = ?";
+		String sql = "UPDATE funcionario SET fun_nome = ?, fun_status = ?, fun_telefone = ?, fun_cpf = ?, fun_endereco = ?, " +
+					 "fun_sexo = ?, fun_data_nascimento = ?, fun_data_admissao = ?, fun_observacoes = ?, " +
+					 "fun_cep = ?, fun_rua = ?, fun_numero = ?, fun_complemento = ?, fun_bairro = ?, fun_cidade = ?, fun_estado = ? " +
+					 "WHERE fun_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql)) {
 
+			String telefoneFormat = funcionario.getTelefone() != null ? funcionario.getTelefone().replaceAll("[^0-9]", "") : "";
+			String cpfFormat = funcionario.getCpf() != null ? funcionario.getCpf().replaceAll("[^0-9]", "") : "";
+			String cepFormat = funcionario.getCep() != null ? funcionario.getCep().replaceAll("[^0-9]", "") : "";
+
 			stmt.setString(1, funcionario.getNome());
 			stmt.setString(2, funcionario.getStatus());
-			stmt.setLong(3, funcionario.getId());
+			stmt.setString(3, telefoneFormat);
+			stmt.setString(4, cpfFormat);
+			stmt.setString(5, funcionario.getEndereco());
+			stmt.setString(6, funcionario.getSexo());
+			
+			if (funcionario.getDataNascimento() != null) {
+				stmt.setDate(7, new java.sql.Date(funcionario.getDataNascimento().getTime()));
+			} else {
+				stmt.setNull(7, java.sql.Types.DATE);
+			}
+			
+			if (funcionario.getDataAdmissao() != null) {
+				stmt.setDate(8, new java.sql.Date(funcionario.getDataAdmissao().getTime()));
+			} else {
+				stmt.setNull(8, java.sql.Types.DATE);
+			}
+			
+			stmt.setString(9, funcionario.getObservacoes());
+			stmt.setString(10, cepFormat);
+			stmt.setString(11, funcionario.getRua());
+			stmt.setString(12, funcionario.getNumero());
+			stmt.setString(13, funcionario.getComplemento());
+			stmt.setString(14, funcionario.getBairro());
+			stmt.setString(15, funcionario.getCidade());
+			stmt.setString(16, funcionario.getEstado());
+			stmt.setLong(17, funcionario.getId());
 
 			stmt.executeUpdate();
 		} catch (SQLException e) {
@@ -238,13 +293,46 @@ public class FuncionarioDAO {
 	}
 
 	public static void salvar(Funcionario funcionario) throws SQLException {
-		String sql = "INSERT INTO funcionario (fun_nome, fun_status, usu_codigo) VALUES (?, ?, ?)";
+		String sql = "INSERT INTO funcionario (fun_nome, fun_status, usu_codigo, fun_telefone, fun_cpf, fun_endereco, " +
+					 "fun_sexo, fun_data_nascimento, fun_data_admissao, fun_observacoes, " +
+					 "fun_cep, fun_rua, fun_numero, fun_complemento, fun_bairro, fun_cidade, fun_estado) " +
+					 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+			String telefoneFormat = funcionario.getTelefone() != null ? funcionario.getTelefone().replaceAll("[^0-9]", "") : "";
+			String cpfFormat = funcionario.getCpf() != null ? funcionario.getCpf().replaceAll("[^0-9]", "") : "";
+			String cepFormat = funcionario.getCep() != null ? funcionario.getCep().replaceAll("[^0-9]", "") : "";
 
 			stmt.setString(1, funcionario.getNome());
 			stmt.setString(2, funcionario.getStatus());
             stmt.setLong(3, funcionario.getUsuario().getId());
+			stmt.setString(4, telefoneFormat);
+			stmt.setString(5, cpfFormat);
+			stmt.setString(6, funcionario.getEndereco());
+			stmt.setString(7, funcionario.getSexo());
+			
+			if (funcionario.getDataNascimento() != null) {
+				stmt.setDate(8, new java.sql.Date(funcionario.getDataNascimento().getTime()));
+			} else {
+				stmt.setNull(8, java.sql.Types.DATE);
+			}
+			
+			if (funcionario.getDataAdmissao() != null) {
+				stmt.setDate(9, new java.sql.Date(funcionario.getDataAdmissao().getTime()));
+			} else {
+				stmt.setNull(9, java.sql.Types.DATE);
+			}
+			
+			stmt.setString(10, funcionario.getObservacoes());
+			stmt.setString(11, cepFormat);
+			stmt.setString(12, funcionario.getRua());
+			stmt.setString(13, funcionario.getNumero());
+			stmt.setString(14, funcionario.getComplemento());
+			stmt.setString(15, funcionario.getBairro());
+			stmt.setString(16, funcionario.getCidade());
+			stmt.setString(17, funcionario.getEstado());
+			
 			stmt.executeUpdate();
 
 			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {

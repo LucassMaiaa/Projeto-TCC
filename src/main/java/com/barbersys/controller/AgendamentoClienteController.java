@@ -6,12 +6,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.PrimeFaces;
@@ -46,6 +50,7 @@ public class AgendamentoClienteController implements Serializable {
     private Long funcionarioId;
     private String horaSelecionada;
     private List<Long> servicosSelecionadosIds = new ArrayList<>();
+    private Map<Long, Boolean> servicosSelecionadosMap = new HashMap<>();
 
     // --- Fontes de Dados para a Tela ---
     private List<Funcionario> funcionariosDisponiveis;
@@ -54,10 +59,23 @@ public class AgendamentoClienteController implements Serializable {
     private List<Agendamento> meusAgendamentos = new ArrayList<>();
 
     // --- Controle de Lógica e UI ---
-    private String tipoAgendamento = "proprio"; // 'proprio' ou 'outro'
-    private String nomeClienteOutro;
-    private double valorTotal = 0.0;
-    private Date today = new Date();
+    private Date today;
+    private Long agendamentoIdParaCancelar;
+    private List<LocalDate> datasDesabilitadas = new ArrayList<>();
+    private List<Date> datasDesabilitadasDate = new ArrayList<>();
+    
+    // --- Controle de Steps ---
+    private boolean agendamentoIniciado = false;
+    private int activeIndex = 0;
+    private String observacoes;
+    
+    // --- Filtro e exibição de serviços ---
+    private String filtroServico = "";
+    private List<Servicos> servicosFiltrados = new ArrayList<>();
+    
+    // --- Total de tempo dos serviços selecionados ---
+    private int tempoTotalServicos = 0;
+
 
     private void exibirAlerta(String icon, String title) {
 		String script = String.format(
@@ -68,76 +86,107 @@ public class AgendamentoClienteController implements Serializable {
 
     @PostConstruct
     public void init() {
-        Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
-        
-        // Verifica se é um cliente logado
-        if (usuarioLogado != null) {
-            // Tenta buscar o cliente associado ao usuário
-            if (usuarioLogado.getClienteAssociado() == null && usuarioLogado.getId() != null) {
-                // Se não estiver carregado na sessão, busca no banco
-                Cliente clienteAssociado = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
-                usuarioLogado.setClienteAssociado(clienteAssociado);
+        try {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            this.today = cal.getTime();
+            
+            Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
+            
+            // Verifica se é um cliente logado
+            if (usuarioLogado != null) {
+                // Tenta buscar o cliente associado ao usuário
+                if (usuarioLogado.getClienteAssociado() == null && usuarioLogado.getId() != null) {
+                    // Se não estiver carregado na sessão, busca no banco
+                    Cliente clienteAssociado = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
+                    usuarioLogado.setClienteAssociado(clienteAssociado);
+                }
+                
+                // Agora valida se realmente é um cliente
+                if (usuarioLogado.getClienteAssociado() != null) {
+                    this.nomeClienteLogado = usuarioLogado.getClienteAssociado().getNome(); 
+                    popularMeusAgendamentos();
+                } else {
+                    // Não é um cliente, não pode usar esta tela
+                    this.nomeClienteLogado = "Acesso restrito";
+                }
+            } else {
+                this.nomeClienteLogado = "Visitante";
             }
             
-            // Agora valida se realmente é um cliente
-            if (usuarioLogado.getClienteAssociado() != null) {
-                this.nomeClienteLogado = usuarioLogado.getClienteAssociado().getNome(); 
-                popularMeusAgendamentos();
-            } else {
-                // Não é um cliente, não pode usar esta tela
-                this.nomeClienteLogado = "Acesso restrito";
-                // Redireciona para o dashboard
-                try {
-                    FacesContext.getCurrentInstance().getExternalContext().redirect("dashboard.xhtml");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        } else {
-            this.nomeClienteLogado = "Visitante";
+            this.funcionariosDisponiveis = FuncionarioDAO.buscarTodosFuncionarios();
+            this.servicosDisponiveis = ServicosDAO.buscarTodos();
+            this.servicosFiltrados = new ArrayList<>(this.servicosDisponiveis);
+        } catch (Exception e) {
+            System.err.println("ERRO em init(): " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        this.funcionariosDisponiveis = FuncionarioDAO.buscarTodosFuncionarios();
-        this.servicosDisponiveis = ServicosDAO.buscarTodos();
     }
 
     // --- Ações e Lógica ---
     
     public void agendar() {
+        // VALIDAÇÃO: Não permite agendar para datas passadas
+        LocalDate dataAgendamento = new java.sql.Date(dataSelecionada.getTime()).toLocalDate();
+        LocalDate hoje = LocalDate.now();
+        
+        if (dataAgendamento.isBefore(hoje)) {
+            exibirAlerta("error", "Não é possível agendar para datas passadas!");
+            return;
+        }
+        
+        // Se for hoje, valida se o horário já passou
+        if (dataAgendamento.isEqual(hoje)) {
+            LocalTime horarioAgendamento = LocalTime.parse(horaSelecionada);
+            LocalTime horarioAtual = LocalTime.now();
+            
+            if (horarioAgendamento.isBefore(horarioAtual) || horarioAgendamento.equals(horarioAtual)) {
+                exibirAlerta("error", "Não é possível agendar para horários que já passaram!");
+                return;
+            }
+        }
+        
         Agendamento novoAgendamento = new Agendamento();
         novoAgendamento.setDataCriado(dataSelecionada);
         novoAgendamento.setHoraSelecionada(LocalTime.parse(horaSelecionada));
         novoAgendamento.setStatus("A");
         novoAgendamento.setPago("N");
+        
+        // Define observações (prioriza observação do agendamento, senão usa do cliente)
+        if (observacoes != null && !observacoes.trim().isEmpty()) {
+            novoAgendamento.setObservacoes(observacoes);
+        } else {
+            Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
+            if (usuarioLogado != null && usuarioLogado.getClienteAssociado() != null) {
+                Cliente clienteLogado = usuarioLogado.getClienteAssociado();
+                if (clienteLogado.getObservacoes() != null && !clienteLogado.getObservacoes().trim().isEmpty()) {
+                    novoAgendamento.setObservacoes(clienteLogado.getObservacoes());
+                }
+            }
+        }
 
         Funcionario func = new Funcionario();
         func.setId(funcionarioId);
         novoAgendamento.setFuncionario(func);
 
-        if ("proprio".equals(tipoAgendamento)) {
-            Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
-            if (usuarioLogado != null) {
-                Cliente clienteLogado = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
-                novoAgendamento.setCliente(clienteLogado);
-                novoAgendamento.setTipoCadastro("A");
-            } else {
-                exibirAlerta("error", "Você precisa estar logado para agendar!");
-                return;
-            }
+        Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
+        if (usuarioLogado != null) {
+            Cliente clienteLogado = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
+            novoAgendamento.setCliente(clienteLogado);
+            novoAgendamento.setTipoCadastro("A");
         } else {
-            if (nomeClienteOutro == null || nomeClienteOutro.trim().isEmpty()) {
-                 exibirAlerta("error", "O nome do cliente é obrigatório.");
-                 return;
-            }
-            novoAgendamento.setTipoCadastro("I");
-            novoAgendamento.setNomeClienteAvulso(nomeClienteOutro);
+            exibirAlerta("error", "Você precisa estar logado para agendar!");
+            return;
         }
 
         try {
             AgendamentoDAO.salvar(novoAgendamento, servicosSelecionadosIds);
 
             // INÍCIO DA LÓGICA DE NOTIFICAÇÃO NO BANCO
-            String nomeCliente = "proprio".equals(tipoAgendamento) ? nomeClienteLogado : nomeClienteOutro;
+            String nomeCliente = nomeClienteLogado;
             String nomeFuncionario = "";
             if (funcionariosDisponiveis != null) {
                 for (com.barbersys.model.Funcionario f : funcionariosDisponiveis) {
@@ -175,14 +224,142 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
 
+    public void iniciarAgendamento() {
+        try {
+            System.out.println("=== iniciarAgendamento() chamado ===");
+            this.agendamentoIniciado = true;
+            this.activeIndex = 0;
+            
+            System.out.println("agendamentoIniciado=" + agendamentoIniciado);
+            System.out.println("activeIndex=" + activeIndex);
+            
+            // Força atualização do componente steps
+            PrimeFaces.current().ajax().update("form:bookingAreaPanel");
+            System.out.println("=== iniciarAgendamento() concluído ===");
+        } catch (Exception e) {
+            System.err.println("ERRO em iniciarAgendamento(): " + e.getMessage());
+            e.printStackTrace();
+            exibirAlerta("error", "Erro ao iniciar agendamento");
+        }
+    }
+    
+    public void proximoPasso() {
+        try {
+            System.out.println("=== proximoPasso() chamado. activeIndex=" + activeIndex + " ===");
+            
+            // Validações antes de avançar
+            if (activeIndex == 0) {
+                // Validar Passo 1: Cliente e Funcionário
+                System.out.println("Validando Passo 1...");
+                System.out.println("funcionarioId=" + funcionarioId);
+                
+                if (funcionarioId == null) {
+                    exibirAlerta("warning", "Por favor, selecione um funcionário.");
+                    return;
+                }
+                // Calcula datas desabilitadas quando sair do passo 1 (otimizado)
+                System.out.println("Calculando datas desabilitadas...");
+                calcularDatasDesabilitadas();
+                System.out.println("Datas desabilitadas calculadas: " + datasDesabilitadas.size());
+                
+            } else if (activeIndex == 1) {
+                // Validar Passo 2: Data e Serviços
+                System.out.println("Validando Passo 2...");
+                System.out.println("dataSelecionada=" + dataSelecionada);
+                System.out.println("servicosSelecionadosIds.size=" + servicosSelecionadosIds.size());
+                
+                if (dataSelecionada == null) {
+                    exibirAlerta("warning", "Por favor, selecione uma data.");
+                    return;
+                }
+                if (servicosSelecionadosIds.isEmpty()) {
+                    exibirAlerta("warning", "Por favor, selecione ao menos um serviço.");
+                    return;
+                }
+                // Carregar horários disponíveis para o próximo passo
+                System.out.println("Gerando horários disponíveis...");
+                gerarHorariosDisponiveis();
+                System.out.println("Horários disponíveis gerados: " + horariosDisponiveis.size());
+                
+                // Verifica se há horários disponíveis
+                if (horariosDisponiveis.isEmpty()) {
+                    exibirAlerta("warning", "Não há horários disponíveis para esta data com os serviços selecionados.");
+                    return;
+                }
+            }
+            
+            if (activeIndex < 2) {
+                activeIndex++;
+                System.out.println("Avançando para passo " + activeIndex);
+                PrimeFaces.current().ajax().update("form:stepsContainer", "form:msgs");
+            }
+            System.out.println("=== proximoPasso() concluído ===");
+        } catch (Exception e) {
+            System.err.println("ERRO em proximoPasso(): " + e.getMessage());
+            e.printStackTrace();
+            exibirAlerta("error", "Erro ao avançar para o próximo passo");
+        }
+    }
+    
+    public void passoAnterior() {
+        if (activeIndex > 0) {
+            activeIndex--;
+            PrimeFaces.current().ajax().update("form:stepsComponent", "form:bookingAreaPanel");
+        }
+    }
+    
+    /**
+     * Verifica se pode avançar para o próximo passo
+     */
+    public boolean isPodeAvancarPasso() {
+        try {
+            if (activeIndex == 0) {
+                // Passo 1: Sempre precisa ter funcionário selecionado
+                return funcionarioId != null;
+            } else if (activeIndex == 1) {
+                // Passo 2: Deve ter data e serviços selecionados
+                return dataSelecionada != null && servicosSelecionadosIds != null && !servicosSelecionadosIds.isEmpty();
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("ERRO em isPodeAvancarPasso(): " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Verifica se pode finalizar o agendamento
+     */
+    public boolean isPodeAgendar() {
+        try {
+            if (activeIndex != 2) {
+                return false;
+            }
+            // Deve ter funcionário, data, serviços e horário
+            return funcionarioId != null 
+                && dataSelecionada != null 
+                && servicosSelecionadosIds != null
+                && !servicosSelecionadosIds.isEmpty() 
+                && horaSelecionada != null 
+                && !horaSelecionada.trim().isEmpty();
+        } catch (Exception e) {
+            System.err.println("ERRO em isPodeAgendar(): " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
     private void limparFormulario() {
         this.dataSelecionada = null;
         this.funcionarioId = null;
+        this.observacoes = null;
+        this.agendamentoIniciado = false;
+        this.activeIndex = 0;
         this.horaSelecionada = null;
         this.servicosSelecionadosIds.clear();
+        this.servicosSelecionadosMap.clear();
         this.horariosDisponiveis.clear();
-        this.valorTotal = 0.0;
-        this.nomeClienteOutro = null;
     }
 
     private void popularMeusAgendamentos() {
@@ -246,48 +423,432 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
 
-    public void aoMudarTipoAgendamento() {
-        if ("proprio".equals(tipoAgendamento)) {
-            nomeClienteOutro = null;
+    public void aoSelecionarData() {
+        try {
+            System.out.println("=== aoSelecionarData() chamado ===");
+            System.out.println("Data selecionada: " + dataSelecionada);
+            
+            // No fluxo de steps, não limpamos mais os serviços ao selecionar a data
+            // Os serviços são selecionados no mesmo passo que a data
+            this.horaSelecionada = null;
+            
+            System.out.println("=== aoSelecionarData() concluído ===");
+            
+            // Não precisa gerar horários aqui, pois será feito no próximo passo
+            // quando os serviços forem selecionados
+        } catch (Exception e) {
+            System.err.println("ERRO em aoSelecionarData(): " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    public void aoSelecionarData() {
-        this.funcionarioId = null;
-        this.horaSelecionada = null;
-        this.horariosDisponiveis.clear();
-        aoSelecionarServico();
-    }
-
     public void aoSelecionarFuncionario() {
-        gerarHorariosDisponiveis();
-        aoSelecionarServico();
+        try {
+            System.out.println("=== aoSelecionarFuncionario() chamado ===");
+            System.out.println("funcionarioId selecionado: " + funcionarioId);
+            
+            this.dataSelecionada = null;
+            this.horaSelecionada = null;
+            this.horariosDisponiveis.clear();
+            this.servicosSelecionadosIds.clear();
+            this.servicosSelecionadosMap.clear();
+            
+            System.out.println("=== aoSelecionarFuncionario() concluído ===");
+            
+            // Não calcula datas desabilitadas aqui mais, será feito ao avançar do passo 1
+            // calcularDatasDesabilitadas();
+        } catch (Exception e) {
+            System.err.println("ERRO em aoSelecionarFuncionario(): " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
+
+
+    public void aoSelecionarHorario() {
+        // Os serviços devem ser habilitados automaticamente pelo getter isAgendamentoDesabilitado
+    }
+    
     public void aoSelecionarServico() {
-        this.valorTotal = 0.0;
-        if (servicosSelecionadosIds != null && !servicosSelecionadosIds.isEmpty()) {
+        try {
+            System.out.println("=== aoSelecionarServico() chamado ===");
+            
+            // Sincroniza o Map com a lista de IDs
+            servicosSelecionadosIds.clear();
+            
+            for (Map.Entry<Long, Boolean> entry : servicosSelecionadosMap.entrySet()) {
+                if (Boolean.TRUE.equals(entry.getValue())) {
+                    servicosSelecionadosIds.add(entry.getKey());
+                }
+            }
+            
+            System.out.println("Serviços selecionados: " + servicosSelecionadosIds.size());
+            System.out.println("=== aoSelecionarServico() concluído ===");
+            
+            // No fluxo de steps, não recalculamos datas ou horários aqui
+            // Os horários serão calculados apenas quando avançar para o passo 3
+        } catch (Exception e) {
+            System.err.println("ERRO em aoSelecionarServico(): " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Filtra serviços conforme o texto digitado
+     */
+    public void filtrarServicos() {
+        try {
+            if (filtroServico == null || filtroServico.trim().isEmpty()) {
+                servicosFiltrados = new ArrayList<>(servicosDisponiveis);
+            } else {
+                servicosFiltrados.clear();
+                String filtroLower = filtroServico.toLowerCase().trim();
+                for (Servicos servico : servicosDisponiveis) {
+                    if (servico.getNome().toLowerCase().contains(filtroLower)) {
+                        servicosFiltrados.add(servico);
+                    }
+                }
+            }
+            PrimeFaces.current().ajax().update("form:servicosWrapper");
+        } catch (Exception e) {
+            System.err.println("ERRO em filtrarServicos(): " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Retorna o tempo total dos serviços selecionados em minutos
+     */
+    public int getTempoTotalMinutos() {
+        int total = 0;
+        if (servicosDisponiveis != null && servicosSelecionadosIds != null) {
+            for (Servicos servico : servicosDisponiveis) {
+                if (servicosSelecionadosIds.contains(servico.getId())) {
+                    if (servico.getMinutos() != null) {
+                        total += servico.getMinutos();
+                    }
+                }
+            }
+        }
+        return total;
+    }
+    
+    /**
+     * Retorna o tempo total formatado (ex: "1h 30min" ou "45min")
+     */
+    public String getTempoTotalFormatado() {
+        int totalMinutos = getTempoTotalMinutos();
+        if (totalMinutos == 0) {
+            return "0min";
+        }
+        
+        int horas = totalMinutos / 60;
+        int minutos = totalMinutos % 60;
+        
+        if (horas > 0 && minutos > 0) {
+            return horas + "h " + minutos + "min";
+        } else if (horas > 0) {
+            return horas + "h";
+        } else {
+            return minutos + "min";
+        }
+    }
+    
+    /**
+     * Formata a duração de um serviço individual
+     */
+    public String formatarDuracaoServico(Integer minutos) {
+        if (minutos == null || minutos == 0) {
+            return "";
+        }
+        
+        int horas = minutos / 60;
+        int min = minutos % 60;
+        
+        if (horas > 0 && min > 0) {
+            return horas + "h " + min + "min";
+        } else if (horas > 0) {
+            return horas + "h";
+        } else {
+            return min + "min";
+        }
+    }
+    
+    /**
+     * Lista de serviços para exibição (filtrados ou todos)
+     */
+    public List<Servicos> getServicosParaExibir() {
+        if (filtroServico != null && !filtroServico.trim().isEmpty()) {
+            return servicosFiltrados;
+        }
+        return servicosDisponiveis;
+    }
+    
+    /**
+	 * Verifica se uma data tem horários disponíveis (sem considerar serviços)
+	 * Otimizado para evitar loop infinito
+	 */
+	private boolean temHorariosDisponiveisNaData(Date data, Funcionario funcionario) {
+		// Busca os horários de trabalho do funcionário
+		List<Horario> horariosFuncionario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionario);
+		
+		if (horariosFuncionario == null || horariosFuncionario.isEmpty()) {
+			return false;
+		}
+		
+		// Verifica qual dia da semana
+		java.util.Calendar cal = java.util.Calendar.getInstance();
+		cal.setTime(data);
+		int diaSemana = cal.get(java.util.Calendar.DAY_OF_WEEK);
+		
+		// Filtra horários válidos para este dia
+		List<Horario> horariosValidosParaDia = new ArrayList<>();
+		for (Horario h : horariosFuncionario) {
+			boolean trabalhaNesteDay = false;
+			
+			switch (diaSemana) {
+				case java.util.Calendar.SUNDAY:
+					trabalhaNesteDay = h.getDomingo() != null && h.getDomingo();
+					break;
+				case java.util.Calendar.MONDAY:
+					trabalhaNesteDay = h.getSegunda() != null && h.getSegunda();
+					break;
+				case java.util.Calendar.TUESDAY:
+					trabalhaNesteDay = h.getTerca() != null && h.getTerca();
+					break;
+				case java.util.Calendar.WEDNESDAY:
+					trabalhaNesteDay = h.getQuarta() != null && h.getQuarta();
+					break;
+				case java.util.Calendar.THURSDAY:
+					trabalhaNesteDay = h.getQuinta() != null && h.getQuinta();
+					break;
+				case java.util.Calendar.FRIDAY:
+					trabalhaNesteDay = h.getSexta() != null && h.getSexta();
+					break;
+				case java.util.Calendar.SATURDAY:
+					trabalhaNesteDay = h.getSabado() != null && h.getSabado();
+					break;
+			}
+			
+			if (trabalhaNesteDay) {
+				horariosValidosParaDia.add(h);
+			}
+		}
+		
+		if (horariosValidosParaDia.isEmpty()) {
+			return false;
+		}
+		
+		// Busca horários ocupados
+		List<LocalTime> horariosOcupados = AgendamentoDAO.getHorariosOcupados(funcionario.getId(), data, null);
+		
+		LocalDate dataLocal = new java.sql.Date(data.getTime()).toLocalDate();
+		LocalDateTime agora = LocalDateTime.now();
+		
+		// Otimização: Verifica se há pelo menos UM slot de 30min livre
+		// Não precisa considerar a duração dos serviços neste momento
+		for (Horario periodo : horariosValidosParaDia) {
+			LocalTime horaAtual = periodo.getHoraInicial();
+			LocalTime horaFinal = periodo.getHoraFinal().minusMinutes(30);
+			
+			// Limita iteração para evitar loop infinito (máximo 100 slots = 50 horas)
+			int maxIteracoes = 100;
+			int iteracao = 0;
+			
+			// Proteção contra overflow de horário
+			while ((horaAtual.isBefore(horaFinal) || horaAtual.equals(horaFinal)) 
+					&& iteracao < maxIteracoes) {
+				iteracao++;
+				
+				boolean isHoje = dataLocal.isEqual(LocalDate.now());
+				boolean isHorarioFuturo = !isHoje || horaAtual.isAfter(agora.toLocalTime());
+				
+				if (isHorarioFuturo && !horariosOcupados.contains(horaAtual)) {
+					// Encontrou pelo menos 1 horário disponível
+					return true;
+				}
+				
+				LocalTime proximaHora = horaAtual.plusMinutes(30);
+				
+				// Se deu volta (passou de 23:59 para 00:00), para o loop
+				if (proximaHora.compareTo(horaAtual) < 0) {
+					break;
+				}
+				
+				horaAtual = proximaHora;
+			}
+		}
+		
+		return false; // Nenhum horário disponível
+	}
+	
+	/**
+	 * Calcula as datas que devem ser desabilitadas no datepicker
+	 * baseado no funcionário selecionado (SEM considerar serviços)
+	 * Calcula para os próximos 3 anos (rápido e suficiente)
+	 */
+	public void calcularDatasDesabilitadas() {
+		datasDesabilitadas.clear();
+		datasDesabilitadasDate.clear();
+		
+		if (funcionarioId == null) {
+			return;
+		}
+		
+		// Busca o funcionário selecionado
+		Funcionario funcionarioSelecionado = null;
+		if (funcionariosDisponiveis != null) {
+			for (Funcionario f : funcionariosDisponiveis) {
+				if (f.getId().equals(funcionarioId)) {
+					funcionarioSelecionado = f;
+					break;
+				}
+			}
+		}
+		
+		if (funcionarioSelecionado == null) {
+			return;
+		}
+		
+		// Busca os horários de trabalho do funcionário
+		List<Horario> horariosFuncionario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioSelecionado);
+		
+		if (horariosFuncionario == null || horariosFuncionario.isEmpty()) {
+			// Se não tem horários, todas as datas futuras ficam desabilitadas
+			return;
+		}
+		
+		// Calcula para os próximos 3 anos (1095 dias)
+		LocalDate hoje = LocalDate.now();
+		for (int i = 0; i <= 1095; i++) {
+			LocalDate dataVerificar = hoje.plusDays(i);
+			Date dataUtil = Date.from(dataVerificar.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+			
+			// Verifica se está bloqueada por restrição
+			if (com.barbersys.dao.RestricaoDataDAO.isDataBloqueada(dataUtil, funcionarioSelecionado.getId())) {
+				datasDesabilitadas.add(dataVerificar);
+				datasDesabilitadasDate.add(dataUtil);
+				continue;
+			}
+			
+			// Verifica se o funcionário trabalha neste dia da semana
+			int diaSemana = dataVerificar.getDayOfWeek().getValue(); // 1=Segunda, 7=Domingo
+			boolean trabalhaNesteDay = false;
+			
+			for (Horario h : horariosFuncionario) {
+				boolean trabalha = false;
+				
+				switch (diaSemana) {
+					case 7: // Domingo
+						trabalha = h.getDomingo() != null && h.getDomingo();
+						break;
+					case 1: // Segunda
+						trabalha = h.getSegunda() != null && h.getSegunda();
+						break;
+					case 2: // Terça
+						trabalha = h.getTerca() != null && h.getTerca();
+						break;
+					case 3: // Quarta
+						trabalha = h.getQuarta() != null && h.getQuarta();
+						break;
+					case 4: // Quinta
+						trabalha = h.getQuinta() != null && h.getQuinta();
+						break;
+					case 5: // Sexta
+						trabalha = h.getSexta() != null && h.getSexta();
+						break;
+					case 6: // Sábado
+						trabalha = h.getSabado() != null && h.getSabado();
+						break;
+				}
+				
+				if (trabalha) {
+					trabalhaNesteDay = true;
+					break;
+				}
+			}
+			
+			// Se não trabalha neste dia, desabilita
+			if (!trabalhaNesteDay) {
+				datasDesabilitadas.add(dataVerificar);
+				datasDesabilitadasDate.add(dataUtil);
+				continue;
+			}
+			
+			// Verifica se tem horários disponíveis nesta data (otimizado)
+			if (!temHorariosDisponiveisNaData(dataUtil, funcionarioSelecionado)) {
+				datasDesabilitadas.add(dataVerificar);
+				datasDesabilitadasDate.add(dataUtil);
+			}
+		}
+	}
+	
+	/**
+	 * Retorna string JavaScript com array de datas desabilitadas
+	 * Formato: "2025-11-13,2025-11-14,2025-11-17"
+	 */
+	public String getDatasDesabilitadasString() {
+		if (datasDesabilitadas.isEmpty()) {
+			return "";
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		
+		for (int i = 0; i < datasDesabilitadas.size(); i++) {
+			sb.append(datasDesabilitadas.get(i).format(formatter));
+			if (i < datasDesabilitadas.size() - 1) {
+				sb.append(",");
+			}
+		}
+		
+		return sb.toString();
+	}
+    
+    public double getValorTotal() {
+        double total = 0.0;
+        
+        if (servicosSelecionadosIds != null && !servicosSelecionadosIds.isEmpty() && servicosDisponiveis != null) {
             for (Long servicoId : servicosSelecionadosIds) {
                 for (Servicos servico : servicosDisponiveis) {
                     if (servico.getId().equals(servicoId)) {
-                        this.valorTotal += servico.getPreco();
+                        if (servico.getPreco() != null) {
+                            total += servico.getPreco();
+                        }
                         break;
                     }
                 }
             }
         }
+        
+        return total;
+    }
+    
+    public String getValorTotalFormatado() {
+        double total = getValorTotal();
+        return String.format("%.2f", total);
     }
 
     public boolean isDataDesabilitada() {
-        return "outro".equals(tipoAgendamento) && (nomeClienteOutro == null || nomeClienteOutro.trim().isEmpty());
+        return funcionarioId == null;
     }
 
     public boolean isFuncionarioDesabilitado() {
-        return dataSelecionada == null;
+        // Campo de funcionário sempre está habilitado
+        return false;
     }
 
+    public boolean isHorarioDesabilitado() {
+        return funcionarioId == null || dataSelecionada == null;
+    }
+    
+    /**
+     * No novo fluxo de steps, os serviços não são mais bloqueados
+     * O controle é feito pelo botão "Próximo"
+     */
     public boolean isAgendamentoDesabilitado() {
-        return funcionarioId == null;
+        // Serviços sempre habilitados quando estiver no step 2
+        return false;
     }
 
     public void gerarHorariosDisponiveis() {
@@ -316,9 +877,58 @@ public class AgendamentoClienteController implements Serializable {
 
 		Funcionario funcionarioSelecionado = new Funcionario();
         funcionarioSelecionado.setId(funcionarioId);
+        
+        // Verifica se a data está bloqueada por restrição
+        if (com.barbersys.dao.RestricaoDataDAO.isDataBloqueada(dataSelecionada, funcionarioId)) {
+            return; // Data bloqueada, não mostra horários
+        }
 
 		List<Horario> horariosFuncionario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioSelecionado);
 		if (horariosFuncionario == null || horariosFuncionario.isEmpty()) {
+			return;
+		}
+		
+		// Verifica qual dia da semana é a data selecionada
+		java.util.Calendar cal = java.util.Calendar.getInstance();
+		cal.setTime(dataSelecionada);
+		int diaSemana = cal.get(java.util.Calendar.DAY_OF_WEEK);
+		
+		// Filtra apenas os horários que trabalham neste dia da semana
+		List<Horario> horariosValidosParaDia = new ArrayList<>();
+		for (Horario h : horariosFuncionario) {
+			boolean trabalhaNesteDay = false;
+			
+			switch (diaSemana) {
+				case java.util.Calendar.SUNDAY:
+					trabalhaNesteDay = h.getDomingo() != null && h.getDomingo();
+					break;
+				case java.util.Calendar.MONDAY:
+					trabalhaNesteDay = h.getSegunda() != null && h.getSegunda();
+					break;
+				case java.util.Calendar.TUESDAY:
+					trabalhaNesteDay = h.getTerca() != null && h.getTerca();
+					break;
+				case java.util.Calendar.WEDNESDAY:
+					trabalhaNesteDay = h.getQuarta() != null && h.getQuarta();
+					break;
+				case java.util.Calendar.THURSDAY:
+					trabalhaNesteDay = h.getQuinta() != null && h.getQuinta();
+					break;
+				case java.util.Calendar.FRIDAY:
+					trabalhaNesteDay = h.getSexta() != null && h.getSexta();
+					break;
+				case java.util.Calendar.SATURDAY:
+					trabalhaNesteDay = h.getSabado() != null && h.getSabado();
+					break;
+			}
+			
+			if (trabalhaNesteDay) {
+				horariosValidosParaDia.add(h);
+			}
+		}
+		
+		// Se não trabalha neste dia, retorna vazio
+		if (horariosValidosParaDia.isEmpty()) {
 			return;
 		}
 
@@ -328,40 +938,81 @@ public class AgendamentoClienteController implements Serializable {
 		LocalDateTime agora = LocalDateTime.now();
 		LocalDate dataSelecionadaLocalDate = new java.sql.Date(dataSelecionada.getTime()).toLocalDate();
 
-		for (Horario periodo : horariosFuncionario) {
+		// Usa apenas os horários válidos para o dia da semana
+		for (Horario periodo : horariosValidosParaDia) {
 			LocalTime horaInicialPeriodo = periodo.getHoraInicial();
 			LocalTime horaFinalPeriodo = periodo.getHoraFinal();
 
-			long duracaoTotalServico = (long) numeroDeSlotsNecessarios * 30;
-			LocalTime ultimoHorarioPossivel = horaFinalPeriodo.minusMinutes(duracaoTotalServico);
-
 			LocalTime horaAtual = horaInicialPeriodo;
+			
+			// Proteção contra loop infinito - máximo 100 iterações por período
+			int maxIteracoes = 100;
+			int iteracao = 0;
 
-			while (!horaAtual.isAfter(ultimoHorarioPossivel)) {
+			// CORREÇÃO: Para evitar overflow de horário (passar de 23:59 para 00:00)
+			// Usa isBefore e equals ao invés de isAfter
+			while ((horaAtual.isBefore(horaFinalPeriodo) || horaAtual.equals(horaFinalPeriodo)) 
+					&& iteracao < maxIteracoes 
+					&& horaAtual.compareTo(horaInicialPeriodo) >= 0) {
+				iteracao++;
 				
 				boolean isHoje = dataSelecionadaLocalDate.isEqual(LocalDate.now());
 				boolean isHorarioFuturo = !isHoje || horaAtual.isAfter(agora.toLocalTime());
 
 				if (isHorarioFuturo) {
-					boolean todosSlotsLivres = true;
-					for (int i = 0; i < numeroDeSlotsNecessarios; i++) {
-						LocalTime slotParaVerificar = horaAtual.plusMinutes((long) i * 30);
-						if (horariosOcupados.contains(slotParaVerificar)) {
-							todosSlotsLivres = false;
-							break;
+					// Calcula quando o serviço terminaria se começasse neste horário
+					// CORREÇÃO: Usa totalMinutos ao invés de (slots-1)*30
+					LocalTime horarioTermino = horaAtual.plusMinutes(totalMinutos);
+					
+					// Verifica se o serviço termina dentro do período de trabalho
+					// E não ultrapassa o limite (evita overflow para 00:00, 01:00, etc)
+					if (!horarioTermino.isAfter(horaFinalPeriodo) 
+							&& horarioTermino.compareTo(horaAtual) >= 0) {
+						// Verifica se todos os slots necessários estão livres
+						boolean todosSlotsLivres = true;
+						for (int i = 0; i < numeroDeSlotsNecessarios; i++) {
+							LocalTime slotParaVerificar = horaAtual.plusMinutes((long) i * 30);
+							
+							// Verifica se o slot não deu overflow (passou da meia-noite)
+							if (slotParaVerificar.compareTo(horaAtual) < 0) {
+								// Slot deu volta (passou de 23:59 para 00:00)
+								todosSlotsLivres = false;
+								break;
+							}
+							
+							// Verifica se o slot ultrapassa o horário final
+							if (slotParaVerificar.isAfter(horaFinalPeriodo)) {
+								todosSlotsLivres = false;
+								break;
+							}
+							
+							if (horariosOcupados.contains(slotParaVerificar)) {
+								todosSlotsLivres = false;
+								break;
+							}
 						}
-					}
 
-					if (todosSlotsLivres) {
-						String horaFormatadaLoop = horaAtual.format(formatter);
-						if (!horariosDisponiveis.contains(horaFormatadaLoop)) {
-							horariosDisponiveis.add(horaFormatadaLoop);
+						if (todosSlotsLivres) {
+							String horaFormatadaLoop = horaAtual.format(formatter);
+							if (!horariosDisponiveis.contains(horaFormatadaLoop)) {
+								horariosDisponiveis.add(horaFormatadaLoop);
+							}
 						}
 					}
 				}
-				horaAtual = horaAtual.plusMinutes(30);
+				
+				// Avança 30 minutos
+				LocalTime proximaHora = horaAtual.plusMinutes(30);
+				
+				// Se deu volta (passou de 23:59 para 00:00), para o loop
+				if (proximaHora.compareTo(horaAtual) < 0) {
+					break;
+				}
+				
+				horaAtual = proximaHora;
 			}
 		}
 		java.util.Collections.sort(horariosDisponiveis);
 	}
+	
 }

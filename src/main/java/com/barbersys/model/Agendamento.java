@@ -44,6 +44,9 @@ public class Agendamento {
 
 	@Column(name = "age_pago")
 	private String pago = "N";
+	
+	@Column(name = "age_observacoes")
+	private String observacoes;
 
 	@ManyToMany
 	@JoinTable(name = "agendamento_servico", joinColumns = @JoinColumn(name = "age_codigo"), inverseJoinColumns = @JoinColumn(name = "ser_codigo"))
@@ -70,5 +73,49 @@ public class Agendamento {
             nomes.add(s.getNome());
         }
         return String.join(", ", nomes);
+    }
+    
+    public double getValorTotal() {
+        if (servicos == null || servicos.isEmpty()) {
+            return 0.0;
+        }
+        double total = 0.0;
+        for (Servicos s : servicos) {
+            if (s.getPreco() != null) {
+                total += s.getPreco();
+            }
+        }
+        return total;
+    }
+    
+    public int getDuracaoTotalMinutos() {
+        if (servicos == null || servicos.isEmpty()) {
+            return 0;
+        }
+        int total = 0;
+        for (Servicos s : servicos) {
+            if (s.getMinutos() != null) {
+                total += s.getMinutos();
+            }
+        }
+        return total;
+    }
+    
+    public String getDuracaoTotalFormatada() {
+        int totalMinutos = getDuracaoTotalMinutos();
+        if (totalMinutos == 0) {
+            return "0min";
+        }
+        
+        int horas = totalMinutos / 60;
+        int minutos = totalMinutos % 60;
+        
+        if (horas > 0 && minutos > 0) {
+            return horas + "h " + minutos + "min";
+        } else if (horas > 0) {
+            return horas + "h";
+        } else {
+            return minutos + "min";
+        }
     }
 }

@@ -241,6 +241,15 @@ public class FuncionarioController {
 			PrimeFaces.current().ajax().update("form:dlgFuncForm");
 			return;
 		}
+		
+		// Validação: pelo menos um dia da semana deve estar selecionado
+		if (!horarioModel.getDomingo() && !horarioModel.getSegunda() && !horarioModel.getTerca() && 
+			!horarioModel.getQuarta() && !horarioModel.getQuinta() && !horarioModel.getSexta() && !horarioModel.getSabado()) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Selecione pelo menos um dia da semana!", "Erro!"));
+			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			return;
+		}
 
 		if (funcionarioModel != null && funcionarioModel.getId() != null) {
 			// Editando um funcionário existente
@@ -249,12 +258,21 @@ public class FuncionarioController {
 			horarioModel.setFuncionario(funcionarioModel);
 			HorarioDAO.salvar(horarioModel);
 			carregarHorariosFuncionario();
+			horarioModel = new Horario(); // Limpa o modelo
 		} else {
 			// Criando um novo funcionário
 			Horario horario = new Horario();
 			horario.setHoraFinal(horaFinal);
 			horario.setHoraInicial(horaInicial);
+			horario.setDomingo(horarioModel.getDomingo());
+			horario.setSegunda(horarioModel.getSegunda());
+			horario.setTerca(horarioModel.getTerca());
+			horario.setQuarta(horarioModel.getQuarta());
+			horario.setQuinta(horarioModel.getQuinta());
+			horario.setSexta(horarioModel.getSexta());
+			horario.setSabado(horarioModel.getSabado());
 			lstHorarioAux.add(horario);
+			horarioModel = new Horario(); // Limpa o modelo
 		}
 
 		exibirAlerta("success", "Horário adicionado com sucesso!");
@@ -307,6 +325,10 @@ public class FuncionarioController {
 		PrimeFaces.current().ajax().update("form:dlgFuncForm");
 		exibirAlerta("success", "Horário deletado com sucesso!");
 		carregarHorariosFuncionario();
+	}
+	
+	public java.util.Date getHoje() {
+		return new java.util.Date();
 	}
 
 }

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +33,13 @@ public class HorarioDAO {
 				horario.setHoraInicial(rs.getTime("hor_hora_inicio").toLocalTime());
 				horario.setHoraFinal(rs.getTime("hor_hora_fim").toLocalTime());
 				horario.setFuncionario(funcionario);
+				horario.setDomingo(rs.getBoolean("hor_domingo"));
+				horario.setSegunda(rs.getBoolean("hor_segunda"));
+				horario.setTerca(rs.getBoolean("hor_terca"));
+				horario.setQuarta(rs.getBoolean("hor_quarta"));
+				horario.setQuinta(rs.getBoolean("hor_quinta"));
+				horario.setSexta(rs.getBoolean("hor_sexta"));
+				horario.setSabado(rs.getBoolean("hor_sabado"));
 				horarios.add(horario);
 			}
 		} catch (Exception e) {
@@ -79,13 +87,28 @@ public class HorarioDAO {
 	}
 
 	public static void salvar(Horario horario) {
-		String sql = "INSERT INTO horario (hor_hora_inicio, hor_hora_fim, " + "fun_codigo) VALUES (?, ?, ?)";
+		String sql = "INSERT INTO horario (hor_hora_inicio, hor_hora_fim, fun_codigo, " +
+					 "hor_domingo, hor_segunda, hor_terca, hor_quarta, hor_quinta, hor_sexta, hor_sabado) " +
+					 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setTime(1, java.sql.Time.valueOf(horario.getHoraInicial()));
 			stmt.setTime(2, java.sql.Time.valueOf(horario.getHoraFinal()));
 			stmt.setLong(3, horario.getFuncionario().getId());
+			stmt.setBoolean(4, horario.getDomingo() != null ? horario.getDomingo() : false);
+			stmt.setBoolean(5, horario.getSegunda() != null ? horario.getSegunda() : false);
+			stmt.setBoolean(6, horario.getTerca() != null ? horario.getTerca() : false);
+			stmt.setBoolean(7, horario.getQuarta() != null ? horario.getQuarta() : false);
+			stmt.setBoolean(8, horario.getQuinta() != null ? horario.getQuinta() : false);
+			stmt.setBoolean(9, horario.getSexta() != null ? horario.getSexta() : false);
+			stmt.setBoolean(10, horario.getSabado() != null ? horario.getSabado() : false);
 			stmt.executeUpdate();
+			
+			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					horario.setId(generatedKeys.getLong(1));
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

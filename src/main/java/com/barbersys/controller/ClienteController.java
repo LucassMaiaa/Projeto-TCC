@@ -189,5 +189,9 @@ public class ClienteController {
 					"Erro inesperado ao deletar cliente: " + e.getMessage(), "Erro!"));
         }
 	}
+	
+	public java.util.Date getHoje() {
+		return new java.util.Date();
+	}
 
 }

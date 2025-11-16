@@ -70,6 +70,192 @@ body .ui-datalist .ui-datalist-content {
 	font-size: 14px;
 	font-weight: bold;
 }
+
+/* Estilos para dias da semana */
+.dias-semana-container {
+	display: flex;
+	gap: 15px;
+	flex-wrap: wrap;
+	padding: 10px 0;
+}
+
+.dia-checkbox {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+}
+
+.dia-checkbox .ui-chkbox {
+	margin: 0 !important;
+}
+
+.dia-label {
+	font-size: 12px;
+	font-weight: 500;
+	color: #495057;
+	cursor: pointer;
+}
+
+/* Horário estendido com dias */
+.list-time-extended {
+	position: relative;
+	background: #FFFFFF;
+	border: 1px solid #DDE3DF;
+	border-radius: 8px;
+	padding: 12px 15px;
+	margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.horario-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.horario-info .fa-solid {
+	color: #6C757D;
+	font-size: 16px;
+}
+
+.horario-info > div {
+	display: flex;
+	flex-direction: column;
+}
+
+.horario-info > div label {
+	margin: 0;
+}
+
+.dias-info {
+	display: flex;
+	gap: 6px;
+	padding-left: 26px;
+}
+
+.dia-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: 10px;
+	font-weight: 600;
+	transition: all 0.2s ease;
+}
+
+.dia-badge.ativo {
+	background-color: #28a745;
+	color: white;
+}
+
+.dia-badge.inativo {
+	background-color: #E9ECEF;
+	color: #ADB5BD;
+}
+
+.list-time-extended .btn-trash {
+	position: absolute;
+	right: 12px;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+body .data-list-time.ui-datalist .ui-datalist-content {
+	min-height: 250px;
+	max-height: 350px;
+}
+
+/* Seções do formulário */
+.section-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	border-bottom: 2px solid #E7F3F5;
+}
+
+.section-title i {
+	color: #4CAF50;
+	font-size: 18px;
+}
+
+.section-title label {
+	font-size: 16px;
+	font-weight: 600;
+	color: #2C3E50;
+	margin: 0;
+}
+
+/* Melhorias nos cards de horário */
+.list-time-extended {
+	transition: all 0.2s ease;
+	border: 1px solid #E0E0E0;
+}
+
+.list-time-extended:hover {
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+	border-color: #4CAF50;
+}
+
+.horario-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.horario-tempo {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	color: #2C3E50;
+}
+
+/* Ajustes no modal */
+body .ui-dialog#dlgFunc {
+	width: 700px !important;
+}
+
+.dialog-scroll {
+	max-height: 65vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 0 15px 15px 0;
+	margin-right: -15px;
+}
+
+.dialog-scroll::-webkit-scrollbar {
+	width: 8px;
+}
+
+.dialog-scroll::-webkit-scrollbar-track {
+	background: #F5F5F5;
+	border-radius: 10px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb {
+	background: #BDBDBD;
+	border-radius: 10px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb:hover {
+	background: #9E9E9E;
+}
+
+/* Título das seções menores */
+.title-item {
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	color: #546E7A;
+	display: block;
+}
 		</style>
 	</ui:define>
 
@@ -138,7 +324,7 @@ body .ui-datalist .ui-datalist-content {
 
 		<p:dialog id="dlgFunc" widgetVar="dlgFunc" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
-			draggable="false" resizable="false">
+			draggable="false" resizable="false" width="700">
 			<h:panelGroup id="dlgFuncForm">
 				<div class="header-modal">
 					<div class="flex align-center">
@@ -177,6 +363,8 @@ body .ui-datalist .ui-datalist-content {
 
 				</div>
 
+				<div class="dialog-scroll">
+				
 				<div class="row">
 					<div class="col-md-4">
 						<div class="content-filter no-filter">
@@ -195,67 +383,307 @@ body .ui-datalist .ui-datalist-content {
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
 
+				<div class="section-title mt10">
+					<i class="fa-solid fa-user-shield"></i>
+					<label>Dados de Acesso</label>
+				</div>
+				
                 <div class="row">
-					<div class="col-md-6">
+					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Login" />
+							<p:outputLabel styleClass="title-input" value="Login *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
-								value="#{funcionarioController.funcionarioModel.usuario.login}" />
+								value="#{funcionarioController.funcionarioModel.usuario.login}" 
+								placeholder="usuario.login" />
 						</div>
 					</div>
+				</div>
+				
+				<div class="row">
                     <div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Senha" />
-							<p:password styleClass="senha-login" autocomplete="off"
+							<p:outputLabel styleClass="title-input" value="Senha *" />
+							<p:password id="senhaFunc1" styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.senha}"
-								placeholder="#{funcionarioController.editarModel eq 'A' and funcionarioController.funcionarioModel.usuario.id != null ? 'Criar nova senha' : ''}" />
+								match="senhaFunc2" feedback="true"
+								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter' : ''}" />
 						</div>
 					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Confirmar Senha *" />
+							<p:password id="senhaFunc2" styleClass="senha-login" autocomplete="off"
+								value="#{funcionarioController.funcionarioModel.usuario.senha}"
+								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter' : ''}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-user"></i>
+					<label>Dados Pessoais</label>
 				</div>
 
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Nome do funcionário" />
+							<p:outputLabel styleClass="title-input" value="Nome Completo *" />
 							<p:inputText styleClass="senha-login"
-								value="#{funcionarioController.funcionarioModel.nome}" />
+								value="#{funcionarioController.funcionarioModel.nome}" 
+								placeholder="Ex: João da Silva Santos" />
 						</div>
-					</div>
-				</div>
-
-				<div class="row flex align-center">
-					<div class="col-5">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Ínicio" />
-							<p:datePicker id="inputHoraInicio" timeOnly="true"
-								validatorMessage="Hora inicial inválida. Use o formato HH:mm."
-								pattern="HH:mm" value="#{funcionarioController.dataInicial}"
-								styleClass="senha-login" />
-						</div>
-					</div>
-
-					<div class="col-5">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Fim" />
-							<p:datePicker id="inputHoraFim" timeOnly="true"
-								validatorMessage="Hora final inválida. Use o formato HH:mm."
-								pattern="HH:mm" value="#{funcionarioController.dataFinal}"
-								styleClass="senha-login" />
-						</div>
-					</div>
-
-					<div class="col-2">
-						<p:commandButton update="dttLstHorarios dlgFuncForm"
-							process="@form"
-							actionListener="#{funcionarioController.novoHorario()}"
-							class="btn btn-green" value="Adicionar" />
 					</div>
 				</div>
 				
-				<label class="title-item mt30 mb25">Horários de Trabalho</label>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="CPF" />
+							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.cpf}" 
+								placeholder="000.000.000-00" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
+							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
+								value="#{funcionarioController.funcionarioModel.dataNascimento}" 
+								showIcon="true" locale="pt" yearNavigator="true" 
+								yearRange="1920:2024" maxdate="#{funcionarioController.hoje}" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Sexo" />
+							<p:selectOneMenu styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.sexo}">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="Masculino" itemValue="M" />
+								<f:selectItem itemLabel="Feminino" itemValue="F" />
+								<f:selectItem itemLabel="Outro" itemValue="O" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Telefone" />
+							<p:inputMask mask="(99) 99999-9999" styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.telefone}" 
+								placeholder="(00) 00000-0000" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Data de Admissão" />
+							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
+								value="#{funcionarioController.funcionarioModel.dataAdmissao}" 
+								showIcon="true" locale="pt" yearNavigator="true" 
+								yearRange="2000:2030" maxdate="#{funcionarioController.hoje}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-map-location-dot"></i>
+					<label>Endereço</label>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="CEP" />
+							<p:inputMask mask="99999-999" styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.cep}" />
+						</div>
+					</div>
+					<div class="col-md-7">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Rua" />
+							<p:inputText styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.rua}" />
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Número" />
+							<p:inputText styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.numero}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Complemento" />
+							<p:inputText styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.complemento}" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Bairro" />
+							<p:inputText styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.bairro}" />
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Cidade" />
+							<p:inputText styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.cidade}" />
+						</div>
+					</div>
+					<div class="col-md-1">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="UF" />
+							<p:selectOneMenu styleClass="senha-login"
+								value="#{funcionarioController.funcionarioModel.estado}">
+								<f:selectItem itemLabel="UF" itemValue="" />
+								<f:selectItem itemLabel="AC" itemValue="AC" />
+								<f:selectItem itemLabel="AL" itemValue="AL" />
+								<f:selectItem itemLabel="AP" itemValue="AP" />
+								<f:selectItem itemLabel="AM" itemValue="AM" />
+								<f:selectItem itemLabel="BA" itemValue="BA" />
+								<f:selectItem itemLabel="CE" itemValue="CE" />
+								<f:selectItem itemLabel="DF" itemValue="DF" />
+								<f:selectItem itemLabel="ES" itemValue="ES" />
+								<f:selectItem itemLabel="GO" itemValue="GO" />
+								<f:selectItem itemLabel="MA" itemValue="MA" />
+								<f:selectItem itemLabel="MT" itemValue="MT" />
+								<f:selectItem itemLabel="MS" itemValue="MS" />
+								<f:selectItem itemLabel="MG" itemValue="MG" />
+								<f:selectItem itemLabel="PA" itemValue="PA" />
+								<f:selectItem itemLabel="PB" itemValue="PB" />
+								<f:selectItem itemLabel="PR" itemValue="PR" />
+								<f:selectItem itemLabel="PE" itemValue="PE" />
+								<f:selectItem itemLabel="PI" itemValue="PI" />
+								<f:selectItem itemLabel="RJ" itemValue="RJ" />
+								<f:selectItem itemLabel="RN" itemValue="RN" />
+								<f:selectItem itemLabel="RS" itemValue="RS" />
+								<f:selectItem itemLabel="RO" itemValue="RO" />
+								<f:selectItem itemLabel="RR" itemValue="RR" />
+								<f:selectItem itemLabel="SC" itemValue="SC" />
+								<f:selectItem itemLabel="SP" itemValue="SP" />
+								<f:selectItem itemLabel="SE" itemValue="SE" />
+								<f:selectItem itemLabel="TO" itemValue="TO" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-comment-dots"></i>
+					<label>Observações</label>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Observações Gerais" />
+							<p:inputTextarea styleClass="senha-login" rows="3" maxlength="500"
+								value="#{funcionarioController.funcionarioModel.observacoes}"
+								placeholder="Anotações sobre o funcionário..." />
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-clock"></i>
+					<label>Horários de Trabalho</label>
+				</div>
+
+				<div class="row mt20">
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Hora Início" />
+							<p:datePicker id="inputHoraInicio" timeOnly="true"
+								validatorMessage="Hora inicial inválida. Use o formato HH:mm."
+								pattern="HH:mm" 
+								stepMinute="30"
+								value="#{funcionarioController.dataInicial}"
+								styleClass="senha-login" />
+						</div>
+					</div>
+
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Hora Fim" />
+							<p:datePicker id="inputHoraFim" timeOnly="true"
+								validatorMessage="Hora final inválida. Use o formato HH:mm."
+								pattern="HH:mm" 
+								stepMinute="30"
+								value="#{funcionarioController.dataFinal}"
+								styleClass="senha-login" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row mt20">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="title-input mb-2" value="Dias da Semana" />
+						<div class="dias-semana-container">
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.domingo}" id="chkDom">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkDom" class="dia-label">Dom</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.segunda}" id="chkSeg">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSeg" class="dia-label">Seg</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.terca}" id="chkTer">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkTer" class="dia-label">Ter</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quarta}" id="chkQua">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkQua" class="dia-label">Qua</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quinta}" id="chkQui">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkQui" class="dia-label">Qui</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sexta}" id="chkSex">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSex" class="dia-label">Sex</label>
+							</div>
+							<div class="dia-checkbox">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sabado}" id="chkSab">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSab" class="dia-label">Sáb</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row mt20">
+					<div class="col-md-12 flex justify-end">
+						<p:commandButton update="dttLstHorarios dttLstHorariosAux dlgFuncForm"
+							process="@form"
+							actionListener="#{funcionarioController.novoHorario()}"
+							class="btn btn-green" value="Adicionar Horário" 
+							icon="fa fa-plus" />
+					</div>
+				</div>
+				
+				<label class="title-item mt30 mb25">Horários Cadastrados</label>
 
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
 					<p:dataList id="dttLstHorariosAux" paginator="true"
@@ -265,26 +693,35 @@ body .ui-datalist .ui-datalist-content {
 						emptyMessage="Nenhum horário adicionado" var="horario"
 						rowIndexVar="index">
 
-						<div class="list-time">
-							<div>
+						<div class="list-time-extended">
+							<div class="horario-info">
 								<i class="fa-solid fa-clock"></i>
 								<div>
-									<label class="title-obj">Inicial</label> <label
-										class="subtitle-obj">#{horario.horaInicial}</label>
+									<label class="title-obj">Inicial</label> 
+									<label class="subtitle-obj">#{horario.horaInicial}</label>
 								</div>
 								<div>
 									<label>-</label>
 								</div>
 								<div>
-									<label class="title-obj">Final</label> <label
-										class="subtitle-obj">#{horario.horaFinal}</label>
+									<label class="title-obj">Final</label> 
+									<label class="subtitle-obj">#{horario.horaFinal}</label>
 								</div>
 							</div>
-
-							<p:commandButton update="dttLstHorariosAux" process="@this"
+							<div class="dias-info">
+								<span class="dia-badge #{horario.domingo ? 'ativo' : 'inativo'}">D</span>
+								<span class="dia-badge #{horario.segunda ? 'ativo' : 'inativo'}">S</span>
+								<span class="dia-badge #{horario.terca ? 'ativo' : 'inativo'}">T</span>
+								<span class="dia-badge #{horario.quarta ? 'ativo' : 'inativo'}">Q</span>
+								<span class="dia-badge #{horario.quinta ? 'ativo' : 'inativo'}">Q</span>
+								<span class="dia-badge #{horario.sexta ? 'ativo' : 'inativo'}">S</span>
+								<span class="dia-badge #{horario.sabado ? 'ativo' : 'inativo'}">S</span>
+							</div>
+							<p:commandButton update="dttLstHorariosAux dlgFuncForm" process="@this"
 								styleClass="btn-trash"
 								actionListener="#{funcionarioController.recebeValorDeleteHorarioAux(index)}"
-								icon="fa-solid fa-trash" />
+								icon="fa-solid fa-trash"
+								onclick="PF('dlgHoraAux').show()" />
 						</div>
 
 					</p:dataList>
@@ -296,31 +733,40 @@ body .ui-datalist .ui-datalist-content {
 						paginator="true" paginatorPosition="bottom" rows="4" lazy="true"
 						emptyMessage="Nenhum horário cadastrado para esse funcionário">
 
-						<div class="list-time">
-							<div>
+						<div class="list-time-extended">
+							<div class="horario-info">
 								<i class="fa-solid fa-clock"></i>
 								<div>
-									<label class="title-obj">Inicial</label> <label
-										class="subtitle-obj">#{horario.horaInicial}</label>
+									<label class="title-obj">Inicial</label> 
+									<label class="subtitle-obj">#{horario.horaInicial}</label>
 								</div>
 								<div>
 									<label>-</label>
 								</div>
 								<div>
-									<label class="title-obj">Final</label> <label
-										class="subtitle-obj">#{horario.horaFinal}</label>
+									<label class="title-obj">Final</label> 
+									<label class="subtitle-obj">#{horario.horaFinal}</label>
 								</div>
 							</div>
-
+							<div class="dias-info">
+								<span class="dia-badge #{horario.domingo ? 'ativo' : 'inativo'}">D</span>
+								<span class="dia-badge #{horario.segunda ? 'ativo' : 'inativo'}">S</span>
+								<span class="dia-badge #{horario.terca ? 'ativo' : 'inativo'}">T</span>
+								<span class="dia-badge #{horario.quarta ? 'ativo' : 'inativo'}">Q</span>
+								<span class="dia-badge #{horario.quinta ? 'ativo' : 'inativo'}">Q</span>
+								<span class="dia-badge #{horario.sexta ? 'ativo' : 'inativo'}">S</span>
+								<span class="dia-badge #{horario.sabado ? 'ativo' : 'inativo'}">S</span>
+							</div>
 							<p:commandButton update="dttLstHorarios" process="@this"
 								styleClass="btn-trash"
 								actionListener="#{funcionarioController.recebeValorDeleteHorario(horario)}"
 								icon="fa-solid fa-trash" />
 						</div>
 
-
 					</p:dataList>
 				</ui:fragment>
+				
+				</div><!-- Fecha dialog-scroll -->
 
 			</h:panelGroup>
 

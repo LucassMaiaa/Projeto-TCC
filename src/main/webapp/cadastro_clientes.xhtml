@@ -63,6 +63,67 @@ body .ui-datalist .ui-datalist-content {
 	flex-direction: column;
 	gap: 6px;
 }
+
+/* Seções do formulário */
+.section-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	border-bottom: 2px solid #E7F3F5;
+}
+
+.section-title i {
+	color: #4CAF50;
+	font-size: 18px;
+}
+
+.section-title label {
+	font-size: 16px;
+	font-weight: 600;
+	color: #2C3E50;
+	margin: 0;
+}
+
+.mt10 {
+	margin-top: 10px;
+}
+
+.mt20 {
+	margin-top: 20px;
+}
+
+/* Ajustes no modal */
+body .ui-dialog#dlgCli {
+	width: 700px !important;
+}
+
+.dialog-scroll {
+	max-height: 65vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 0 15px 15px 0;
+	margin-right: -15px;
+}
+
+.dialog-scroll::-webkit-scrollbar {
+	width: 8px;
+}
+
+.dialog-scroll::-webkit-scrollbar-track {
+	background: #F5F5F5;
+	border-radius: 10px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb {
+	background: #BDBDBD;
+	border-radius: 10px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb:hover {
+	background: #9E9E9E;
+}
 		</style>
 	</ui:define>
 
@@ -160,34 +221,55 @@ body .ui-datalist .ui-datalist-content {
 
 				</div>
 
+				<div class="dialog-scroll">
+
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
 
+				<div class="section-title mt10">
+					<i class="fa-solid fa-user-shield"></i>
+					<label>Dados de Acesso</label>
+				</div>
+				
                 <div class="row">
-					<div class="col-md-6">
+					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Login" />
+							<p:outputLabel styleClass="title-input" value="Login" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{clienteController.clienteModel.usuario.login}" />
 						</div>
 					</div>
+				</div>
+				
+				<div class="row">
                     <div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Senha" />
-							<p:password styleClass="senha-login" autocomplete="off"
+							<p:outputLabel styleClass="title-input" value="Senha" />
+							<p:password id="senha1" styleClass="senha-login" autocomplete="off"
 								value="#{clienteController.clienteModel.usuario.senha}"
-								placeholder="#{clienteController.editarModel eq 'A' and clienteController.clienteModel.usuario.id != null ? 'Criar nova senha' : ''}" />
+								match="senha2" feedback="true"
+								placeholder="#{clienteController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : ''}" />
 						</div>
 					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Confirmar Senha" />
+							<p:password id="senha2" styleClass="senha-login" autocomplete="off"
+								value="#{clienteController.clienteModel.usuario.senha}"
+								placeholder="#{clienteController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : ''}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-user"></i>
+					<label>Dados Pessoais</label>
 				</div>
 
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Nome do cliente" />
+							<p:outputLabel styleClass="title-input" value="Nome Completo" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{clienteController.clienteModel.nome}" />
 						</div>
@@ -195,34 +277,161 @@ body .ui-datalist .ui-datalist-content {
 				</div>
 
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="CPF" />
+							<p:outputLabel styleClass="title-input" value="CPF" />
 							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
 								value="#{clienteController.clienteModel.cpf}" />
 						</div>
 					</div>
-					<div class="col-md-6">
+					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Telefone" />
-							<p:inputMask mask="(99) 99999 - 9999" styleClass="senha-login"
-								value="#{clienteController.clienteModel.telefone}" />
+							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
+							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
+								value="#{clienteController.clienteModel.dataNascimento}" 
+								showIcon="true" locale="pt" yearNavigator="true" 
+								yearRange="1920:2024" maxdate="#{clienteController.hoje}" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Sexo" />
+							<p:selectOneMenu styleClass="senha-login"
+								value="#{clienteController.clienteModel.sexo}">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="Masculino" itemValue="M" />
+								<f:selectItem itemLabel="Feminino" itemValue="F" />
+								<f:selectItem itemLabel="Outro" itemValue="O" />
+							</p:selectOneMenu>
 						</div>
 					</div>
 				</div>
 				
+				<!-- CONTATO -->
 				<div class="row">
-					<div class="col-md-12">
+					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Email" />
+							<p:outputLabel styleClass="title-input" value="Telefone" />
+							<p:inputMask mask="(99) 99999-9999" styleClass="senha-login"
+								value="#{clienteController.clienteModel.telefone}" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Email" />
 							<p:inputText styleClass="senha-login"
 								value="#{clienteController.clienteModel.email}" />
 						</div>
 					</div>
 				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-map-location-dot"></i>
+					<label>Endereço</label>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="CEP" />
+							<p:inputMask mask="99999-999" styleClass="senha-login"
+								value="#{clienteController.clienteModel.cep}" />
+						</div>
+					</div>
+					<div class="col-md-7">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Rua" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.rua}" />
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Número" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.numero}" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Complemento" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.complemento}" />
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Bairro" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.bairro}" />
+						</div>
+					</div>
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Cidade" />
+							<p:inputText styleClass="senha-login"
+								value="#{clienteController.clienteModel.cidade}" />
+						</div>
+					</div>
+					<div class="col-md-1">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="UF" />
+							<p:selectOneMenu styleClass="senha-login"
+								value="#{clienteController.clienteModel.estado}">
+								<f:selectItem itemLabel="UF" itemValue="" />
+								<f:selectItem itemLabel="AC" itemValue="AC" />
+								<f:selectItem itemLabel="AL" itemValue="AL" />
+								<f:selectItem itemLabel="AP" itemValue="AP" />
+								<f:selectItem itemLabel="AM" itemValue="AM" />
+								<f:selectItem itemLabel="BA" itemValue="BA" />
+								<f:selectItem itemLabel="CE" itemValue="CE" />
+								<f:selectItem itemLabel="DF" itemValue="DF" />
+								<f:selectItem itemLabel="ES" itemValue="ES" />
+								<f:selectItem itemLabel="GO" itemValue="GO" />
+								<f:selectItem itemLabel="MA" itemValue="MA" />
+								<f:selectItem itemLabel="MT" itemValue="MT" />
+								<f:selectItem itemLabel="MS" itemValue="MS" />
+								<f:selectItem itemLabel="MG" itemValue="MG" />
+								<f:selectItem itemLabel="PA" itemValue="PA" />
+								<f:selectItem itemLabel="PB" itemValue="PB" />
+								<f:selectItem itemLabel="PR" itemValue="PR" />
+								<f:selectItem itemLabel="PE" itemValue="PE" />
+								<f:selectItem itemLabel="PI" itemValue="PI" />
+								<f:selectItem itemLabel="RJ" itemValue="RJ" />
+								<f:selectItem itemLabel="RN" itemValue="RN" />
+								<f:selectItem itemLabel="RS" itemValue="RS" />
+								<f:selectItem itemLabel="RO" itemValue="RO" />
+								<f:selectItem itemLabel="RR" itemValue="RR" />
+								<f:selectItem itemLabel="SC" itemValue="SC" />
+								<f:selectItem itemLabel="SP" itemValue="SP" />
+								<f:selectItem itemLabel="SE" itemValue="SE" />
+								<f:selectItem itemLabel="TO" itemValue="TO" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				
+				<div class="section-title mt20">
+					<i class="fa-solid fa-comment-dots"></i>
+					<label>Preferências do Cliente</label>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" 
+								value="Observações (Ex: Prefiro não conversar durante o atendimento, gosto do corte mais curto em cima, etc.)" />
+							<p:inputTextarea styleClass="senha-login" rows="4" maxlength="500"
+								value="#{clienteController.clienteModel.observacoes}"
+								placeholder="Digite aqui as preferências e observações do cliente..." />
+						</div>
+					</div>
+				</div>
+				
+				</div><!-- Fecha dialog-scroll -->
 
 			</h:panelGroup>
 

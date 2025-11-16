@@ -19,6 +19,24 @@
 	background: #FCFCFF;
 }
 
+/* Estilos para datas desabilitadas no datepicker */
+.ui-datepicker .ui-state-disabled {
+	opacity: 0.4 !important;
+	cursor: not-allowed !important;
+	background-color: #f5f5f5 !important;
+	color: #999 !important;
+}
+
+.ui-datepicker .ui-datepicker-unselectable {
+	cursor: not-allowed !important;
+}
+
+.ui-datepicker .ui-datepicker-unselectable a {
+	pointer-events: none !important;
+	color: #ccc !important;
+	text-decoration: line-through !important;
+}
+
 .header-filters {
 	margin-top: 9px;
 }
@@ -213,7 +231,7 @@ body .ui-datatable .ui-datatable-even>td {
 					<div class="flex align-center">
 						<ui:fragment
 							rendered="#{agendamentoController.editarModel eq 'A' and agendamentoController.passos eq 2}">
-							<p:commandButton update="dttDataSelect" process="@form"
+							<p:commandButton update="dttDataSelect" process="dttDataSelect @this"
 								actionListener="#{agendamentoController.atualizarAgendamento()}"
 								styleClass="btn btn-green" value="Salvar"
 								disabled="#{empty agendamentoController.horaSelecionada or agendamentoController.agendamentoPassado}" />
@@ -221,7 +239,7 @@ body .ui-datatable .ui-datatable-even>td {
 						<ui:fragment
 							rendered="#{agendamentoController.editarModel eq 'I' and agendamentoController.passos eq 2}">
 							<p:commandButton id="agendarButton" update="dttDataSelect"
-								process="@form"
+								process="dttDataSelect @this"
 								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
 								styleClass="btn btn-green" value="Agendar"
 								disabled="#{empty agendamentoController.horaSelecionada}" />
@@ -264,122 +282,159 @@ body .ui-datatable .ui-datatable-even>td {
 									<div class="input-combined">
 										<p:outputLabel styleClass="title-input"
 											value="Nome do Cliente" />
-																		<p:selectOneMenu value="#{agendamentoController.clienteId}"
-																			filter="true" filterMatchMode="startsWith" style="width: 100%;"
-																			disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
-																			<f:selectItem itemLabel="Selecione um cliente" />
-																			<f:selectItems var="cli"
-																				value="#{agendamentoController.lstCliente}"
-																				itemLabel="#{cli.nome}" itemValue="#{cli.id}" />
-																			<p:ajax event="change" update="proximoButton" process="@this" />
-																			<f:facet name="footer">
-																				<p:divider styleClass="mt-0" />
-																				<h:outputText
-																					value="#{agendamentoController.lstCliente.size()} Clientes encontrados"
-																					style="font-weight:bold;" />
-																			</f:facet>
-																		</p:selectOneMenu>
-																	</div>
-																</ui:fragment>
-																<ui:fragment
-																	rendered="#{agendamentoController.tipoCadastro eq 'I'}">
-																	<div class="input-combined">
-																		<p:outputLabel styleClass="title-input"
-																			value="Nome do Cliente" />
-																		<p:inputText value="#{agendamentoController.nomeCliente}"
-																			styleClass="senha-login" style="width: 100%;"
-																			disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
-																			<p:ajax event="keyup" update="proximoButton" process="@this" />
-																		</p:inputText>
-																	</div>
-																</ui:fragment>
-															</p:outputPanel>
-														</div>
-													</div>
-										
-													<div class="row">
-														<div class="col-md-12">
-															<div class="input-combined">
-																<p:outputLabel styleClass="title-input"
-																	value="Selecione uma data" />
-																<p:datePicker id="inputData" widgetVar="dlgDatePicker"
-																	value="#{agendamentoController.dataSelecionada}"
-																	showIcon="true" pattern="dd/MM/yyyy" autocomplete="off"
-																	mindate="#{agendamentoController.today}" disabled="#{agendamentoController.agendamentoPassado}">									<p:ajax event="dateSelect"
-										listener="#{agendamentoController.filtrarFuncionariosPorData}"
-										update="dttDataSelect" process="@this" />
-								</p:datePicker>
-							</div>
-						</div>
-					</div>
-				</ui:fragment>
-
-				<ui:fragment rendered="#{agendamentoController.passos eq 1}">
-									<div class="row">
-										<div class="col-md-12">
-											<div class="input-combined">
-												<p:outputLabel styleClass="title-input"
-													value="Nome do funcionário" />
-												<p:selectOneMenu id="inputFuncionario"
-													value="#{agendamentoController.nomeFuncionario}" filter="true"
-													filterMatchMode="startsWith" disabled="#{agendamentoController.agendamentoPassado}">
-													<f:selectItem itemLabel="Selecione um funcionário" itemValue="" />
-													<f:selectItems
-														value="#{agendamentoController.lstFuncionarioDisponivel}"
-														var="func" itemLabel="#{func.nome}" itemValue="#{func.nome}" />
-													<p:ajax event="change" update="proximoButton" process="@this" />
-												</p:selectOneMenu>
-											</div>
-										</div>
-									</div>
-									<div class="row">
-										<div class="col-md-12">
-											<div class="input-combined">
-												<p:outputLabel styleClass="title-input" value="Serviços" />
-												<p:selectCheckboxMenu
-													value="#{agendamentoController.servicosSelecionadosIds}"
-													label="Selecione os serviços" multiple="true" filter="true"
-													converter="javax.faces.Long" disabled="#{agendamentoController.agendamentoPassado}">
-													<f:selectItems value="#{agendamentoController.lstServico}"
-														var="servico" itemLabel="#{servico.nome}"
-														itemValue="#{servico.id}" />
-													<p:ajax event="change" update="proximoButton" process="@this" />
-													<p:ajax event="toggleSelect" update="proximoButton"
-														process="@this" />
-												</p:selectCheckboxMenu>
-											</div>
-										</div>
+										<p:selectOneMenu value="#{agendamentoController.clienteId}"
+											filter="true" filterMatchMode="startsWith" style="width: 100%;"
+											disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
+											<f:selectItem itemLabel="Selecione um cliente" />
+											<f:selectItems var="cli"
+												value="#{agendamentoController.lstCliente}"
+												itemLabel="#{cli.nome}" itemValue="#{cli.id}" />
+											<p:ajax event="change" update="proximoButton" process="@this" />
+											<f:facet name="footer">
+												<p:divider styleClass="mt-0" />
+												<h:outputText
+													value="#{agendamentoController.lstCliente.size()} Clientes encontrados"
+													style="font-weight:bold;" />
+											</f:facet>
+										</p:selectOneMenu>
 									</div>
 								</ui:fragment>
+								<ui:fragment
+									rendered="#{agendamentoController.tipoCadastro eq 'I'}">
+									<div class="input-combined">
+										<p:outputLabel styleClass="title-input"
+											value="Nome do Cliente" />
+										<p:inputText value="#{agendamentoController.nomeCliente}"
+											styleClass="senha-login" style="width: 100%;"
+											disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
+											<p:ajax event="keyup" update="proximoButton" process="@this" />
+										</p:inputText>
+									</div>
+								</ui:fragment>
+							</p:outputPanel>
+						</div>
+					</div>
 					
-								<ui:fragment rendered="#{agendamentoController.passos eq 2}">
-									<div class="row">
-										<div class="col-md-12">
-											<div class="input-combined">
-												<p:outputLabel styleClass="title-input"
-													value="Horários disponíveis" />
-												<p:selectOneMenu id="inputHorario"
-													value="#{agendamentoController.horaSelecionada}" disabled="#{agendamentoController.agendamentoPassado}">									<f:selectItem itemLabel="Selecione horário" itemValue="" />
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input"
+									value="Nome do funcionário" />
+								<p:selectOneMenu id="inputFuncionario"
+									value="#{agendamentoController.nomeFuncionario}" filter="true"
+									filterMatchMode="startsWith" disabled="#{agendamentoController.agendamentoPassado}">
+									<f:selectItem itemLabel="Selecione um funcionário" itemValue="" />
 									<f:selectItems
-										value="#{agendamentoController.horariosDisponiveis}" var="h"
-										itemLabel="#{h}" itemValue="#{h}" />
-									<p:ajax event="change" update="@form:agendarButton" process="@this" />
+										value="#{agendamentoController.lstFuncionarioDisponivel}"
+										var="func" itemLabel="#{func.nome}" itemValue="#{func.nome}" />
+									<p:ajax event="change" 
+										listener="#{agendamentoController.onFuncionarioChange}"
+										update="proximoButton" 
+										process="@this" />
 								</p:selectOneMenu>
 							</div>
 						</div>
 					</div>
 				</ui:fragment>
 
-				<div class="row">
+				<ui:fragment rendered="#{agendamentoController.passos eq 1}">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input"
+									value="Selecione uma data" />
+								<p:datePicker id="inputData" widgetVar="dlgDatePicker"
+									value="#{agendamentoController.dataSelecionada}"
+									showIcon="true" pattern="dd/MM/yyyy" autocomplete="off"
+									mindate="#{agendamentoController.today}"
+									disabledDates="#{agendamentoController.datasDesabilitadasDate}"
+									disabled="#{agendamentoController.agendamentoPassado}"
+									locale="pt"
+									onkeydown="return false;">
+									<p:ajax event="dateSelect"
+										listener="#{agendamentoController.filtrarFuncionariosPorData}"
+										update="dttDataSelect proximoButton" process="@this" />
+								</p:datePicker>
+							</div>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Serviços" />
+								<p:selectCheckboxMenu id="servicosSelect"
+									value="#{agendamentoController.servicosSelecionadosIds}"
+									label="Selecione os serviços" multiple="true" filter="true"
+									converter="javax.faces.Long" disabled="#{agendamentoController.agendamentoPassado}">
+									<f:selectItems value="#{agendamentoController.lstServico}"
+										var="servico" itemLabel="#{servico.nome}"
+										itemValue="#{servico.id}" />
+									<p:ajax event="change" 
+										update="proximoButton" 
+										process="@this" />
+									<p:ajax event="toggleSelect" 
+										update="proximoButton"
+										process="@this" />
+								</p:selectCheckboxMenu>
+							</div>
+						</div>
+					</div>
+				</ui:fragment>
+					
+								<ui:fragment rendered="#{agendamentoController.passos eq 2 and agendamentoController.agendamentoModel != null}">
+									<div class="row">
+										<div class="col-md-12">
+											<div class="input-combined">
+												<p:outputLabel styleClass="title-input"
+													value="Horários disponíveis" />
+												<p:selectOneMenu id="inputHorario"
+													value="#{agendamentoController.horaSelecionada}" 
+													disabled="#{agendamentoController.agendamentoPassado or empty agendamentoController.horariosDisponiveis}">
+													<f:selectItem itemLabel="#{empty agendamentoController.horariosDisponiveis ? 'Nenhum horário disponível nesta data' : 'Selecione horário'}" itemValue="" />
+													<f:selectItems
+														value="#{agendamentoController.horariosDisponiveis}" var="h"
+														itemLabel="#{h}" itemValue="#{h}" />
+													<p:ajax event="change" update="@form:agendarButton" process="@this" />
+												</p:selectOneMenu>
+												
+												<p:message for="inputHorario" />
+											</div>
+											
+											<!-- Mensagem informativa quando não há horários -->
+											<h:panelGroup rendered="#{empty agendamentoController.horariosDisponiveis and agendamentoController.dataSelecionada != null}">
+												<div class="alert alert-warning mt-2" style="padding: 10px; background: #FFF3CD; border: 1px solid #FFECB5; border-radius: 4px; color: #856404;">
+													<i class="fa-solid fa-exclamation-triangle"></i>
+													<strong>Atenção:</strong> Não há horários disponíveis para esta data. 
+													Possíveis motivos: data com restrição, funcionário não trabalha neste dia ou todos os horários estão ocupados.
+												</div>
+											</h:panelGroup>
+						</div>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" 
+									value="Observações para este agendamento (opcional)" />
+								<p:inputTextarea styleClass="senha-login" rows="3" maxlength="500"
+									value="#{agendamentoController.agendamentoModel.observacoes}"
+									placeholder="Ex: Prefiro não conversar, deixar o corte mais curto, etc..." />
+							</div>
+						</div>
+					</div>
+				</ui:fragment>
+
+				<div class="row mt20">
 					<div class="col-md-6">
-						<p:commandButton update="dttDataSelect" process="@form"
+						<p:commandButton update="dttDataSelect msgs" process="@this"
 							immediate="true" value="Anterior" styleClass="btn btn-blue medium"
 							actionListener="#{agendamentoController.voltaPassosAgendamento()}"
 							rendered="#{agendamentoController.passos > 0}" />
 					</div>
 					<div class="col-md-6 flex justify-end">
-						<p:commandButton id="proximoButton" update="dttDataSelect"
-							process="@form" value="Próximo" styleClass="btn btn-blue medium"
+						<p:commandButton id="proximoButton" update="dttDataSelect msgs"
+							process="dttDataSelect" value="Próximo" styleClass="btn btn-blue medium"
 							actionListener="#{agendamentoController.addPassosAgendamento()}"
 							rendered="#{agendamentoController.passos lt 2}"
 							disabled="#{agendamentoController.proximoDisabled}" />
@@ -401,9 +456,14 @@ body .ui-datatable .ui-datatable-even>td {
 				<div class="flex align-center justify-center">
 					<p:commandButton styleClass="btn medium btn-confirm"
 						value="Confirmar"
-						actionListener="#{agendamentoController.cancelarAgendamento}" />
+						actionListener="#{agendamentoController.cancelarAgendamento}"
+						update="dttDataSelect"
+						process="@this"
+						oncomplete="PF('dlgConfirmCancel').hide(); PF('dlgAgendar').hide();" />
 					<p:commandButton styleClass="btn medium btn-cancel"
-						value="Cancelar" onclick="PF('dlgConfirmCancel').hide()" />
+						value="Cancelar" 
+						type="button"
+						onclick="PF('dlgConfirmCancel').hide()" />
 				</div>
 			</h:panelGroup>
 		</p:dialog>
@@ -473,6 +533,26 @@ body .ui-datatable .ui-datatable-even>td {
 						</ui:fragment>
 					</div>
 				</div>
+				
+				<!-- Sexo do Cliente -->
+				<ui:fragment rendered="#{agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.sexo != null}">
+					<div class="content-valores" style="padding-top: 8px;">
+						<label class="title-obj">Sexo</label>
+						<label class="subtitle-obj">
+							#{agendamentoController.clienteModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.clienteModel.sexo eq 'F' ? 'Feminino' : 'Outro')}
+						</label>
+					</div>
+				</ui:fragment>
+				
+				<!-- Observações do Cliente (prioridade: agendamento > cadastro) -->
+				<ui:fragment rendered="#{(agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '') or (agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.observacoes != null and agendamentoController.clienteModel.observacoes.trim() != '')}">
+					<div class="content-valores" style="padding-top: 8px;">
+						<label class="title-obj">Observações/Preferências</label>
+						<label class="subtitle-obj" style="white-space: pre-wrap;">
+							#{agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '' ? agendamentoController.agendamentoModel.observacoes : agendamentoController.clienteModel.observacoes}
+						</label>
+					</div>
+				</ui:fragment>
 
 				<p:outputPanel id="attCaixa">
 					<div>
@@ -576,7 +656,7 @@ body .ui-datatable .ui-datatable-even>td {
 								actionListener="#{agendamentoController.finalizarPedido()}"
 								class="btn btn-blue medium" value="Finalizar" update="@form"
 								process="@this"
-								rendered="#{agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pago eq 'S'}" />
+								rendered="#{agendamentoController.agendamentoModel.status eq 'A' and agendamentoController.agendamentoModel.pago eq 'S' and agendamentoController.podeFinalizarHoje}" />
 						</div>
 					</p:outputPanel>
 				</div>

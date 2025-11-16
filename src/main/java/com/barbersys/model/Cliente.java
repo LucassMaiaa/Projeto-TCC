@@ -1,6 +1,7 @@
 package com.barbersys.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -33,9 +36,41 @@ public class Cliente implements Serializable{
 	
 	@Column
 	private String cpf;
+	
+	@Column(name = "cli_sexo")
+	private String sexo; // M=Masculino, F=Feminino, O=Outro
+	
+	@Column(name = "cli_data_nascimento")
+	@Temporal(TemporalType.DATE)
+	private Date dataNascimento;
+	
+	@Column(name = "cli_observacoes")
+	private String observacoes;
+	
+	// Endereço separado
+	@Column(name = "cli_cep")
+	private String cep;
+	
+	@Column(name = "cli_rua")
+	private String rua;
+	
+	@Column(name = "cli_numero")
+	private String numero;
+	
+	@Column(name = "cli_complemento")
+	private String complemento;
+	
+	@Column(name = "cli_bairro")
+	private String bairro;
+	
+	@Column(name = "cli_cidade")
+	private String cidade;
+	
+	@Column(name = "cli_estado")
+	private String estado;
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "usu_codigo")
-	private Usuario usuario = new Usuario(); // Inicialização direta aqui
+	private Usuario usuario = new Usuario();
 	
 }
