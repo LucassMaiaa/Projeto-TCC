@@ -229,6 +229,28 @@
 			font-size: 13px;
 		}
 		
+		/* Observações no card */
+		.info-row.observations {
+			/* Estilo simplificado para seguir o padrão do sistema */
+			/* Herda display:flex e gap do .info-row */
+			margin-top: 0; /* Remove margem extra */
+		}
+		
+		.info-row.observations i {
+			/* Herda a cor e o tamanho dos outros ícones do .info-row */
+			font-size: 14px;
+		}
+		
+		.info-row.observations span {
+			color: #6B7280; /* Mesma cor do texto de serviços */
+			font-size: 13px; /* Mesmo tamanho do texto de serviços */
+			font-weight: 400; /* Fonte mais leve */
+			font-style: italic; /* Mantém itálico para indicar que é uma nota */
+			line-height: 1.4;
+			white-space: pre-wrap;
+			word-break: break-word;
+		}
+		
 		/* Footer do card */
 		.card-footer {
 			padding: 12px 16px;
@@ -878,8 +900,7 @@
 											value="#{agendamentoClienteController.funcionarioId}"
 											required="true"
 											requiredMessage="O campo funcionário é obrigatório."
-											filter="true" filterMatchMode="startsWith"
-											disabled="#{agendamentoClienteController.funcionarioDesabilitado}">
+											filter="true" filterMatchMode="startsWith">
 											<f:selectItem itemLabel="Selecione um funcionário" itemValue="" />
 											<f:selectItems
 												value="#{agendamentoClienteController.funcionariosDisponiveis}"
@@ -900,9 +921,10 @@
 									styleClass="btn-step btn-step-next"
 									action="#{agendamentoClienteController.proximoPasso}"
 									disabled="#{not agendamentoClienteController.podeAvancarPasso}"
-									update=":form:stepsContainer :form:msgs"
-									process="@this :form:panelCliente :form:barberSelectorWrapper"
-									ax="true" />
+									update="stepsContainer"
+									process="@this barberSelector"
+									ajax="true"
+									resetValues="false" />
 							</div>
 						</div>
 					</h:panelGroup>
@@ -921,7 +943,6 @@
 										mindate="#{agendamentoClienteController.today}"
 										disabledDates="#{agendamentoClienteController.datasDesabilitadasDate}"
 										required="true" requiredMessage="O campo Data é obrigatório."
-										disabled="#{agendamentoClienteController.dataDesabilitada}"
 										locale="pt"
 										onkeydown="return false;">
 										<p:ajax event="dateSelect"
@@ -1035,16 +1056,19 @@
 								<p:commandButton value="Anterior" 
 									styleClass="btn-step btn-step-previous"
 									action="#{agendamentoClienteController.passoAnterior}"
-									update=":form:stepsContainer"
-									process="@this"
-									ax="true" />
+									update="stepsContainer"
+									process="@none"
+									immediate="true"
+									ajax="true"
+									resetValues="false" />
 								<p:commandButton id="btnProximoPasso2" value="Próximo" 
 									styleClass="btn-step btn-step-next"
 									action="#{agendamentoClienteController.proximoPasso}"
 									disabled="#{not agendamentoClienteController.podeAvancarPasso}"
-									update=":form:stepsContainer :form:msgs"
-									process="@this :form:datePickerWrapper :form:servicosWrapper"
-									ax="true" />
+									update="stepsContainer"
+									process="@this datePickerWrapper servicosGridPanel"
+									ajax="true"
+									resetValues="false" />
 							</div>
 						</div>
 					</h:panelGroup>
@@ -1061,7 +1085,7 @@
 											value="#{agendamentoClienteController.horaSelecionada}"
 											required="true"
 											requiredMessage="O campo Horário é obrigatório."
-											disabled="#{agendamentoClienteController.horarioDesabilitado or empty agendamentoClienteController.horariosDisponiveis}">
+											disabled="#{empty agendamentoClienteController.horariosDisponiveis}">
 											<f:selectItem itemLabel="#{empty agendamentoClienteController.horariosDisponiveis ? 'Nenhum horário disponível' : 'Selecione um horário'}" itemValue="" />
 											<f:selectItems
 												value="#{agendamentoClienteController.horariosDisponiveis}"
@@ -1099,16 +1123,18 @@
 								<p:commandButton value="Anterior" 
 									styleClass="btn-step btn-step-previous"
 									action="#{agendamentoClienteController.passoAnterior}"
-									update=":form:stepsContainer"
-									process="@this"
-									ax="true" />
+									update="stepsContainer"
+									process="@none"
+									immediate="true"
+									ajax="true"
+									resetValues="false" />
 								<p:commandButton id="btnAgendar" value="AGENDAR" 
 									styleClass="btn-step btn-step-finish"
 									action="#{agendamentoClienteController.agendar}"
 									disabled="#{not agendamentoClienteController.podeAgendar}"
 									update=":form:bookingAreaPanel :form:msgs :form:listaAgendamentosPanel"
 									process="@form"
-									ax="true" />
+									ajax="true" />
 							</div>
 						</div>
 					</h:panelGroup>
@@ -1183,6 +1209,14 @@
 							<div class="info-row services">
 								<i class="fa-solid fa-scissors"></i> <span>#{agend.servicosConcatenados}</span>
 							</div>
+							
+							<!-- Observações (se existir) -->
+							<h:panelGroup rendered="#{agend.observacoesExibicao != null}">
+								<div class="info-row observations">
+									<i class="fa-solid fa-note-sticky"></i>
+									<span>#{agend.observacoesExibicao}</span>
+								</div>
+							</h:panelGroup>
 						</div>
 
 						<div class="card-footer">

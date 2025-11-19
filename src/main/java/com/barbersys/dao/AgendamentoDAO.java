@@ -76,7 +76,8 @@ public class AgendamentoDAO {
 				+ "a.age_hora AS agendamento_hora, " + "a.age_tipo_cadastro AS agendamento_tipo, "
 				+ "a.age_pago AS agendamento_pago, " + "a.age_observacoes AS agendamento_observacoes, "
 				+ "s.ser_codigo AS servico_id, " + "s.ser_nome AS servico_nome, "
-				+ "s.ser_preco AS servico_preco, " + "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
+				+ "s.ser_preco AS servico_preco, " + "s.ser_minutos AS servico_minutos, " 
+				+ "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
 				+ "a.age_nome_cliente AS nome_cliente_avulso, " + "f.fun_codigo AS funcionario_id, "
 				+ "f.fun_nome AS funcionario_nome, " + "p.pag_codigo AS pagamento_id, "
 				+ "p.pag_nome AS pagamento_nome, " + "p.pag_integra_caixa AS pagamento_integra_caixa "
@@ -173,6 +174,7 @@ public class AgendamentoDAO {
 				servico.setId(rs.getLong("servico_id"));
 				servico.setNome(rs.getString("servico_nome"));
 				servico.setPreco(rs.getDouble("servico_preco"));
+				servico.setMinutos(rs.getInt("servico_minutos"));
 				agendamento.getServicos().add(servico);
 			}
 
@@ -582,7 +584,6 @@ public class AgendamentoDAO {
 							System.out.println("DEBUG SALVAR: Salvando observação: " + obs);
 						} else {
 							stmt.setNull(10, java.sql.Types.VARCHAR);
-							System.out.println("DEBUG SALVAR: Observação vazia ou null: [" + obs + "]");
 						}
 					} else {
 						stmt.setNull(10, java.sql.Types.VARCHAR);
@@ -678,9 +679,12 @@ public class AgendamentoDAO {
 		StringBuilder sql = new StringBuilder("SELECT " + "a.age_codigo AS agendamento_id, "
 				+ "a.age_status AS agendamento_status, " + "a.age_data AS agendamento_data, "
 				+ "a.age_hora AS agendamento_hora, " + "a.age_tipo_cadastro AS agendamento_tipo, "
-				+ "a.age_nome_cliente AS nome_cliente_avulso, " + "s.ser_codigo AS servico_id, "
-				+ "s.ser_nome AS servico_nome, " + "s.ser_preco AS servico_preco, " + "f.fun_codigo AS funcionario_id, "
-				+ "f.fun_nome AS funcionario_nome, " + "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome "
+				+ "a.age_nome_cliente AS nome_cliente_avulso, " + "a.age_observacoes AS agendamento_observacoes, "
+				+ "s.ser_codigo AS servico_id, " + "s.ser_nome AS servico_nome, " 
+				+ "s.ser_preco AS servico_preco, " + "s.ser_minutos AS servico_minutos, "
+				+ "f.fun_codigo AS funcionario_id, " + "f.fun_nome AS funcionario_nome, " 
+				+ "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
+				+ "c.cli_observacoes AS cliente_observacoes "
 				+ "FROM agendamento a " + "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo "
 				+ "JOIN servicos s ON s.ser_codigo = ags.ser_codigo "
 				+ "JOIN funcionario f ON a.fun_codigo = f.fun_codigo "
@@ -709,6 +713,7 @@ public class AgendamentoDAO {
 					agendamento.setHoraSelecionada(rs.getTime("agendamento_hora").toLocalTime());
 					agendamento.setTipoCadastro(rs.getString("agendamento_tipo"));
 					agendamento.setNomeClienteAvulso(rs.getString("nome_cliente_avulso"));
+					agendamento.setObservacoes(rs.getString("agendamento_observacoes"));
 
 					Funcionario funcionario = new Funcionario();
 					funcionario.setId(rs.getLong("funcionario_id"));
@@ -719,6 +724,7 @@ public class AgendamentoDAO {
 						Cliente cliente = new Cliente();
 						cliente.setId(rs.getLong("cliente_id"));
 						cliente.setNome(rs.getString("cliente_nome"));
+						cliente.setObservacoes(rs.getString("cliente_observacoes"));
 						agendamento.setCliente(cliente);
 					}
 
@@ -730,6 +736,7 @@ public class AgendamentoDAO {
 				servico.setId(rs.getLong("servico_id"));
 				servico.setNome(rs.getString("servico_nome"));
 				servico.setPreco(rs.getDouble("servico_preco"));
+				servico.setMinutos(rs.getInt("servico_minutos"));
 				agendamento.getServicos().add(servico);
 			}
 

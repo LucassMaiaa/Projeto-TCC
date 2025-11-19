@@ -106,14 +106,10 @@ a {
 /* Conteúdo Principal */
 
 .content-dashboard{
-    padding: 30px 30px 30px 0;
+        padding: 0px 30px 30px 105px;
     height: 100vh;
     width: 100%;
     box-sizing: border-box;
-}
-
-.content-dashboard.full-width{
-    padding: 30px;
 }
 
 .content-title-perfil{
@@ -121,7 +117,12 @@ a {
 }
 
 .content-perfil{
-    margin-bottom: 60px;
+   margin-bottom: 30px;
+    position: sticky;
+    top: 0px;
+    background: #f1f1f1;
+    padding: 30px 0 15px;
+    z-index: 1000;
 }
 
 .content-dashboard.full-width .content-perfil{
@@ -159,10 +160,12 @@ a {
 }
 
 .content-menu-lateral{
-    display: flex;
+        display: flex;
     flex-direction: column;
     justify-content: space-between;
     padding: 36px 30px;
+    position: fixed;
+    height: 100%;
 }
 
 .content-info-lateral{
@@ -176,8 +179,7 @@ a {
 }
 
 .content-btns {
-    display: flex;
-    height: 75px;
+    height: auto;
     justify-content: space-between;
     align-items: center;
     padding: 8px 20px;
@@ -188,7 +190,7 @@ a {
 .content-agendamentos{
     border-radius: 0px;
     height: 100vh;
-    height: calc(100vh - 194px);
+        height: calc(100vh - 302px);
     padding: 15px 20px 30px;
 }
 
@@ -611,13 +613,13 @@ a {
 
 .grid-content{
     display: grid;
-    grid-template-columns: 105px 1fr;
+    grid-template-columns: 1fr;
     height: 100vh;
     width: 100%;
 }
 
 .grid-content.has-sidebar{
-    grid-template-columns: 105px 1fr 374px;
+    grid-template-columns: 1fr 374px;
 }
 
 /* Sidebar fixa - SEM SCROLL */
@@ -941,6 +943,18 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 
 
 /* Others */
+
+body .ui-selectonemenu-panel .ui-selectonemenu-filter-container .ui-icon{
+	top: 44%;
+}
+
+.ui-selectonemenu-footer {
+    padding: 3px 15px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
 
 .status-table{
 	width: 13px;

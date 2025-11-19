@@ -26,7 +26,7 @@
 
 /* Wrapper do gráfico - estilo padrão do sistema */
 .grafico-visitas-wrapper {
-	background: rgba(255, 255, 255, 0.3);
+	background: rgb(255 255 255 / 15%);
 	border-radius: 8px;
 	padding: 15px 10px 8px;
 	position: relative;
@@ -708,26 +708,24 @@
 
 .servicos-vazio {
 	text-align: center;
-	padding: 40px 20px;
-	color: #999;
+	padding: 60px 20px;
+	color: #9CA3AF;
+	font-size: 14px;
+	font-weight: 500;
+	position: relative;
+	top: calc(100% - 63px);
 }
 
-.servicos-vazio i {
-	font-size: 40px;
-	margin-bottom: 12px;
-	color: #DDD;
-	display: block;
-}
-
-.servicos-vazio p {
-	font-size: 12px;
-	color: #999;
-	margin: 0;
+.servicos-vazio p:first-child {
+	    font-size: 17px;
+    color: #0F1324;
+    margin: 0;
+    font-weight: bold;
 }
 
 /* Estilos do gráfico de agendamentos */
 .progress-item {
-	margin-bottom: 18px;
+	margin-bottom: 9px;
 	display: flex;
 	align-items: center;
 	gap: 12px;
@@ -769,7 +767,7 @@
 	flex: 1;
 	height: 26px;
 	background-color: #E8F0E3;
-	border-radius: 9px;
+	border-radius: 20px;
 	overflow: hidden;
 	position: relative;
 }
@@ -798,6 +796,7 @@
     font-weight: 700;
     color: black;
     white-space: nowrap;
+        min-width: 27.83px;
 }
 
 .total-agendamentos-section {
@@ -1529,7 +1528,7 @@
 						</script>
 					</div>
 					<div class="content-gastos-mes">
-						<div class="flex" style="margin-bottom: 20px;">
+						<div class="flex" style="margin-bottom: 10px;">
 							<div class="icon-circle icon-circle-green">
 								<i class="fa-solid fa-calendar-plus"></i>
 							</div>
@@ -1544,29 +1543,39 @@
 						
 						<h:panelGroup id="graficoAgendamentos">
 							<!-- Barra de Finalizados -->
+							<div class="flex justify-end">
+								<span class="progress-percentage">#{homeController.porcentagemFinalizados}%</span>
+							</div>
+							
 							<div class="progress-item">
 								<div class="progress-label-left">
 									<span class="progress-dot finalizados"></span>
 									<span class="progress-label-text">Finalizados</span>
 								</div>
+								
 								<div class="progress-bar-container">
 									<div class="progress-bar-fill finalizados" 
 									     style="width: #{homeController.porcentagemFinalizados}%;">
-										<span class="progress-percentage">#{homeController.porcentagemFinalizados}%</span>
+										
 									</div>
 								</div>
 							</div>
 							
 							<!-- Barra de Cancelados -->
+							<div class="flex justify-end">
+								<span class="progress-percentage">#{homeController.porcentagemCancelados}%</span>
+							</div>
+							
 							<div class="progress-item">
 								<div class="progress-label-left">
 									<span class="progress-dot cancelados"></span>
 									<span class="progress-label-text">Cancelados</span>
 								</div>
+								
 								<div class="progress-bar-container">
 									<div class="progress-bar-fill cancelados" 
 									     style="width: #{homeController.porcentagemCancelados}%;">
-										<span class="progress-percentage">#{homeController.porcentagemCancelados}%</span>
+										
 									</div>
 								</div>
 							</div>
@@ -1851,8 +1860,7 @@
 				<!-- Mensagem quando não há serviços -->
 				<h:panelGroup rendered="#{empty homeController.topServicosMes}">
 					<div class="servicos-vazio">
-						<i class="fa-solid fa-chart-simple"></i>
-						<p>Nenhum serviço solicitado este mês</p>
+						<p>Nenhum dado encontrado</p>
 					</div>
 				</h:panelGroup>
 			</h:panelGroup>

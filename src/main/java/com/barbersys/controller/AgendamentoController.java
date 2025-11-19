@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,10 @@ public class AgendamentoController implements Serializable {
 	private List<LocalDate> datasDesabilitadas = new ArrayList<>();
 	private List<Date> datasDesabilitadasDate = new ArrayList<>();
 	
+	// Filtro de serviços
+	private String filtroServico = "";
+	private List<Servicos> servicosFiltrados = new ArrayList<>();
+	
 	// Propriedades para tela agendamentoCliente
 	private String tipoAgendamento = "proprio";
 	private String nomeClienteOutro;
@@ -92,6 +97,20 @@ public class AgendamentoController implements Serializable {
 
 	@PostConstruct
 	public void init() {
+		// Define today como meia-noite do dia atual para o datepicker funcionar corretamente
+		Calendar cal = Calendar.getInstance();
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		this.today = cal.getTime();
+		
+		// Garante que agendamentoModel está sempre inicializado
+		if (agendamentoModel == null) {
+			agendamentoModel = new Agendamento();
+			agendamentoModel.setObservacoes("");
+			agendamentoModel.setServicos(new ArrayList<>());
+		}
 		// Inicializa agendamentoModel para evitar NullPointerException
 		if (agendamentoModel == null) {
 			agendamentoModel = new Agendamento();
@@ -132,6 +151,7 @@ public class AgendamentoController implements Serializable {
 		lstFuncionario = FuncionarioDAO.buscarTodosFuncionarios();
 		lstCliente = ClienteDAO.buscarTodosClientes();
 		lstServico = ServicosDAO.buscarTodos();
+		servicosFiltrados = new ArrayList<>(lstServico);
 		lstPagamento = PagamentoDAO.buscarTodos();
 		lstFuncionarioDisponivel = new ArrayList<>(lstFuncionario);
 		
@@ -156,7 +176,18 @@ public class AgendamentoController implements Serializable {
 
 	public void calculaValorServicos() {
 		totalGastoServicos = 0.0;
-		if (agendamentoModel != null && agendamentoModel.getServicos() != null) {
+		
+		// Se estamos no modal (servicosSelecionadosIds tem dados), usa ele
+		if (servicosSelecionadosIds != null && !servicosSelecionadosIds.isEmpty()) {
+			for (Long servicoId : servicosSelecionadosIds) {
+				Servicos servico = ServicosDAO.buscarPorId(servicoId);
+				if (servico != null) {
+					totalGastoServicos += servico.getPreco();
+				}
+			}
+		}
+		// Caso contrário, usa o agendamentoModel (para quando já tem agendamento)
+		else if (agendamentoModel != null && agendamentoModel.getServicos() != null) {
 			for (Servicos item : agendamentoModel.getServicos()) {
 				totalGastoServicos += item.getPreco();
 			}
@@ -340,8 +371,11 @@ public class AgendamentoController implements Serializable {
 	    this.editarModel = "A";
 	    
 	    this.servicosSelecionadosIds = new ArrayList<>();
+	    this.servicosSelecionadosMap = new java.util.HashMap<>();
+	    
 	    for (Servicos item : agendamentoModel.getServicos()) {
 	        this.servicosSelecionadosIds.add(item.getId());
+	        this.servicosSelecionadosMap.put(item.getId(), true);
 	    }
 
 	    		if ("A".equals(agendamentoModel.getTipoCadastro()) && agendamentoModel.getCliente() != null) {
@@ -355,10 +389,8 @@ public class AgendamentoController implements Serializable {
 	    this.dataSelecionada = agendamentoModel.getDataCriado();
 	    this.horaSelecionada = agendamentoModel.getHoraSelecionada().format(horaFormatada);
 	    
-	    // Garante que observações não seja null
-	    if (agendamentoModel.getObservacoes() == null) {
-	        agendamentoModel.setObservacoes("");
-	    }
+	    // Popula a propriedade observacoes do controller
+	    this.observacoes = agendamentoModel.getObservacoes() != null ? agendamentoModel.getObservacoes() : "";
 
 	    this.lstFuncionarioDisponivel = new ArrayList<>(this.lstFuncionario);
 	    this.horariosDisponiveis.clear(); // Apenas limpa para garantir que não haja dados antigos
@@ -376,6 +408,7 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel.setServicos(new ArrayList<>());
 		agendamentoModel.setObservacoes(""); // Inicializa observações como string vazia
 		servicosSelecionadosIds = new ArrayList<>();
+		servicosSelecionadosMap = new java.util.HashMap<>();
 		clienteId = null;
 		nomeCliente = "";
 		nomeFuncionario = "";
@@ -478,8 +511,7 @@ public class AgendamentoController implements Serializable {
 			agendamentoModel.setNomeClienteAvulso(this.nomeCliente);
 		}
 		agendamentoModel.setTipoCadastro(tipoCadastro);
-		// Observações já está preenchida no agendamentoModel do formulário
-		System.out.println("DEBUG CONTROLLER: Observação antes de salvar: [" + agendamentoModel.getObservacoes() + "]");
+		agendamentoModel.setObservacoes(this.observacoes); // Copia observacoes do controller
 		AgendamentoDAO.salvar(agendamentoModel, servicosSelecionadosIds);
 
 		List<Servicos> servicosSelecionados = new ArrayList<>();
@@ -588,6 +620,7 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel.setHoraSelecionada(LocalTime.parse(horaSelecionada));
 		agendamentoModel.setNomeClienteAvulso(nomeCliente);
 		agendamentoModel.setTipoCadastro(tipoCadastro);
+		agendamentoModel.setObservacoes(this.observacoes); // Copia observacoes do controller
 		AgendamentoDAO.atualizar(agendamentoModel, servicosSelecionadosIds);
 
 		// Atualiza a lista de serviços no modelo para refletir na tela
@@ -601,6 +634,14 @@ public class AgendamentoController implements Serializable {
 		exibirAlerta("success", "Agendamento atualizado com sucesso!");
 		PrimeFaces.current().executeScript("PF('dlgAgendar').hide();");
 		PrimeFaces.current().executeScript("setTimeout(function() { PrimeFaces.ab({s:'form', u:'form'}); }, 50);");
+	}
+
+	public void salvarOuAtualizarAgendamento() {
+		if ("A".equals(editarModel)) {
+			atualizarAgendamento();
+		} else {
+			adicionarNovoAgendamento();
+		}
 	}
 
 
@@ -753,6 +794,16 @@ public class AgendamentoController implements Serializable {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime agora = LocalDateTime.now();
 		LocalDate dataSelecionadaLocalDate = new java.sql.Date(dataSelecionada.getTime()).toLocalDate();
+		LocalTime horaAtualSistema = agora.toLocalTime();
+		
+		// Debug: Log para dia de hoje
+		boolean isHojeDia = dataSelecionadaLocalDate.isEqual(LocalDate.now());
+		if (isHojeDia) {
+			System.out.println("=== GERANDO HORÁRIOS PARA HOJE ===");
+			System.out.println("Hora atual do sistema: " + horaAtualSistema);
+			System.out.println("Total minutos serviço: " + totalMinutos);
+			System.out.println("Slots necessários: " + numeroDeSlotsNecessarios);
+		}
 
 		if ("A".equals(editarModel) && horaSelecionada != null && !horaSelecionada.isEmpty()) {
 			horariosDisponiveis.add(horaSelecionada);
@@ -762,6 +813,10 @@ public class AgendamentoController implements Serializable {
 		for (Horario periodo : horariosValidosParaDia) {
 			LocalTime horaInicialPeriodo = periodo.getHoraInicial();
 			LocalTime horaFinalPeriodo = periodo.getHoraFinal();
+			
+			if (isHojeDia) {
+				System.out.println("Período de trabalho: " + horaInicialPeriodo + " até " + horaFinalPeriodo);
+			}
 
 			LocalTime horaAtual = horaInicialPeriodo;
 			
@@ -777,7 +832,10 @@ public class AgendamentoController implements Serializable {
 				iteracao++;
 				
 				boolean isHoje = dataSelecionadaLocalDate.isEqual(LocalDate.now());
-				boolean isHorarioFuturo = !isHoje || horaAtual.isAfter(agora.toLocalTime());
+				// CORREÇÃO: Para hoje, aceita horários que dão tempo de chegar (30min de antecedência)
+				// Exemplo: Se são 22:30, aceita horários onde: horário + 30min > hora atual
+				// Horário 23:00: (23:00 + 30min = 23:30) > 22:30 = true ✅
+				boolean isHorarioFuturo = !isHoje || horaAtual.plusMinutes(30).isAfter(horaAtualSistema);
 
 				if (isHorarioFuturo) {
 					// Calcula quando o serviço terminaria se começasse neste horário
@@ -833,6 +891,21 @@ public class AgendamentoController implements Serializable {
 			}
 		}
 		java.util.Collections.sort(horariosDisponiveis);
+		
+		// Debug: Log para dia de hoje
+		if (isHojeDia) {
+			System.out.println("=== RESULTADO GERAÇÃO DE HORÁRIOS ===");
+			System.out.println("Total de horários encontrados: " + horariosDisponiveis.size());
+			if (!horariosDisponiveis.isEmpty()) {
+				System.out.println("Horários disponíveis: " + horariosDisponiveis);
+			} else {
+				System.out.println("❌ NENHUM HORÁRIO DISPONÍVEL!");
+				System.out.println("Verifique se:");
+				System.out.println("- Hora atual + 30min < últimos horários");
+				System.out.println("- Slots estão livres");
+				System.out.println("- Horário de término não ultrapassa período");
+			}
+		}
 	}
 
 	public void funcionarioAlterado() {
@@ -882,6 +955,14 @@ public class AgendamentoController implements Serializable {
 				if (this.passos == 2) {
 					// Gera horários quando avança para passo 2 (já validado antes)
 					gerarHorariosDisponiveis();
+					
+					// Garante que agendamentoModel e observacoes estão inicializados
+					if (agendamentoModel == null) {
+						agendamentoModel = new Agendamento();
+					}
+					if (agendamentoModel.getObservacoes() == null) {
+						agendamentoModel.setObservacoes("");
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -1057,8 +1138,9 @@ public class AgendamentoController implements Serializable {
 		}
 		
 		// Calcula para os próximos 3 anos (1095 dias)
+		// Inclui o dia de hoje para verificar se há horários disponíveis
 		LocalDate hoje = LocalDate.now();
-		for (int i = 0; i <= 1095; i++) {
+		for (int i = 0; i <= 1095; i++) {  // ← Volta para 0 (inclui hoje)
 			LocalDate dataVerificar = hoje.plusDays(i);
 			Date dataUtil = Date.from(dataVerificar.atStartOfDay(ZoneId.systemDefault()).toInstant());
 			
@@ -1303,6 +1385,125 @@ public class AgendamentoController implements Serializable {
 	               (servicosSelecionadosIds == null || servicosSelecionadosIds.isEmpty());
 	    }
 	    return false; // No "Próximo" button on step 2
+	}
+	
+	// ===== MÉTODOS PARA CARDS DE SERVIÇOS =====
+	
+	/**
+	 * Retorna o valor total dos serviços selecionados
+	 */
+	public Double getValorTotalSelecionado() {
+	    double total = 0.0;
+	    if (servicosSelecionadosMap != null && !servicosSelecionadosMap.isEmpty()) {
+	        for (Map.Entry<Long, Boolean> entry : servicosSelecionadosMap.entrySet()) {
+	            if (entry.getValue() != null && entry.getValue()) {
+	                Servicos s = lstServico.stream()
+	                    .filter(servico -> servico.getId().equals(entry.getKey()))
+	                    .findFirst()
+	                    .orElse(null);
+	                if (s != null) {
+	                    total += s.getPreco();
+	                }
+	            }
+	        }
+	    }
+	    return total;
+	}
+	
+	/**
+	 * Retorna o tempo total em minutos dos serviços selecionados
+	 */
+	public Integer getTempoTotalSelecionado() {
+	    int total = 0;
+	    if (servicosSelecionadosMap != null && !servicosSelecionadosMap.isEmpty()) {
+	        for (Map.Entry<Long, Boolean> entry : servicosSelecionadosMap.entrySet()) {
+	            if (entry.getValue() != null && entry.getValue()) {
+	                Servicos s = lstServico.stream()
+	                    .filter(servico -> servico.getId().equals(entry.getKey()))
+	                    .findFirst()
+	                    .orElse(null);
+	                if (s != null) {
+	                    total += s.getMinutos();
+	                }
+	            }
+	        }
+	    }
+	    return total;
+	}
+	
+	/**
+	 * Retorna o tempo total formatado (ex: "1h 30min" ou "45min")
+	 */
+	public String getTempoTotalFormatado() {
+	    int totalMinutos = getTempoTotalSelecionado();
+	    if (totalMinutos == 0) {
+	        return "0min";
+	    }
+	    
+	    int horas = totalMinutos / 60;
+	    int minutos = totalMinutos % 60;
+	    
+	    if (horas > 0 && minutos > 0) {
+	        return horas + "h " + minutos + "min";
+	    } else if (horas > 0) {
+	        return horas + "h";
+	    } else {
+	        return minutos + "min";
+	    }
+	}
+	
+	/**
+	 * Calcula o tempo total de um agendamento (soma dos minutos de todos os serviços)
+	 */
+	public Integer calcularTempoTotalAgendamento(Agendamento agendamento) {
+	    int total = 0;
+	    if (agendamento != null && agendamento.getServicos() != null && !agendamento.getServicos().isEmpty()) {
+	        for (Servicos servico : agendamento.getServicos()) {
+	            if (servico != null && servico.getMinutos() != null) {
+	                total += servico.getMinutos();
+	            }
+	        }
+	    }
+	    return total;
+	}
+	
+	/**
+	 * Retorna lista de serviços filtrados pela pesquisa
+	 */
+	public List<Servicos> getServicosFiltrados() {
+	    if (filtroServico == null || filtroServico.trim().isEmpty()) {
+	        return lstServico != null ? lstServico : new ArrayList<>();
+	    }
+	    if (lstServico == null) {
+	        return new ArrayList<>();
+	    }
+	    return lstServico.stream()
+	        .filter(s -> s.getNome().toLowerCase().contains(filtroServico.toLowerCase()))
+	        .collect(java.util.stream.Collectors.toList());
+	}
+	
+	/**
+	 * Inicializa o map de serviços selecionados baseado na lista de IDs
+	 */
+	public java.util.Map<Long, Boolean> getServicosSelecionadosMap() {
+	    // Sincroniza o map com a lista de IDs
+	    if (servicosSelecionadosMap == null) {
+	        servicosSelecionadosMap = new java.util.HashMap<>();
+	    }
+	    
+	    // Atualiza o map baseado nos IDs selecionados
+	    if (lstServico != null) {
+	        for (Servicos s : lstServico) {
+	            boolean selecionado = servicosSelecionadosIds != null && servicosSelecionadosIds.contains(s.getId());
+	            servicosSelecionadosMap.put(s.getId(), selecionado);
+	        }
+	    }
+	    
+	    return servicosSelecionadosMap;
+	}
+	
+	public void setServicosSelecionadosMap(java.util.Map<Long, Boolean> servicosSelecionadosMap) {
+	    this.servicosSelecionadosMap = servicosSelecionadosMap;
 	}
 	
 	/**
@@ -1865,5 +2066,137 @@ public class AgendamentoController implements Serializable {
 			this.horariosDisponiveis.clear();
 		}
 		this.nomeClienteOutro = null;
+	}
+	
+	// ===============================================
+	// MÉTODOS PARA O MODAL DE AGENDAMENTO COM GRID VISUAL
+	// ===============================================
+	
+	/**
+	 * Método chamado quando um serviço é selecionado no modal (grid visual de cards)
+	 */
+	public void aoSelecionarServicoModal() {
+		try {
+			System.out.println("=== aoSelecionarServicoModal() chamado ===");
+			
+			// Atualiza a lista servicosSelecionadosIds com base no Map
+			if (servicosSelecionadosIds == null) {
+				servicosSelecionadosIds = new ArrayList<>();
+			} else {
+				servicosSelecionadosIds.clear();
+			}
+			
+			if (servicosSelecionadosMap != null) {
+				for (Map.Entry<Long, Boolean> entry : servicosSelecionadosMap.entrySet()) {
+					if (entry.getValue() != null && entry.getValue()) {
+						servicosSelecionadosIds.add(entry.getKey());
+					}
+				}
+			}
+			
+			System.out.println("Serviços selecionados no modal: " + servicosSelecionadosIds.size());
+			
+			// Recalcula o valor total
+			calculaValorServicos();
+			
+			System.out.println("Valor total calculado: " + totalGastoServicos);
+			System.out.println("=== aoSelecionarServicoModal() concluído ===");
+			
+		} catch (Exception e) {
+			System.err.println("ERRO em aoSelecionarServicoModal(): " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Retorna o tempo total dos serviços selecionados formatado (ex: "45min", "1h 30min")
+	 */
+	public String getTempoTotalServicosFormatado() {
+		int totalMinutos = 0;
+		
+		if (servicosSelecionadosIds != null && !servicosSelecionadosIds.isEmpty()) {
+			for (Long servicoId : servicosSelecionadosIds) {
+				Servicos servico = ServicosDAO.buscarPorId(servicoId);
+				if (servico != null) {
+					totalMinutos += servico.getMinutos();
+				}
+			}
+		}
+		
+		if (totalMinutos == 0) {
+			return "0min";
+		}
+		
+		if (totalMinutos < 60) {
+			return totalMinutos + "min";
+		}
+		
+		int horas = totalMinutos / 60;
+		int minutos = totalMinutos % 60;
+		
+		if (minutos == 0) {
+			return horas + "h";
+		}
+		
+		return horas + "h " + minutos + "min";
+	}
+	
+	/**
+	 * Formata a duração de um serviço individual (para exibir no card)
+	 */
+	public String formatarDuracaoServico(Integer minutos) {
+		if (minutos == null || minutos == 0) {
+			return "0min";
+		}
+		
+		int horas = minutos / 60;
+		int min = minutos % 60;
+		
+		if (horas > 0 && min > 0) {
+			return horas + "h " + min + "min";
+		} else if (horas > 0) {
+			return horas + "h";
+		} else {
+			return min + "min";
+		}
+	}
+	
+	/**
+	 * Filtra serviços conforme o texto digitado
+	 */
+	public void filtrarServicos() {
+		try {
+			if (filtroServico == null || filtroServico.trim().isEmpty()) {
+				servicosFiltrados = new ArrayList<>(lstServico);
+			} else {
+				servicosFiltrados.clear();
+				String filtroLower = filtroServico.toLowerCase().trim();
+				
+				for (Servicos servico : lstServico) {
+					if (servico.getNome().toLowerCase().contains(filtroLower)) {
+						servicosFiltrados.add(servico);
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("ERRO em filtrarServicos(): " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Lista de serviços para exibição (filtrados ou todos)
+	 */
+	public List<Servicos> getServicosParaExibir() {
+		// Se tem filtro e lista filtrada não está vazia, retorna filtrados
+		if (filtroServico != null && !filtroServico.trim().isEmpty() && servicosFiltrados != null && !servicosFiltrados.isEmpty()) {
+			return servicosFiltrados;
+		}
+		// Se tem filtro mas não encontrou nada, retorna lista vazia (para mostrar empty message)
+		if (filtroServico != null && !filtroServico.trim().isEmpty()) {
+			return servicosFiltrados != null ? servicosFiltrados : new ArrayList<>();
+		}
+		// Sem filtro, retorna todos
+		return lstServico != null ? lstServico : new ArrayList<>();
 	}
 }

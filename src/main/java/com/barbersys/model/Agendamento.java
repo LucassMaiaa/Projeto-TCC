@@ -118,4 +118,17 @@ public class Agendamento {
             return minutos + "min";
         }
     }
+    
+    public String getObservacoesExibicao() {
+        // Prioridade: observações do agendamento > observações do cliente > null
+        if (this.observacoes != null && !this.observacoes.trim().isEmpty()) {
+            return this.observacoes;
+        }
+        
+        if (this.cliente != null && this.cliente.getObservacoes() != null && !this.cliente.getObservacoes().trim().isEmpty()) {
+            return this.cliente.getObservacoes();
+        }
+        
+        return null;
+    }
 }

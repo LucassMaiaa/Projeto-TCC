@@ -19,6 +19,186 @@
 	background: #FCFCFF;
 }
 
+/* ============================================ */
+/* STEPS CUSTOMIZADOS */
+/* ============================================ */
+body .ui-steps {
+	background: transparent !important;
+	border: none !important;
+	margin-bottom: 30px !important;
+}
+
+body .ui-steps .ui-steps-item {
+	background: transparent !important;
+}
+
+body .ui-steps .ui-steps-item .ui-menuitem-link {
+	background: transparent !important;
+	padding: 1rem !important;
+	border: none !important;
+	transition: all 0.3s ease !important;
+}
+
+body .ui-steps .ui-steps-item .ui-steps-number {
+	background: #E5E7EB !important;
+	color: #6B7280 !important;
+	border: 3px solid #E5E7EB !important;
+	width: 40px !important;
+	height: 40px !important;
+	line-height: 34px !important;
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	box-shadow: none !important;
+	transition: all 0.4s ease !important;
+}
+
+body .ui-steps .ui-steps-item.ui-state-highlight .ui-steps-number {
+	background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+	color: #FFFFFF !important;
+	border-color: #6366F1 !important;
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+	transform: scale(1.1);
+}
+
+body .ui-steps .ui-steps-item .ui-steps-title {
+	color: #6B7280 !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	margin-top: 8px !important;
+	transition: all 0.4s ease !important;
+}
+
+body .ui-steps .ui-steps-item.ui-state-highlight .ui-steps-title {
+	color: #6366F1 !important;
+}
+
+/* Conteúdo dos steps com animação */
+.step-content {
+	animation: step-enter-animation 0.5s ease-out;
+	padding: 20px 0;
+}
+
+@keyframes step-enter-animation {
+	from {
+		opacity: 0;
+		transform: translateY(15px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Botões de navegação dos steps */
+.step-buttons {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 30px;
+	gap: 15px;
+}
+
+.btn-step {
+	padding: 12px 30px !important;
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	border-radius: 40px !important;
+	transition: all 0.3s ease !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.5px !important;
+}
+
+.btn-step-previous {
+	background: #F3F4F6 !important;
+	border: 1px solid #E5E7EB !important;
+	color: #374151 !important;
+}
+
+.btn-step-previous:hover {
+	background: #E5E7EB !important;
+	transform: translateY(-2px) !important;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-step-next {
+	background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+	border: none !important;
+	color: #FFFFFF !important;
+}
+
+.btn-step-next:hover:not(:disabled) {
+	transform: translateY(-2px) !important;
+	box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+}
+
+.btn-step-finish {
+	background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+	border: none !important;
+	color: #FFFFFF !important;
+}
+
+.btn-step-finish:hover:not(:disabled) {
+	transform: translateY(-2px) !important;
+	box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4) !important;
+}
+
+.btn-step:disabled {
+	opacity: 0.5 !important;
+	cursor: not-allowed !important;
+}
+
+.btn-step-next:disabled {
+	background: #D1D5DB !important;
+}
+
+.btn-step-finish:disabled {
+	background: #D1D5DB !important;
+}
+
+/* Layout dos steps em grid */
+.step-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	margin: 20px 0;
+}
+
+.step-grid-full {
+	grid-column: 1 / -1;
+}
+
+/* Estilos para input de pesquisa */
+.input-combined-no-text {
+	position: relative;
+}
+
+.input-combined-no-text .ui-inputfield,
+.input-combined-no-text .ui-inputfield.ui-state-focus,
+.input-combined-no-text .ui-inputfield.ui-state-hover {
+	height: 46px !important;
+	position: relative;
+	width: 100%;
+	font-size: 14px;
+	color: #656464;
+	font-weight: 600;
+	font-family: "Barlow";
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	border-color: #ced4da !important;
+	padding-right: 40px !important;
+	display: flex;
+	align-items: center;
+}
+
+.input-combined-no-text i {
+	position: absolute;
+	right: 17px;
+	top: 14px;
+	color: #999;
+	font-size: 16px;
+	pointer-events: none;
+}
+/* ============================================ */
+
 /* Estilos para datas desabilitadas no datepicker */
 .ui-datepicker .ui-state-disabled {
 	opacity: 0.4 !important;
@@ -51,7 +231,7 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
 	{
 	display: grid;
-	grid-template-columns: 40px 1fr 1fr 87px 110px 70px;
+	grid-template-columns: 40px 1fr 1fr 87px 110px 70px 130px;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -87,6 +267,199 @@ body .ui-datatable .ui-datatable-even>td {
 
 .list-time>div:first-of-type .fa-solid {
 	left: 12px;
+}
+
+/* === CSS CARDS DE SERVIÇOS (IGUAL AGENDAMENTOCLIENTE) === */
+
+/* Grid de serviços - 3 colunas */
+.services-grid-cliente {
+	margin-bottom: 30px;
+	max-height: 233px;
+	overflow: auto;
+}
+
+body .services-datagrid-cliente.ui-datagrid {
+	background: transparent;
+	border: none;
+}
+
+body .services-datagrid-cliente .ui-datagrid-content {
+	background: transparent;
+	border: none;
+	padding: 0;
+}
+
+body .services-datagrid-cliente .ui-g {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+	margin: 0;
+}
+
+body .services-datagrid-cliente .ui-g-12 {
+	padding: 0;
+	margin: 0;
+	width: 100%;
+}
+
+.services-datagrid-cliente .ui-datagrid-empty-message {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 80px 20px;
+	color: #9CA3AF;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.services-datagrid-cliente .ui-datagrid-empty-message::before {
+	content: '🚫';
+	display: block;
+	font-size: 48px;
+	margin-bottom: 12px;
+	opacity: 0.5;
+}
+
+/* Card de serviço */
+.service-card-cliente {
+	background: #EBEBEB;
+	border-radius: 8px;
+	padding: 10px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: 2px solid transparent;
+	min-height: 70px;
+}
+
+.service-card-cliente:hover:not(.disabled) {
+	background: #DCDCDC;
+	border-color: #C0C0C0;
+}
+
+.service-card-cliente.disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+/* Checkbox customizado */
+.service-card-cliente .ui-chkbox {
+	margin-top: 3px;
+}
+
+.service-card-cliente .ui-chkbox .ui-chkbox-box {
+	width: 20px;
+	height: 20px;
+	border: 2px solid #666;
+	border-radius: 4px;
+	background: #FFF;
+}
+
+.service-card-cliente .ui-chkbox .ui-chkbox-box.ui-state-active {
+	background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+	border-color: #6366F1 !important;
+}
+
+/* Remove TODOS os hovers do checkbox */
+.service-card-cliente .ui-chkbox .ui-chkbox-box:hover,
+.service-card-cliente .ui-chkbox .ui-chkbox-box.ui-state-hover,
+.service-card-cliente .ui-chkbox .ui-chkbox-box.ui-state-active:hover,
+.service-card-cliente .ui-chkbox .ui-chkbox-box.ui-state-active.ui-state-hover {
+	background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+	border-color: #6366F1 !important;
+}
+
+.service-card-cliente .ui-chkbox .ui-chkbox-box:not(.ui-state-active):hover,
+.service-card-cliente .ui-chkbox .ui-chkbox-box:not(.ui-state-active).ui-state-hover {
+	background: #FFF !important;
+	border-color: #666 !important;
+}
+
+.service-card-cliente .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
+	color: #FFF;
+	top: 4px;
+}
+
+/* Informações do serviço */
+.service-info-cliente {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: 1;
+	cursor: pointer;
+}
+
+.service-name-cliente {
+	font-size: 12px;
+	font-weight: 600;
+	color: #5A5A5A;
+	text-transform: uppercase;
+	letter-spacing: 0.3px;
+	line-height: 1.2;
+}
+
+.service-price-cliente {
+	font-size: 17px;
+	font-weight: bold;
+	color: #000;
+	line-height: 1;
+}
+
+.service-duration-cliente {
+	font-size: 14px !important;
+	font-weight: 700 !important;
+	color: #4F46E5 !important;
+	background-color: rgba(99, 102, 241, 0.1);
+	padding: 4px 8px;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.service-duration-cliente i {
+	color: #4F46E5 !important;
+}
+
+.header-modal{
+margin-bottom: 0px
+}
+
+.img-custom{
+	    max-width: 380px;
+    max-height: 380px;
+}
+
+.sidebar-empty{
+	display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.services-scroll.dataList-dialog-custom ul[class="ui-datalist-data"] {
+    overflow-y: auto;
+       max-height: calc(100vh - 579px);
+}
+
+.content-info-cliente{
+	    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 8px;
+	
+}
+
+.content-card-info-cliente {
+        height: auto;
+    background: #DFDFDF;
+    padding: 8px 20px;
+    border-radius: 8px;
+    max-height: 78px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 		</style>
 	</ui:define>
@@ -206,13 +579,25 @@ body .ui-datatable .ui-datatable-even>td {
 							<h:outputText styleClass="title-date-table"
 								value="#{agend.horaSelecionada}" />
 						</p:column>
+						
+						<p:column styleClass="flex align-center justify-center"
+							headerText="Tempo Serviços">
+							<span style="display: inline-flex; align-items: center; gap: 6px; 
+								background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); 
+								color: #FFFFFF; padding: 6px 12px; border-radius: 6px; 
+								font-weight: 700; font-size: 13px; box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2); width: 100%;">
+								<i class="pi pi-clock" style="font-size: 12px;"></i>
+								<h:outputText value="#{agend.duracaoTotalFormatada}" />
+							</span>
+						</p:column>
 					</p:dataTable>
 				</div>
 
 		<!-- Modais de agendamento, cancelamento e estorno -->
 		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
-			draggable="false" resizable="false" focus="proximoButton">
+			draggable="false" resizable="false" focus="proximoButton"
+			responsive="true" fitViewport="true" dynamic="true">
 			<h:panelGroup id="dttDataSelect">
 				<div class="header-modal">
 					<div class="flex align-center">
@@ -229,26 +614,6 @@ body .ui-datatable .ui-datatable-even>td {
 						<label>#{agendamentoController.editarModel eq 'A' ? 'Editar Agendamento' : 'Novo Agendamento'}</label>
 					</div>
 					<div class="flex align-center">
-						<ui:fragment
-							rendered="#{agendamentoController.editarModel eq 'A' and agendamentoController.passos eq 2}">
-							<p:commandButton update="dttDataSelect" process="dttDataSelect @this"
-								actionListener="#{agendamentoController.atualizarAgendamento()}"
-								styleClass="btn btn-green" value="Salvar"
-								disabled="#{empty agendamentoController.horaSelecionada or agendamentoController.agendamentoPassado}" />
-						</ui:fragment>
-						<ui:fragment
-							rendered="#{agendamentoController.editarModel eq 'I' and agendamentoController.passos eq 2}">
-							<p:commandButton id="agendarButton" update="dttDataSelect"
-								process="dttDataSelect @this"
-								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
-								styleClass="btn btn-green" value="Agendar"
-								disabled="#{empty agendamentoController.horaSelecionada}" />
-						</ui:fragment>
-
-						<p:commandButton value="Cancelar Agendamento"
-							onclick="PF('dlgConfirmCancel').show()"
-							styleClass="btn btn-danger" process="@this"
-							rendered="#{agendamentoController.editarModel eq 'A' and agendamentoController.passos eq 0 and agendamentoController.agendamentoModel.pago ne 'S'}" />
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
 							onclick="PF('dlgAgendar').hide()" />
 					</div>
@@ -256,11 +621,23 @@ body .ui-datatable .ui-datatable-even>td {
 
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
+				
+				<!-- Steps do PrimeFaces -->
+				<p:steps id="stepsComponent" 
+					activeIndex="#{agendamentoController.passos}" 
+					widgetVar="stepsModalWV"
+					styleClass="custom-steps"
+					readonly="true"
+					style="margin-bottom: 30px;">
+					<p:menuitem value="Cliente e Funcionário" />
+					<p:menuitem value="Data e Serviços" />
+					<p:menuitem value="Horário e Confirmação" />
+				</p:steps>
 
 				<ui:fragment rendered="#{agendamentoController.passos eq 0}">
-					<ui:fragment rendered="#{agendamentoController.editarModel eq 'I'}">
-						<div class="row">
-							<div class="col-md-6">
+					<div class="step-content">
+						<ui:fragment rendered="#{agendamentoController.editarModel eq 'I'}">
+							<div style="margin-bottom: 20px;">
 								<div class="content-filter no-filter">
 									<p:selectOneButton
 										value="#{agendamentoController.tipoCadastro}"
@@ -271,12 +648,10 @@ body .ui-datatable .ui-datatable-even>td {
 									</p:selectOneButton>
 								</div>
 							</div>
-						</div>
-					</ui:fragment>
+						</ui:fragment>
 
-					<div class="row">
-						<div class="col-md-12">
-							<p:outputPanel id="dlgAttCliente">
+						<div class="step-grid">
+							<p:outputPanel id="dlgAttCliente" styleClass="step-grid-full">
 								<ui:fragment
 									rendered="#{agendamentoController.tipoCadastro eq 'A'}">
 									<div class="input-combined">
@@ -284,12 +659,12 @@ body .ui-datatable .ui-datatable-even>td {
 											value="Nome do Cliente" />
 										<p:selectOneMenu value="#{agendamentoController.clienteId}"
 											filter="true" filterMatchMode="startsWith" style="width: 100%;"
-											disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
+											disabled="#{agendamentoController.editarModel eq 'A'}">
 											<f:selectItem itemLabel="Selecione um cliente" />
 											<f:selectItems var="cli"
 												value="#{agendamentoController.lstCliente}"
 												itemLabel="#{cli.nome}" itemValue="#{cli.id}" />
-											<p:ajax event="change" update="proximoButton" process="@this" />
+											<p:ajax event="change" update="@(.total-update)" process="@this" />
 											<f:facet name="footer">
 												<p:divider styleClass="mt-0" />
 												<h:outputText
@@ -306,33 +681,47 @@ body .ui-datatable .ui-datatable-even>td {
 											value="Nome do Cliente" />
 										<p:inputText value="#{agendamentoController.nomeCliente}"
 											styleClass="senha-login" style="width: 100%;"
-											disabled="#{agendamentoController.editarModel eq 'A' or agendamentoController.agendamentoPassado}">
-											<p:ajax event="keyup" update="proximoButton" process="@this" />
+											disabled="#{agendamentoController.editarModel eq 'A'}">
+											<p:ajax event="keyup" update="@(.total-update)" process="@this" />
 										</p:inputText>
 									</div>
 								</ui:fragment>
 							</p:outputPanel>
 						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-md-12">
-							<div class="input-combined">
+						
+						<div class="step-grid">
+							<div class="input-combined step-grid-full">
 								<p:outputLabel styleClass="title-input"
-									value="Nome do funcionário" />
-								<p:selectOneMenu id="inputFuncionario"
-									value="#{agendamentoController.nomeFuncionario}" filter="true"
-									filterMatchMode="startsWith" disabled="#{agendamentoController.agendamentoPassado}">
-									<f:selectItem itemLabel="Selecione um funcionário" itemValue="" />
-									<f:selectItems
-										value="#{agendamentoController.lstFuncionarioDisponivel}"
-										var="func" itemLabel="#{func.nome}" itemValue="#{func.nome}" />
-									<p:ajax event="change" 
-										listener="#{agendamentoController.onFuncionarioChange}"
-										update="proximoButton" 
-										process="@this" />
+									value="Nome do Funcionário" />
+								<p:selectOneMenu value="#{agendamentoController.nomeFuncionario}"
+									filter="true" filterMatchMode="startsWith" style="width: 100%;"
+									disabled="#{agendamentoController.agendamentoPassado}">
+									<f:selectItem itemLabel="Selecione um funcionário" />
+									<f:selectItems var="func"
+										value="#{agendamentoController.lstFuncionario}"
+										itemLabel="#{func.nome}" itemValue="#{func.nome}" />
+									<p:ajax event="change"
+										update="@(.total-update)" process="@this" />
+									<f:facet name="footer">
+										<p:divider styleClass="mt-0" />
+										<h:outputText
+											value="#{agendamentoController.lstFuncionario.size()} Funcionários disponíveis"
+											style="font-weight:bold;" />
+									</f:facet>
 								</p:selectOneMenu>
 							</div>
+						</div>
+						
+						<!-- Botões do Passo 1 -->
+						<div class="step-buttons">
+							<div></div>
+							<p:commandButton id="proximoButton" styleClass="btn-step btn-step-next total-update" 
+								value="Próximo"
+								update="dttDataSelect msgs"
+								process="dttDataSelect" 
+								actionListener="#{agendamentoController.addPassosAgendamento()}"
+								disabled="#{agendamentoController.proximoDisabled}"
+								oncomplete="setTimeout(function(){ PF('dlgAgendar').initPosition(); }, 100);" />
 						</div>
 					</div>
 				</ui:fragment>
@@ -353,7 +742,7 @@ body .ui-datatable .ui-datatable-even>td {
 									onkeydown="return false;">
 									<p:ajax event="dateSelect"
 										listener="#{agendamentoController.filtrarFuncionariosPorData}"
-										update="dttDataSelect proximoButton" process="@this" />
+										update="proximoButton servicosGridPanel totaisPanel" process="@this" />
 								</p:datePicker>
 							</div>
 						</div>
@@ -361,85 +750,192 @@ body .ui-datatable .ui-datatable-even>td {
 					
 					<div class="row">
 						<div class="col-md-12">
-							<div class="input-combined">
-								<p:outputLabel styleClass="title-input" value="Serviços" />
-								<p:selectCheckboxMenu id="servicosSelect"
-									value="#{agendamentoController.servicosSelecionadosIds}"
-									label="Selecione os serviços" multiple="true" filter="true"
-									converter="javax.faces.Long" disabled="#{agendamentoController.agendamentoPassado}">
-									<f:selectItems value="#{agendamentoController.lstServico}"
-										var="servico" itemLabel="#{servico.nome}"
-										itemValue="#{servico.id}" />
-									<p:ajax event="change" 
-										update="proximoButton" 
-										process="@this" />
-									<p:ajax event="toggleSelect" 
-										update="proximoButton"
-										process="@this" />
-								</p:selectCheckboxMenu>
+							<div>
+		
+								<!-- Cards de Totais -->
+								<p:outputPanel id="totaisPanel" styleClass="total-update" style="width: 100%;">
+									<div style="display: flex; gap: 12px; margin-bottom: 16px; margin-top: 15px;">
+										<div style="width: 50%; padding: 12px 16px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 10px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+											<div style="display: flex; align-items: center; gap: 10px;">
+												<div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px;">
+													<i class="fa-solid fa-dollar-sign" style="color: #FFFFFF; font-size: 14px;"></i>
+												</div>
+												<div style="flex: 1;">
+													<div style="font-size: 10px; color: rgba(255,255,255,0.95); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px;">Valor Total</div>
+													<div style="font-size: 18px; color: #FFFFFF; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1);"> 
+														R$ <h:outputText value="#{agendamentoController.valorTotalSelecionado}">
+															<f:convertNumber pattern="0.00" groupingUsed="false" />
+														</h:outputText>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div style="width: 50%; padding: 12px 16px; background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%); border-radius: 10px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);">
+											<div style="display: flex; align-items: center; gap: 10px;">
+												<div style="background: rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px;">
+													<i class="fa-regular fa-clock" style="color: #FFFFFF; font-size: 14px;"></i>
+												</div>
+												<div style="flex: 1;">
+													<div style="font-size: 10px; color: rgba(255,255,255,0.95); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px;">Tempo Total</div>
+													<div style="font-size: 18px; color: #FFFFFF; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+														#{agendamentoController.tempoTotalFormatado}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</p:outputPanel>
+								
+								<h3 style="font-size: 16px; font-weight: 700; color: #374151; margin: 24px 0 16px 0;">Serviços disponíveis</h3>
+								
+								<!-- Campo de pesquisa -->
+								<div class="input-combined-no-text" style="margin-bottom: 16px;">
+									<p:inputText id="filtroServicoModal"
+										value="#{agendamentoController.filtroServico}"
+										placeholder="Pesquisar serviços..."
+										autocomplete="off">
+										<p:ajax event="keyup" delay="300"
+											listener="#{agendamentoController.filtrarServicos}"
+											update="servicosGridPanel"
+											process="@this" />
+									</p:inputText>
+									<i class="fa-solid fa-magnifying-glass"></i>
+								</div>
+								
+								<!-- Grid de serviços em cards - IGUAL AGENDAMENTOCLIENTE -->
+								<p:outputPanel id="servicosGridPanel">
+									<div class="services-grid-cliente">
+										<p:dataGrid var="servico"
+											value="#{agendamentoController.servicosFiltrados}"
+											columns="3" layout="grid"
+											styleClass="services-datagrid-cliente"
+											emptyMessage="Nenhum serviço encontrado.">
+											
+											<div class="service-card-cliente"
+												onclick="document.getElementById('form:dlgAgendar:chk_#{servico.id}').click();">
+												
+												<p:selectBooleanCheckbox 
+													id="chk_#{servico.id}"
+													value="#{agendamentoController.servicosSelecionadosMap[servico.id]}"
+													disabled="#{agendamentoController.agendamentoPassado}">
+													<p:ajax event="change"
+														listener="#{agendamentoController.aoSelecionarServicoModal}"
+														update="@(.total-update)" 
+														process="@this" />
+												</p:selectBooleanCheckbox>
+												
+												<div class="service-info-cliente">
+													<h:outputText value="#{servico.nome}"
+														styleClass="service-name-cliente" />
+													
+													<div style="display: flex; align-items: center; gap: 12px; margin-top: 10px;">
+														<span class="service-price-cliente"> 
+															R$ <h:outputText value="#{servico.preco}">
+																<f:convertNumber pattern="0.00" groupingUsed="false" />
+															</h:outputText>
+														</span>
+														
+														<span class="service-duration-cliente">
+															<i class="pi pi-clock"></i>
+															#{servico.minutos} min
+														</span>
+													</div>
+												</div>
+											</div>
+										</p:dataGrid>
+									</div>
+								</p:outputPanel>
 							</div>
 						</div>
 					</div>
+					
+					<!-- Botões do Passo 2 -->
+					<div class="step-buttons">
+						<p:commandButton value="Anterior" 
+							styleClass="btn-step btn-step-previous"
+							actionListener="#{agendamentoController.voltaPassosAgendamento()}"
+							update="dttDataSelect msgs"
+							process="@this"
+							immediate="true"
+							oncomplete="setTimeout(function(){ PF('dlgAgendar').initPosition(); }, 100);" />
+						<p:commandButton id="proximoButtonStep2" styleClass="btn-step btn-step-next total-update" 
+							value="Próximo"
+							update="dttDataSelect msgs"
+							process="dttDataSelect" 
+							actionListener="#{agendamentoController.addPassosAgendamento()}"
+							disabled="#{agendamentoController.proximoDisabled}"
+							oncomplete="setTimeout(function(){ PF('dlgAgendar').initPosition(); }, 100);" />
+					</div>
 				</ui:fragment>
 					
-								<ui:fragment rendered="#{agendamentoController.passos eq 2 and agendamentoController.agendamentoModel != null}">
-									<div class="row">
-										<div class="col-md-12">
-											<div class="input-combined">
-												<p:outputLabel styleClass="title-input"
-													value="Horários disponíveis" />
-												<p:selectOneMenu id="inputHorario"
-													value="#{agendamentoController.horaSelecionada}" 
-													disabled="#{agendamentoController.agendamentoPassado or empty agendamentoController.horariosDisponiveis}">
-													<f:selectItem itemLabel="#{empty agendamentoController.horariosDisponiveis ? 'Nenhum horário disponível nesta data' : 'Selecione horário'}" itemValue="" />
-													<f:selectItems
-														value="#{agendamentoController.horariosDisponiveis}" var="h"
-														itemLabel="#{h}" itemValue="#{h}" />
-													<p:ajax event="change" update="@form:agendarButton" process="@this" />
-												</p:selectOneMenu>
-												
-												<p:message for="inputHorario" />
-											</div>
-											
-											<!-- Mensagem informativa quando não há horários -->
-											<h:panelGroup rendered="#{empty agendamentoController.horariosDisponiveis and agendamentoController.dataSelecionada != null}">
-												<div class="alert alert-warning mt-2" style="padding: 10px; background: #FFF3CD; border: 1px solid #FFECB5; border-radius: 4px; color: #856404;">
-													<i class="fa-solid fa-exclamation-triangle"></i>
-													<strong>Atenção:</strong> Não há horários disponíveis para esta data. 
-													Possíveis motivos: data com restrição, funcionário não trabalha neste dia ou todos os horários estão ocupados.
-												</div>
-											</h:panelGroup>
-						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-md-12">
+				<ui:fragment rendered="#{agendamentoController.passos eq 2}">
+					<div class="step-content">
+						<div class="step-grid">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input"
+									value="Selecione o Horário" />
+								<p:selectOneMenu id="inputHorario"
+									value="#{agendamentoController.horaSelecionada}" 
+									disabled="#{agendamentoController.agendamentoPassado or empty agendamentoController.horariosDisponiveis}">
+									<f:selectItem itemLabel="#{empty agendamentoController.horariosDisponiveis ? 'Nenhum horário disponível' : 'Selecione um horário'}" itemValue="" />
+									<f:selectItems
+										value="#{agendamentoController.horariosDisponiveis}" var="h"
+										itemLabel="#{h}" itemValue="#{h}" />
+									<p:ajax event="change" update="dttDataSelect" process="@this" />
+								</p:selectOneMenu>
+								
+								<!-- Mensagem informativa quando não há horários -->
+								<h:panelGroup rendered="#{empty agendamentoController.horariosDisponiveis and agendamentoController.dataSelecionada != null}">
+									<div class="alert alert-warning mt-2" style="padding: 10px; background: #FFF3CD; border: 1px solid #FFECB5; border-radius: 4px; color: #856404; margin-top: 12px;">
+										<i class="fa-solid fa-exclamation-triangle"></i>
+										<strong>Atenção:</strong> Não há horários disponíveis para esta data.
+									</div>
+								</h:panelGroup>
+							</div>
+							
 							<div class="input-combined">
 								<p:outputLabel styleClass="title-input" 
-									value="Observações para este agendamento (opcional)" />
-								<p:inputTextarea styleClass="senha-login" rows="3" maxlength="500"
-									value="#{agendamentoController.agendamentoModel.observacoes}"
-									placeholder="Ex: Prefiro não conversar, deixar o corte mais curto, etc..." />
+									value="Observações (Opcional)" />
+								<p:inputTextarea 
+									value="#{agendamentoController.observacoes}"
+									placeholder="Alguma observação para o atendimento?"
+									rows="4"
+									maxlength="500" />
 							</div>
+						</div>
+						
+						<!-- Botões do Passo 3 -->
+						<div class="step-buttons">
+							<p:commandButton value="Anterior" 
+								styleClass="btn-step btn-step-previous"
+								actionListener="#{agendamentoController.voltaPassosAgendamento()}"
+								update="dttDataSelect msgs"
+								process="@this"
+								immediate="true"
+								oncomplete="setTimeout(function(){ PF('dlgAgendar').initPosition(); }, 100);" />
+							
+							<!-- Botão Salvar (quando está editando) -->
+							<p:commandButton 
+								value="SALVAR" 
+								styleClass="btn-step btn-step-finish"
+								actionListener="#{agendamentoController.atualizarAgendamento()}"
+								disabled="#{empty agendamentoController.horaSelecionada or agendamentoController.agendamentoPassado}"
+								update="dttDataSelect msgs"
+								process="dttDataSelect @this"
+								rendered="#{agendamentoController.editarModel eq 'A'}" />
+							
+							<!-- Botão Agendar (quando está inserindo) -->
+							<p:commandButton 
+								value="AGENDAR" 
+								styleClass="btn-step btn-step-finish"
+								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
+								disabled="#{empty agendamentoController.horaSelecionada}"
+								update="dttDataSelect msgs"
+								process="dttDataSelect @this"
+								rendered="#{agendamentoController.editarModel eq 'I'}" />
 						</div>
 					</div>
 				</ui:fragment>
-
-				<div class="row mt20">
-					<div class="col-md-6">
-						<p:commandButton update="dttDataSelect msgs" process="@this"
-							immediate="true" value="Anterior" styleClass="btn btn-blue medium"
-							actionListener="#{agendamentoController.voltaPassosAgendamento()}"
-							rendered="#{agendamentoController.passos > 0}" />
-					</div>
-					<div class="col-md-6 flex justify-end">
-						<p:commandButton id="proximoButton" update="dttDataSelect msgs"
-							process="dttDataSelect" value="Próximo" styleClass="btn btn-blue medium"
-							actionListener="#{agendamentoController.addPassosAgendamento()}"
-							rendered="#{agendamentoController.passos lt 2}"
-							disabled="#{agendamentoController.proximoDisabled}" />
-					</div>
-				</div>
 			</h:panelGroup>
 		</p:dialog>
 
@@ -492,10 +988,25 @@ body .ui-datatable .ui-datatable-even>td {
 
 	<!-- Conteúdo da SIDEBAR DIREITA -->
 	<ui:define name="sidebar">
+		<ui:fragment rendered="#{agendamentoController.agendamentoModel == null or agendamentoController.agendamentoModel.id == null}">
+			<div class="sidebar-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 40px 20px; text-align: center;">
+				<img class="img-custom" src="#{facesContext.externalContext.requestContextPath}/resources/images/empty-agendamentos.png" 
+					style="max-width: 280px; width: 100%; margin-bottom: 32px; opacity: 0.9;" />
+				<div style="max-width: 320px;">
+					<h3 style="font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: #374151; margin: 0 0 12px 0; line-height: 1.4;">
+						Selecione um agendamento
+					</h3>
+					<p style="font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 400; color: #6B7280; margin: 0; line-height: 1.6;">
+						Escolha um agendamento da lista ao lado para visualizar os detalhes completos do cliente e serviços
+					</p>
+				</div>
+			</div>
+		</ui:fragment>
+	
 		<ui:fragment
-			rendered="#{agendamentoController.clienteModel.id != null or agendamentoController.agendamentoModel.nomeClienteAvulso != null}">
+			rendered="#{agendamentoController.agendamentoModel != null and agendamentoController.agendamentoModel.id != null}">
 			<div class="content-logo-system">
-				<div class="flex space-between">
+				<div class="flex space-between align-center">
 					<div class="flex">
 						<div class="icon-circle">
 							<i class="fa-solid fa-user"></i>
@@ -519,7 +1030,8 @@ body .ui-datatable .ui-datatable-even>td {
 				</div>
 			</div>
 			<div class="content-btns">
-				<div class="flex">
+				<div class="flex space-between">
+					<div class="flex">
 					<div class="perfil-top-funcionario mr8"></div>
 					<div>
 						<label class="title-obj">Cliente</label>
@@ -534,27 +1046,7 @@ body .ui-datatable .ui-datatable-even>td {
 					</div>
 				</div>
 				
-				<!-- Sexo do Cliente -->
-				<ui:fragment rendered="#{agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.sexo != null}">
-					<div class="content-valores" style="padding-top: 8px;">
-						<label class="title-obj">Sexo</label>
-						<label class="subtitle-obj">
-							#{agendamentoController.clienteModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.clienteModel.sexo eq 'F' ? 'Feminino' : 'Outro')}
-						</label>
-					</div>
-				</ui:fragment>
-				
-				<!-- Observações do Cliente (prioridade: agendamento > cadastro) -->
-				<ui:fragment rendered="#{(agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '') or (agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.observacoes != null and agendamentoController.clienteModel.observacoes.trim() != '')}">
-					<div class="content-valores" style="padding-top: 8px;">
-						<label class="title-obj">Observações/Preferências</label>
-						<label class="subtitle-obj" style="white-space: pre-wrap;">
-							#{agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '' ? agendamentoController.agendamentoModel.observacoes : agendamentoController.clienteModel.observacoes}
-						</label>
-					</div>
-				</ui:fragment>
-
-				<p:outputPanel id="attCaixa">
+					<p:outputPanel id="attCaixa">
 					<div>
 						<p:outputLabel class="title-date"
 							value="#{agendamentoController.agendamentoModel.dataCriado}">
@@ -582,6 +1074,37 @@ body .ui-datatable .ui-datatable-even>td {
 						</ui:fragment>
 					</div>
 				</p:outputPanel>
+				</div>
+				
+				
+
+				<div>
+				
+				<div class="content-info-cliente">
+				
+						<!-- Sexo do Cliente -->
+				<ui:fragment rendered="#{agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.sexo != null}">
+					<div class="content-card-info-cliente" style="padding-top: 8px;">
+						<label class="title-obj">Sexo</label>
+						<label class="subtitle-obj">
+							#{agendamentoController.clienteModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.clienteModel.sexo eq 'F' ? 'Feminino' : 'Outro')}
+						</label>
+					</div>
+				</ui:fragment>
+					<!-- Observações do Cliente (prioridade: agendamento > cadastro) -->
+				<ui:fragment rendered="#{(agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '') or (agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.observacoes != null and agendamentoController.clienteModel.observacoes.trim() != '')}">
+					<div class="content-card-info-cliente" style="padding-top: 8px;">
+						<label class="title-obj">Observações/Preferências</label>
+						<label class="subtitle-obj">
+							#{agendamentoController.agendamentoModel.observacoes != null and agendamentoController.agendamentoModel.observacoes.trim() != '' ? agendamentoController.agendamentoModel.observacoes : agendamentoController.clienteModel.observacoes}
+						</label>
+					</div>
+				</ui:fragment>
+				
+				
+				</div>
+				
+				</div>
 			</div>
 			<div class="content-valores">
 				<label class="title-obj">Funcionário a realizar serviços</label> <label
@@ -591,7 +1114,7 @@ body .ui-datatable .ui-datatable-even>td {
 				<div>
 					<label class="title-servicos mb15">Serviços contratados</label>
 					<p:dataList id="dttlstservicos" rows="4"
-						class="dataList-dialog-custom data-list-time"
+						class="dataList-dialog-custom data-list-time services-scroll"
 						value="#{agendamentoController.agendamentoModel.servicos}"
 						var="servico" rowIndexVar="index">
 						<div class="list-time">

@@ -87,42 +87,45 @@ public class AgendamentoClienteController implements Serializable {
     @PostConstruct
     public void init() {
         try {
+            // Define a data de hoje para o datepicker
             Calendar cal = Calendar.getInstance();
             cal.set(Calendar.HOUR_OF_DAY, 0);
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
             this.today = cal.getTime();
-            
-            Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
-            
-            // Verifica se é um cliente logado
-            if (usuarioLogado != null) {
-                // Tenta buscar o cliente associado ao usuário
-                if (usuarioLogado.getClienteAssociado() == null && usuarioLogado.getId() != null) {
-                    // Se não estiver carregado na sessão, busca no banco
-                    Cliente clienteAssociado = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
-                    usuarioLogado.setClienteAssociado(clienteAssociado);
-                }
-                
-                // Agora valida se realmente é um cliente
-                if (usuarioLogado.getClienteAssociado() != null) {
-                    this.nomeClienteLogado = usuarioLogado.getClienteAssociado().getNome(); 
-                    popularMeusAgendamentos();
-                } else {
-                    // Não é um cliente, não pode usar esta tela
-                    this.nomeClienteLogado = "Acesso restrito";
-                }
-            } else {
-                this.nomeClienteLogado = "Visitante";
-            }
-            
+
+            // Carrega dados essenciais da página
             this.funcionariosDisponiveis = FuncionarioDAO.buscarTodosFuncionarios();
             this.servicosDisponiveis = ServicosDAO.buscarTodos();
             this.servicosFiltrados = new ArrayList<>(this.servicosDisponiveis);
+
+            // Carrega dados específicos do cliente logado
+            Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
+            
+            if (usuarioLogado != null && usuarioLogado.getId() != null) {
+                // Busca o cliente no banco para garantir dados atualizados
+                Cliente cliente = ClienteDAO.buscarClientePorUsuarioId(usuarioLogado.getId());
+                
+                if (cliente != null) {
+                    // Se encontrou um cliente, popula os dados na tela
+                    usuarioLogado.setClienteAssociado(cliente); // Garante que a sessão está atualizada
+                    this.nomeClienteLogado = cliente.getNome();
+                    popularMeusAgendamentos(); // Ponto central do fix: carrega os agendamentos
+                } else {
+                    // Usuário logado não é um cliente
+                    this.nomeClienteLogado = "Acesso Restrito";
+                    this.meusAgendamentos.clear();
+                }
+            } else {
+                // Nenhum usuário logado
+                this.nomeClienteLogado = "Visitante";
+                this.meusAgendamentos.clear();
+            }
         } catch (Exception e) {
-            System.err.println("ERRO em init(): " + e.getMessage());
+            System.err.println("ERRO crítico no init() do AgendamentoClienteController: " + e.getMessage());
             e.printStackTrace();
+            this.meusAgendamentos = new ArrayList<>(); // Garante que a lista não seja nula em caso de erro
         }
     }
 
@@ -214,8 +217,7 @@ public class AgendamentoClienteController implements Serializable {
             popularMeusAgendamentos();
             limparFormulario();
             
-            // Comandos para o frontend (separados, como em outras telas)
-            PrimeFaces.current().ajax().update("@form");
+            // A atualização do formulário é feita pelo update= do p:commandButton no XHTML
             exibirAlerta("success", "Agendamento realizado com sucesso!");
 
         } catch (Exception e) {
@@ -226,16 +228,11 @@ public class AgendamentoClienteController implements Serializable {
 
     public void iniciarAgendamento() {
         try {
-            System.out.println("=== iniciarAgendamento() chamado ===");
             this.agendamentoIniciado = true;
             this.activeIndex = 0;
             
-            System.out.println("agendamentoIniciado=" + agendamentoIniciado);
-            System.out.println("activeIndex=" + activeIndex);
-            
             // Força atualização do componente steps
             PrimeFaces.current().ajax().update("form:bookingAreaPanel");
-            System.out.println("=== iniciarAgendamento() concluído ===");
         } catch (Exception e) {
             System.err.println("ERRO em iniciarAgendamento(): " + e.getMessage());
             e.printStackTrace();
@@ -245,41 +242,36 @@ public class AgendamentoClienteController implements Serializable {
     
     public void proximoPasso() {
         try {
-            System.out.println("=== proximoPasso() chamado. activeIndex=" + activeIndex + " ===");
+            // Debug: Mostra estado atual antes de validar
+            System.out.println("=== AVANÇANDO DO PASSO " + activeIndex + " ===");
+            System.out.println("funcionarioId: " + funcionarioId);
+            System.out.println("dataSelecionada: " + dataSelecionada);
+            System.out.println("servicosSelecionadosIds size: " + (servicosSelecionadosIds != null ? servicosSelecionadosIds.size() : "null"));
             
             // Validações antes de avançar
             if (activeIndex == 0) {
                 // Validar Passo 1: Cliente e Funcionário
-                System.out.println("Validando Passo 1...");
-                System.out.println("funcionarioId=" + funcionarioId);
                 
                 if (funcionarioId == null) {
                     exibirAlerta("warning", "Por favor, selecione um funcionário.");
                     return;
                 }
                 // Calcula datas desabilitadas quando sair do passo 1 (otimizado)
-                System.out.println("Calculando datas desabilitadas...");
                 calcularDatasDesabilitadas();
-                System.out.println("Datas desabilitadas calculadas: " + datasDesabilitadas.size());
                 
             } else if (activeIndex == 1) {
                 // Validar Passo 2: Data e Serviços
-                System.out.println("Validando Passo 2...");
-                System.out.println("dataSelecionada=" + dataSelecionada);
-                System.out.println("servicosSelecionadosIds.size=" + servicosSelecionadosIds.size());
                 
                 if (dataSelecionada == null) {
                     exibirAlerta("warning", "Por favor, selecione uma data.");
                     return;
                 }
-                if (servicosSelecionadosIds.isEmpty()) {
+                if (servicosSelecionadosIds == null || servicosSelecionadosIds.isEmpty()) {
                     exibirAlerta("warning", "Por favor, selecione ao menos um serviço.");
                     return;
                 }
                 // Carregar horários disponíveis para o próximo passo
-                System.out.println("Gerando horários disponíveis...");
                 gerarHorariosDisponiveis();
-                System.out.println("Horários disponíveis gerados: " + horariosDisponiveis.size());
                 
                 // Verifica se há horários disponíveis
                 if (horariosDisponiveis.isEmpty()) {
@@ -290,10 +282,9 @@ public class AgendamentoClienteController implements Serializable {
             
             if (activeIndex < 2) {
                 activeIndex++;
-                System.out.println("Avançando para passo " + activeIndex);
-                PrimeFaces.current().ajax().update("form:stepsContainer", "form:msgs");
+                System.out.println("=== AVANÇOU PARA PASSO " + activeIndex + " ===");
+                // NÃO FAZ UPDATE AQUI - o update é feito pelo botão no XHTML
             }
-            System.out.println("=== proximoPasso() concluído ===");
         } catch (Exception e) {
             System.err.println("ERRO em proximoPasso(): " + e.getMessage());
             e.printStackTrace();
@@ -302,9 +293,23 @@ public class AgendamentoClienteController implements Serializable {
     }
     
     public void passoAnterior() {
-        if (activeIndex > 0) {
-            activeIndex--;
-            PrimeFaces.current().ajax().update("form:stepsComponent", "form:bookingAreaPanel");
+        try {
+            if (activeIndex > 0) {
+                activeIndex--;
+                
+                // Debug: Mostra estado das variáveis ao voltar
+                System.out.println("=== VOLTANDO PARA PASSO " + activeIndex + " ===");
+                System.out.println("funcionarioId: " + funcionarioId);
+                System.out.println("dataSelecionada: " + dataSelecionada);
+                System.out.println("servicosSelecionadosIds size: " + (servicosSelecionadosIds != null ? servicosSelecionadosIds.size() : "null"));
+                System.out.println("horaSelecionada: " + horaSelecionada);
+                
+                // NÃO FAZ UPDATE AQUI - o update é feito pelo botão no XHTML
+            }
+        } catch (Exception e) {
+            System.err.println("ERRO em passoAnterior(): " + e.getMessage());
+            e.printStackTrace();
+            exibirAlerta("error", "Erro ao voltar ao passo anterior");
         }
     }
     
@@ -416,7 +421,7 @@ public class AgendamentoClienteController implements Serializable {
 
             popularMeusAgendamentos(); // Refresh the list
             exibirAlerta("success", "Agendamento cancelado com sucesso!");
-            PrimeFaces.current().ajax().update("@form");
+            // A atualização da lista é feita pelo update= do p:commandButton no XHTML
         } catch (Exception e) {
             exibirAlerta("error", "Não foi possível cancelar o agendamento.");
             e.printStackTrace();
@@ -425,14 +430,9 @@ public class AgendamentoClienteController implements Serializable {
 
     public void aoSelecionarData() {
         try {
-            System.out.println("=== aoSelecionarData() chamado ===");
-            System.out.println("Data selecionada: " + dataSelecionada);
-            
             // No fluxo de steps, não limpamos mais os serviços ao selecionar a data
             // Os serviços são selecionados no mesmo passo que a data
             this.horaSelecionada = null;
-            
-            System.out.println("=== aoSelecionarData() concluído ===");
             
             // Não precisa gerar horários aqui, pois será feito no próximo passo
             // quando os serviços forem selecionados
@@ -444,16 +444,11 @@ public class AgendamentoClienteController implements Serializable {
 
     public void aoSelecionarFuncionario() {
         try {
-            System.out.println("=== aoSelecionarFuncionario() chamado ===");
-            System.out.println("funcionarioId selecionado: " + funcionarioId);
-            
             this.dataSelecionada = null;
             this.horaSelecionada = null;
             this.horariosDisponiveis.clear();
             this.servicosSelecionadosIds.clear();
             this.servicosSelecionadosMap.clear();
-            
-            System.out.println("=== aoSelecionarFuncionario() concluído ===");
             
             // Não calcula datas desabilitadas aqui mais, será feito ao avançar do passo 1
             // calcularDatasDesabilitadas();
@@ -471,8 +466,6 @@ public class AgendamentoClienteController implements Serializable {
     
     public void aoSelecionarServico() {
         try {
-            System.out.println("=== aoSelecionarServico() chamado ===");
-            
             // Sincroniza o Map com a lista de IDs
             servicosSelecionadosIds.clear();
             
@@ -481,9 +474,6 @@ public class AgendamentoClienteController implements Serializable {
                     servicosSelecionadosIds.add(entry.getKey());
                 }
             }
-            
-            System.out.println("Serviços selecionados: " + servicosSelecionadosIds.size());
-            System.out.println("=== aoSelecionarServico() concluído ===");
             
             // No fluxo de steps, não recalculamos datas ou horários aqui
             // Os horários serão calculados apenas quando avançar para o passo 3
@@ -741,25 +731,25 @@ public class AgendamentoClienteController implements Serializable {
 				switch (diaSemana) {
 					case 7: // Domingo
 						trabalha = h.getDomingo() != null && h.getDomingo();
-						break;
+							break;
 					case 1: // Segunda
 						trabalha = h.getSegunda() != null && h.getSegunda();
-						break;
+							break;
 					case 2: // Terça
 						trabalha = h.getTerca() != null && h.getTerca();
-						break;
+							break;
 					case 3: // Quarta
 						trabalha = h.getQuarta() != null && h.getQuarta();
-						break;
+							break;
 					case 4: // Quinta
 						trabalha = h.getQuinta() != null && h.getQuinta();
-						break;
+							break;
 					case 5: // Sexta
 						trabalha = h.getSexta() != null && h.getSexta();
-						break;
+							break;
 					case 6: // Sábado
 						trabalha = h.getSabado() != null && h.getSabado();
-						break;
+							break;
 				}
 				
 				if (trabalha) {
@@ -830,24 +820,24 @@ public class AgendamentoClienteController implements Serializable {
     }
 
     public boolean isDataDesabilitada() {
-        return funcionarioId == null;
+        // NUNCA desabilitar - o controle é feito pelo activeIndex e validações
+        return false;
     }
 
     public boolean isFuncionarioDesabilitado() {
-        // Campo de funcionário sempre está habilitado
+        // NUNCA desabilitar
         return false;
     }
 
     public boolean isHorarioDesabilitado() {
-        return funcionarioId == null || dataSelecionada == null;
+        // NUNCA desabilitar - o dropdown mostra "Nenhum horário disponível" quando vazio
+        return false;
     }
     
     /**
-     * No novo fluxo de steps, os serviços não são mais bloqueados
-     * O controle é feito pelo botão "Próximo"
+     * Serviços SEMPRE habilitados
      */
     public boolean isAgendamentoDesabilitado() {
-        // Serviços sempre habilitados quando estiver no step 2
         return false;
     }
 
@@ -992,12 +982,12 @@ public class AgendamentoClienteController implements Serializable {
 							}
 						}
 
-						if (todosSlotsLivres) {
-							String horaFormatadaLoop = horaAtual.format(formatter);
-							if (!horariosDisponiveis.contains(horaFormatadaLoop)) {
-								horariosDisponiveis.add(horaFormatadaLoop);
+							if (todosSlotsLivres) {
+								String horaFormatadaLoop = horaAtual.format(formatter);
+								if (!horariosDisponiveis.contains(horaFormatadaLoop)) {
+									horariosDisponiveis.add(horaFormatadaLoop);
+								}
 							}
-						}
 					}
 				}
 				
