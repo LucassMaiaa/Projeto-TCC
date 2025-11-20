@@ -14,6 +14,7 @@
 	<!-- CSS específico desta página -->
 	<ui:define name="extra-css">
 		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+		
 		<style>
 .content-info-lateral {
 	background: #FCFCFF;
@@ -95,6 +96,11 @@ body .ui-steps .ui-steps-item.ui-state-highlight .ui-steps-title {
 	justify-content: space-between;
 	margin-top: 30px;
 	gap: 15px;
+	    position: sticky;
+    bottom: -20px;
+    background: #ededed;
+    padding: 10px 20px;
+    margin: 20px -20px -20px;
 }
 
 .btn-step {
@@ -146,18 +152,20 @@ body .ui-steps .ui-steps-item.ui-state-highlight .ui-steps-title {
 	cursor: not-allowed !important;
 }
 
-.btn-step-next:disabled {
-	background: #D1D5DB !important;
+.btn-step-next:disabled, .btn-step-next.ui-state-disabled {
+	background: #9CA3AF !important; /* Cinza mais escuro para melhor legibilidade */
+	color: #FFFFFF !important;
 }
 
-.btn-step-finish:disabled {
-	background: #D1D5DB !important;
+.btn-step-finish:disabled, .btn-step-finish.ui-state-disabled {
+	background: #9CA3AF !important; /* Cinza mais escuro para melhor legibilidade */
+	color: #FFFFFF !important;
 }
 
 /* Layout dos steps em grid */
 .step-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: 1fr;
 	gap: 20px;
 	margin: 20px 0;
 }
@@ -286,7 +294,7 @@ body .services-datagrid-cliente.ui-datagrid {
 body .services-datagrid-cliente .ui-datagrid-content {
 	background: transparent;
 	border: none;
-	padding: 0;
+	padding: 0px;
 }
 
 body .services-datagrid-cliente .ui-g {
@@ -295,6 +303,7 @@ body .services-datagrid-cliente .ui-g {
 	gap: 10px;
 	margin: 0;
 }
+
 
 body .services-datagrid-cliente .ui-g-12 {
 	padding: 0;
@@ -427,6 +436,97 @@ body .services-datagrid-cliente .ui-g-12 {
 margin-bottom: 0px
 }
 
+/* ============================================ */
+/* ESTILOS PARA RESPONSIVIDADE DO MODAL        */
+/* ============================================ */
+.dialog-agendamento-custom .ui-dialog-content {
+	min-height: 500px !important;
+	max-height: calc(90vh - 100px) !important;
+	overflow-y: auto !important;
+	padding: 20px !important;
+}
+
+/* Força o modal a sempre ficar centralizado */
+.dialog-agendamento-custom.ui-dialog {
+	position: fixed !important;
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+	margin: 0 !important;
+}
+
+/* Garante largura de 800px e centralização */
+.dialog-agendamento-custom {
+	width: 800px !important;
+	max-width: 95vw !important;
+}
+
+/* Força o modal a sempre ficar centralizado */
+.dialog-agendamento-custom.ui-dialog {
+	position: fixed !important;
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+	margin: 0 !important;
+}
+
+/* Mensagens de erro não aumentam o modal */
+.dialog-agendamento-custom .ui-messages,
+.messages-modal-fixed {
+	max-width: 100% !important;
+	overflow-wrap: break-word !important;
+	word-wrap: break-word !important;
+	margin-bottom: 15px !important;
+	box-sizing: border-box !important;
+}
+
+/* Força recalculo de posição quando mensagem aparece */
+.dialog-agendamento-custom.ui-dialog.ui-widget-content {
+	position: fixed !important;
+	left: 50% !important;
+	top: 50% !important;
+	transform: translate(-50%, -50%) !important;
+	transition: none !important;
+}
+
+/* Grid de serviços sempre ocupa espaço fixo */
+.services-grid-cliente {
+	min-height: 233px;
+	max-height: 233px;
+	overflow-y: auto;
+	position: relative;
+}
+
+/* Step content sem altura mínima fixa */
+.step-content {
+	animation: step-enter-animation 0.5s ease-out;
+	padding: 0;
+	min-height: auto;
+}
+
+/* Scrollbar customizada */
+.modal-content-scrollable::-webkit-scrollbar {
+	width: 8px;
+}
+
+.modal-content-scrollable::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 4px;
+}
+
+.modal-content-scrollable::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 4px;
+}
+
+.modal-content-scrollable::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+.header-modal{
+margin-bottom: 0px
+}
+
 .img-custom{
 	    max-width: 380px;
     max-height: 380px;
@@ -461,6 +561,63 @@ margin-bottom: 0px
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+/* ============================================ */
+/* INDICADORES DE STATUS NO FILTRO              */
+/* ============================================ */
+.header-filters .content-filter .ui-selectonebutton .ui-button {
+    position: relative !important;
+}
+
+/* Adiciona espaço apenas nos botões que terão o indicador */
+.header-filters .content-filter .ui-selectonebutton .ui-button:nth-child(n+2) {
+	padding-left: 28px !important;
+}
+
+.header-filters .content-filter .ui-selectonebutton .ui-button::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+/* "Todos" não tem cor */
+.header-filters .content-filter .ui-selectonebutton .ui-button:nth-child(1)::before {
+    display: none;
+}
+
+/* Cor para "Pendentes" (Amarelo) */
+.header-filters .content-filter .ui-selectonebutton .ui-button:nth-child(2)::before {
+    background-color: #FFC107;
+}
+
+/* Cor para "Finalizados" (Verde) */
+.header-filters .content-filter .ui-selectonebutton .ui-button:nth-child(3)::before {
+    background-color: #23C538;
+}
+
+/* Cor para "Cancelados" (Vermelho) */
+.header-filters .content-filter .ui-selectonebutton .ui-button:nth-child(4)::before {
+    background-color: #C52323;
+}
+
+/* Ajuste para o estado ativo/selecionado */
+.header-filters .content-filter .ui-selectonebutton .ui-button.ui-state-active::before {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #6B7280; /* Anel cinza para manter a neutralidade */
+}
+
+.services-datagrid-cliente .ui-datagrid-content-empty{
+  padding: 20px !important;
+  font-weight: bold !important;
+  text-align: center !important;
+}
+
 		</style>
 	</ui:define>
 
@@ -504,7 +661,7 @@ margin-bottom: 0px
 							</p:inputText>
 							<i class="fa-solid fa-magnifying-glass"></i>
 						</div>
-						<div class="col-md-4 input-combined-no-text">
+						<div class="col-md-3 input-combined-no-text">
 							<p:selectOneMenu
 								value="#{agendamentoController.nomeFuncionarioFiltro}"
 								filter="true" filterMatchMode="startsWith">
@@ -515,7 +672,7 @@ margin-bottom: 0px
 								<p:ajax update="@form" process="@this" />
 							</p:selectOneMenu>
 						</div>
-						<div class="col-md-6">
+						<div class="col-md-7">
 							<div class="content-filter ">
 								<i class="fa-solid fa-filter"></i>
 								<p:selectOneButton
@@ -597,7 +754,10 @@ margin-bottom: 0px
 		<p:dialog id="dlgAgendar" widgetVar="dlgAgendar" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false" focus="proximoButton"
-			responsive="true" fitViewport="true" dynamic="true">
+			responsive="true" fitViewport="true" dynamic="true"
+			width="700" minHeight="500" maximizable="false"
+			styleClass="dialog-agendamento-custom"
+			style="max-width: 90vw; max-height: 90vh;">
 			<h:panelGroup id="dttDataSelect">
 				<div class="header-modal">
 					<div class="flex align-center">
@@ -619,8 +779,8 @@ margin-bottom: 0px
 					</div>
 				</div>
 
-				<p:messages id="msgs" closable="true" showIcon="true"
-					autoUpdate="true" />
+				<p:messages id="msgs" closable="true" showIcon="true" 
+					styleClass="messages-modal-fixed" />
 				
 				<!-- Steps do PrimeFaces -->
 				<p:steps id="stepsComponent" 
@@ -644,7 +804,8 @@ margin-bottom: 0px
 										unselectable="false">
 										<f:selectItem itemLabel="Com cadastro" itemValue="A" />
 										<f:selectItem itemLabel="Sem cadastros" itemValue="I" />
-										<p:ajax update="dlgAttCliente" process="@this" />
+										<p:ajax update="dttDataSelect" process="@this" 
+											listener="#{agendamentoController.onTipoCadastroChange}" />
 									</p:selectOneButton>
 								</div>
 							</div>
@@ -871,7 +1032,7 @@ margin-bottom: 0px
 				<ui:fragment rendered="#{agendamentoController.passos eq 2}">
 					<div class="step-content">
 						<div class="step-grid">
-							<div class="input-combined">
+							<div class="input-combined step-grid-full">
 								<p:outputLabel styleClass="title-input"
 									value="Selecione o Horário" />
 								<p:selectOneMenu id="inputHorario"
@@ -881,7 +1042,7 @@ margin-bottom: 0px
 									<f:selectItems
 										value="#{agendamentoController.horariosDisponiveis}" var="h"
 										itemLabel="#{h}" itemValue="#{h}" />
-									<p:ajax event="change" update="dttDataSelect" process="@this" />
+									<p:ajax event="change" process="inputHorario" update="btnAgendar btnSalvar" />
 								</p:selectOneMenu>
 								
 								<!-- Mensagem informativa quando não há horários -->
@@ -893,7 +1054,22 @@ margin-bottom: 0px
 								</h:panelGroup>
 							</div>
 							
-							<div class="input-combined">
+							<!-- Campo Sexo: SÓ para agendamentos SEM cadastro -->
+							<p:outputPanel id="panelSexo" rendered="#{agendamentoController.tipoCadastro eq 'I'}">
+								<div class="input-combined step-grid-full">
+									<p:outputLabel styleClass="title-input" value="Sexo *" />
+									<p:selectOneMenu id="selectSexo" value="#{agendamentoController.sexoSelecionado}"
+										required="#{agendamentoController.tipoCadastro eq 'I'}"
+										requiredMessage="O campo Sexo é obrigatório">
+										<f:selectItem itemLabel="Selecione o sexo" itemValue="" noSelectionOption="true"/>
+										<f:selectItem itemLabel="Masculino" itemValue="M" />
+										<f:selectItem itemLabel="Feminino" itemValue="F" />
+										<f:selectItem itemLabel="Outro" itemValue="O" />
+									</p:selectOneMenu>
+								</div>
+							</p:outputPanel>
+							
+							<div class="input-combined step-grid-full">
 								<p:outputLabel styleClass="title-input" 
 									value="Observações (Opcional)" />
 								<p:inputTextarea 
@@ -916,6 +1092,7 @@ margin-bottom: 0px
 							
 							<!-- Botão Salvar (quando está editando) -->
 							<p:commandButton 
+								id="btnSalvar"
 								value="SALVAR" 
 								styleClass="btn-step btn-step-finish"
 								actionListener="#{agendamentoController.atualizarAgendamento()}"
@@ -926,6 +1103,7 @@ margin-bottom: 0px
 							
 							<!-- Botão Agendar (quando está inserindo) -->
 							<p:commandButton 
+								id="btnAgendar"
 								value="AGENDAR" 
 								styleClass="btn-step btn-step-finish"
 								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
@@ -936,6 +1114,7 @@ margin-bottom: 0px
 						</div>
 					</div>
 				</ui:fragment>
+				
 			</h:panelGroup>
 		</p:dialog>
 
@@ -1030,7 +1209,7 @@ margin-bottom: 0px
 				</div>
 			</div>
 			<div class="content-btns">
-				<div class="flex space-between">
+				<div class="flex space-between align-center">
 					<div class="flex">
 					<div class="perfil-top-funcionario mr8"></div>
 					<div>
@@ -1082,12 +1261,16 @@ margin-bottom: 0px
 				
 				<div class="content-info-cliente">
 				
-						<!-- Sexo do Cliente -->
-				<ui:fragment rendered="#{agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.sexo != null}">
+						<!-- Sexo do Cliente (Lógica Unificada) -->
+				<ui:fragment rendered="#{(agendamentoController.agendamentoModel.cliente.id != null and agendamentoController.clienteModel.sexo != null) or (agendamentoController.agendamentoModel.cliente.id == null and agendamentoController.agendamentoModel.sexo != null)}">
 					<div class="content-card-info-cliente" style="padding-top: 8px;">
 						<label class="title-obj">Sexo</label>
 						<label class="subtitle-obj">
-							#{agendamentoController.clienteModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.clienteModel.sexo eq 'F' ? 'Feminino' : 'Outro')}
+							<!-- Determina qual campo de sexo usar -->
+							#{agendamentoController.agendamentoModel.cliente.id != null ? 
+							  (agendamentoController.clienteModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.clienteModel.sexo eq 'F' ? 'Feminino' : 'Outro')) :
+							  (agendamentoController.agendamentoModel.sexo eq 'M' ? 'Masculino' : (agendamentoController.agendamentoModel.sexo eq 'F' ? 'Feminino' : 'Outro'))
+							}
 						</label>
 					</div>
 				</ui:fragment>

@@ -170,6 +170,8 @@ a {
 
 .content-info-lateral{
     background: #EBEBEB;
+    display: flex;
+    flex-direction: column;
 }
 
 .content-logo-system {
@@ -192,6 +194,7 @@ a {
     height: 100vh;
         height: calc(100vh - 302px);
     padding: 15px 20px 30px;
+    flex: 1;
 }
 
 .content-grafic{
@@ -1256,7 +1259,8 @@ body .ui-datatable .ui-datatable-data>tr>td:last-child {
     border-radius: 0 8px 8px 0;
 }
 
-body .ui-datatable .ui-datatable-data>tr>td[colspan="5"] {
+body .ui-datatable .ui-datatable-data>tr>td[colspan="5"],
+body .ui-datatable .ui-datatable-data>tr>td[colspan="7"] {
     height: 514px;
     font-size: 17px;
 }

@@ -59,7 +59,7 @@ public class AgendamentoController implements Serializable {
 	private Date dataFiltro = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 	private String horaSelecionada;
 	private String statusSelecionado = "";
-	private Agendamento agendamentoModel = new Agendamento();
+	private Agendamento agendamentoModel = new Agendamento(); // sempre inicializado para evitar null em binds como sexo
 	private Cliente clienteModel = new Cliente();
 	private ControleCaixa controleCaixaModel = new ControleCaixa();
 	private LazyDataModel<Agendamento> lstAgendamentos;
@@ -89,6 +89,7 @@ public class AgendamentoController implements Serializable {
 	private boolean agendamentoIniciado = false;
 	private int activeIndex = 0;
 	private String observacoes;
+	private String sexoSelecionado;
 	private Long funcionarioId;
 	private List<Funcionario> funcionariosDisponiveis = new ArrayList<>();
 	private List<Servicos> servicosDisponiveis = new ArrayList<>();
@@ -407,6 +408,7 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel = new Agendamento();
 		agendamentoModel.setServicos(new ArrayList<>());
 		agendamentoModel.setObservacoes(""); // Inicializa observações como string vazia
+		agendamentoModel.setSexo(null); // Inicializa sexo como null
 		servicosSelecionadosIds = new ArrayList<>();
 		servicosSelecionadosMap = new java.util.HashMap<>();
 		clienteId = null;
@@ -414,6 +416,7 @@ public class AgendamentoController implements Serializable {
 		nomeFuncionario = "";
 		dataSelecionada = null;
 		horaSelecionada = "";
+		observacoes = "";
 		lstFuncionarioDisponivel = new ArrayList<>(lstFuncionario);
 	}
 
@@ -443,6 +446,13 @@ public class AgendamentoController implements Serializable {
 
 	public void adicionarNovoAgendamento() {
 		if (!validarCamposAgendamento()) return;
+		
+		// Validação do campo sexo para agendamentos sem cadastro
+		if ("I".equals(tipoCadastro) && (agendamentoModel.getSexo() == null || agendamentoModel.getSexo().trim().isEmpty())) {
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo sexo é obrigatório para agendamentos sem cadastro", "Erro!"));
+			return;
+		}
 		
 		Funcionario funcionarioSelecionado = lstFuncionario.stream().filter(f -> f.getNome().equalsIgnoreCase(nomeFuncionario.trim())).findFirst().orElse(null);
 		Cliente clienteSelecionado = null;
@@ -509,6 +519,10 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel.setCliente(clienteSelecionado);
 		if ("I".equals(tipoCadastro)) {
 			agendamentoModel.setNomeClienteAvulso(this.nomeCliente);
+			// Mantém o sexo que foi selecionado no Step 3
+		} else {
+			// Limpa o sexo se for cliente cadastrado (não deve salvar)
+			agendamentoModel.setSexo(null);
 		}
 		agendamentoModel.setTipoCadastro(tipoCadastro);
 		agendamentoModel.setObservacoes(this.observacoes); // Copia observacoes do controller
@@ -535,6 +549,13 @@ public class AgendamentoController implements Serializable {
 
 	public void atualizarAgendamento() {
 		if (!validarCamposAgendamento()) return;
+		
+		// Validação do campo sexo para agendamentos sem cadastro
+		if ("I".equals(tipoCadastro) && (agendamentoModel.getSexo() == null || agendamentoModel.getSexo().trim().isEmpty())) {
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo sexo é obrigatório para agendamentos sem cadastro", "Erro!"));
+			return;
+		}
 		
 		Funcionario funcionarioSelecionado = lstFuncionario.stream().filter(f -> f.getNome().equalsIgnoreCase(nomeFuncionario.trim())).findFirst().orElse(null);
 		Cliente clienteSelecionado = null;
@@ -618,7 +639,13 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel.setFuncionario(funcionarioSelecionado);
 		agendamentoModel.setCliente(clienteSelecionado);
 		agendamentoModel.setHoraSelecionada(LocalTime.parse(horaSelecionada));
-		agendamentoModel.setNomeClienteAvulso(nomeCliente);
+		if ("I".equals(tipoCadastro)) {
+			agendamentoModel.setNomeClienteAvulso(this.nomeCliente);
+			// Mantém o sexo que foi selecionado no Step 3
+		} else {
+			// Limpa o sexo se for cliente cadastrado (não deve salvar)
+			agendamentoModel.setSexo(null);
+		}
 		agendamentoModel.setTipoCadastro(tipoCadastro);
 		agendamentoModel.setObservacoes(this.observacoes); // Copia observacoes do controller
 		AgendamentoDAO.atualizar(agendamentoModel, servicosSelecionadosIds);
@@ -796,14 +823,7 @@ public class AgendamentoController implements Serializable {
 		LocalDate dataSelecionadaLocalDate = new java.sql.Date(dataSelecionada.getTime()).toLocalDate();
 		LocalTime horaAtualSistema = agora.toLocalTime();
 		
-		// Debug: Log para dia de hoje
 		boolean isHojeDia = dataSelecionadaLocalDate.isEqual(LocalDate.now());
-		if (isHojeDia) {
-			System.out.println("=== GERANDO HORÁRIOS PARA HOJE ===");
-			System.out.println("Hora atual do sistema: " + horaAtualSistema);
-			System.out.println("Total minutos serviço: " + totalMinutos);
-			System.out.println("Slots necessários: " + numeroDeSlotsNecessarios);
-		}
 
 		if ("A".equals(editarModel) && horaSelecionada != null && !horaSelecionada.isEmpty()) {
 			horariosDisponiveis.add(horaSelecionada);
@@ -813,10 +833,6 @@ public class AgendamentoController implements Serializable {
 		for (Horario periodo : horariosValidosParaDia) {
 			LocalTime horaInicialPeriodo = periodo.getHoraInicial();
 			LocalTime horaFinalPeriodo = periodo.getHoraFinal();
-			
-			if (isHojeDia) {
-				System.out.println("Período de trabalho: " + horaInicialPeriodo + " até " + horaFinalPeriodo);
-			}
 
 			LocalTime horaAtual = horaInicialPeriodo;
 			
@@ -891,21 +907,6 @@ public class AgendamentoController implements Serializable {
 			}
 		}
 		java.util.Collections.sort(horariosDisponiveis);
-		
-		// Debug: Log para dia de hoje
-		if (isHojeDia) {
-			System.out.println("=== RESULTADO GERAÇÃO DE HORÁRIOS ===");
-			System.out.println("Total de horários encontrados: " + horariosDisponiveis.size());
-			if (!horariosDisponiveis.isEmpty()) {
-				System.out.println("Horários disponíveis: " + horariosDisponiveis);
-			} else {
-				System.out.println("❌ NENHUM HORÁRIO DISPONÍVEL!");
-				System.out.println("Verifique se:");
-				System.out.println("- Hora atual + 30min < últimos horários");
-				System.out.println("- Slots estão livres");
-				System.out.println("- Horário de término não ultrapassa período");
-			}
-		}
 	}
 
 	public void funcionarioAlterado() {
@@ -973,6 +974,24 @@ public class AgendamentoController implements Serializable {
 			if (this.passos > 0) {
 				this.passos--;
 			}
+		}
+	}
+	
+	/**
+	 * Listener chamado quando o tipo de cadastro é alterado no Step 1
+	 * Garante que agendamentoModel esteja sempre inicializado
+	 */
+	public void onTipoCadastroChange() {
+		// Garante que agendamentoModel não está null
+		if (agendamentoModel == null) {
+			agendamentoModel = new Agendamento();
+			agendamentoModel.setServicos(new ArrayList<>());
+			agendamentoModel.setObservacoes("");
+		}
+		
+		// Se mudou para "Com cadastro", limpa o sexo
+		if ("A".equals(tipoCadastro)) {
+			agendamentoModel.setSexo(null);
 		}
 	}
 
@@ -2077,8 +2096,6 @@ public class AgendamentoController implements Serializable {
 	 */
 	public void aoSelecionarServicoModal() {
 		try {
-			System.out.println("=== aoSelecionarServicoModal() chamado ===");
-			
 			// Atualiza a lista servicosSelecionadosIds com base no Map
 			if (servicosSelecionadosIds == null) {
 				servicosSelecionadosIds = new ArrayList<>();
@@ -2094,16 +2111,10 @@ public class AgendamentoController implements Serializable {
 				}
 			}
 			
-			System.out.println("Serviços selecionados no modal: " + servicosSelecionadosIds.size());
-			
 			// Recalcula o valor total
 			calculaValorServicos();
 			
-			System.out.println("Valor total calculado: " + totalGastoServicos);
-			System.out.println("=== aoSelecionarServicoModal() concluído ===");
-			
 		} catch (Exception e) {
-			System.err.println("ERRO em aoSelecionarServicoModal(): " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

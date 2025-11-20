@@ -24,6 +24,7 @@
 		<p:poll interval="30" 
 		        listener="#{notificacaoController.atualizarNotificacoes()}" 
 		        update="notificationBadge" 
+		        process="@this"
 		        autoStart="true" />
 		
 		<!-- Grid com 2 colunas: menu lateral esquerdo e conteúdo central (SEM sidebar) -->

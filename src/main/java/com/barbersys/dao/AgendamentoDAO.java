@@ -75,6 +75,7 @@ public class AgendamentoDAO {
 				+ "a.age_status AS agendamento_status, " + "a.age_data AS agendamento_data, "
 				+ "a.age_hora AS agendamento_hora, " + "a.age_tipo_cadastro AS agendamento_tipo, "
 				+ "a.age_pago AS agendamento_pago, " + "a.age_observacoes AS agendamento_observacoes, "
+				+ "a.age_sexo AS agendamento_sexo, " // Adicionado
 				+ "s.ser_codigo AS servico_id, " + "s.ser_nome AS servico_nome, "
 				+ "s.ser_preco AS servico_preco, " + "s.ser_minutos AS servico_minutos, " 
 				+ "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
@@ -139,6 +140,7 @@ public class AgendamentoDAO {
 					agendamento.setTipoCadastro(rs.getString("agendamento_tipo"));
 					agendamento.setPago(rs.getString("agendamento_pago"));
 					agendamento.setObservacoes(rs.getString("agendamento_observacoes"));
+					agendamento.setSexo(rs.getString("agendamento_sexo")); // Adicionado
 
 					Long clienteId = rs.getLong("cliente_id");
 					String clienteNome = rs.getString("cliente_nome");
@@ -234,8 +236,8 @@ public class AgendamentoDAO {
 			if (numeroDeSlots == 0) numeroDeSlots = 1;
 
 			// 5. Criar os NOVOS registros de slots com o MESMO grupo_id
-			String insertSql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro, age_pago, pag_codigo, age_grupo_id, age_observacoes) " +
-							   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertSql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro, age_pago, pag_codigo, age_grupo_id, age_observacoes, age_sexo) " +
+							   "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			
 			LocalTime horaAtual = agendamento.getHoraSelecionada();
 			Long primeiroNovoId = null;
@@ -271,6 +273,13 @@ public class AgendamentoDAO {
 						insertStmt.setString(11, agendamento.getObservacoes());
 					} else {
 						insertStmt.setNull(11, java.sql.Types.VARCHAR);
+					}
+					
+					// Sexo (apenas no primeiro registro e se for cliente avulso)
+					if (i == 0 && "I".equals(agendamento.getTipoCadastro())) {
+						insertStmt.setString(12, agendamento.getSexo());
+					} else {
+						insertStmt.setNull(12, java.sql.Types.VARCHAR);
 					}
 					
 					insertStmt.executeUpdate();
@@ -486,10 +495,10 @@ public class AgendamentoDAO {
 					agendamento.setStatus(rs.getString("age_status"));
 					agendamento.setDataCriado(rs.getDate("age_data"));
 					agendamento.setHoraSelecionada(rs.getTime("age_hora").toLocalTime());
-					agendamento.setTipoCadastro(rs.getString("age_tipo_cadastro"));
-					agendamento.setPago(rs.getString("age_pago"));
-					agendamento.setObservacoes(rs.getString("age_observacoes"));
-
+									agendamento.setTipoCadastro(rs.getString("age_tipo_cadastro"));
+									agendamento.setPago(rs.getString("age_pago"));
+									agendamento.setObservacoes(rs.getString("age_observacoes"));
+									agendamento.setSexo(rs.getString("age_sexo")); // Adicionado
 					Funcionario f = new Funcionario();
 					f.setId(rs.getLong("fun_codigo"));
 					f.setNome(rs.getString("fun_nome"));
@@ -527,7 +536,7 @@ public class AgendamentoDAO {
 	}
 
 	public static void salvar(Agendamento agendamento, List<Long> servicos) {
-		String sql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro, age_pago, age_grupo_id, age_observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "INSERT INTO agendamento (age_status, age_data, age_hora, fun_codigo, cli_codigo, age_nome_cliente, age_tipo_cadastro, age_pago, age_grupo_id, age_observacoes, age_sexo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		Connection conn = null;
 		try {
 			conn = DatabaseConnection.getConnection();
@@ -587,6 +596,13 @@ public class AgendamentoDAO {
 						}
 					} else {
 						stmt.setNull(10, java.sql.Types.VARCHAR);
+					}
+					
+					// Sexo (apenas no primeiro registro e se for cliente avulso)
+					if (i == 0 && "I".equals(agendamento.getTipoCadastro())) {
+						stmt.setString(11, agendamento.getSexo());
+					} else {
+						stmt.setNull(11, java.sql.Types.VARCHAR);
 					}
 					
 					stmt.executeUpdate();

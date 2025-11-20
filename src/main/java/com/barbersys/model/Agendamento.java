@@ -48,6 +48,9 @@ public class Agendamento {
 	@Column(name = "age_observacoes")
 	private String observacoes;
 
+	@Column(name = "age_sexo")
+	private String sexo;
+
 	@ManyToMany
 	@JoinTable(name = "agendamento_servico", joinColumns = @JoinColumn(name = "age_codigo"), inverseJoinColumns = @JoinColumn(name = "ser_codigo"))
 	private List<Servicos> servicos = new ArrayList<Servicos>();
@@ -130,5 +133,14 @@ public class Agendamento {
         }
         
         return null;
+    }
+    
+    // Getters e Setters explícitos para sexo (garantir funcionamento mesmo se Lombok falhar)
+    public String getSexo() {
+        return sexo;
+    }
+    
+    public void setSexo(String sexo) {
+        this.sexo = sexo;
     }
 }
