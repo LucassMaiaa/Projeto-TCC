@@ -40,23 +40,196 @@ body .ui-datalist .ui-datalist-content {
 	font-weight: bold;
 }
 
+.restricao-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	transition: all 0.2s ease;
+}
+
+.restricao-card:hover {
+	background: #F9FAFB !important;
+}
+
+.restricao-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+
+.restricao-data {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 600;
+	font-size: 14px;
+	color: #1F2937;
+}
+
+.restricao-data i {
+	color: #6366F1;
+	font-size: 16px;
+}
+
+.restricao-card-body {
+	color: #6B7280;
+	font-size: 13px;
+	line-height: 1.5;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: bold;
+}
+
 .restricao-tipo-badge {
-	display: inline-block;
-	padding: 4px 12px;
-	border-radius: 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 12px;
+	border-radius: 16px;
 	font-size: 11px;
 	font-weight: 600;
-	text-transform: uppercase;
+	white-space: nowrap;
+	flex-shrink: 0;
 }
 
 .restricao-tipo-badge.geral {
-	background-color: #FFC107;
-	color: #000;
+	background-color: #FEF3C7;
+	color: #92400E;
+	border: 1px solid #FCD34D;
 }
 
 .restricao-tipo-badge.funcionario {
-	background-color: #17A2B8;
-	color: #FFF;
+	background-color: #DBEAFE;
+	color: #1E40AF;
+	border: 1px solid #93C5FD;
+}
+
+/* Seções do formulário */
+.section-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 15px;
+	border-bottom: 2px solid #E7F3F5;
+}
+
+.section-title i {
+	color: #4CAF50;
+	font-size: 18px;
+}
+
+.section-title label {
+	font-size: 16px;
+	font-weight: 600;
+	color: #2C3E50;
+	margin: 0;
+}
+
+.mt10 {
+	margin-top: 10px;
+}
+
+.mt20 {
+	margin-top: 20px;
+}
+
+/* Ajustes no modal */
+body .ui-dialog#dlgRestricao {
+	width: 700px !important;
+}
+
+/* Estilo para os campos de data nos filtros */
+.input-combined-no-text .p-datepicker,
+.input-combined-no-text .ui-calendar,
+.input-combined-no-text .p-calendar {
+	width: 100% !important;
+	position: relative !important;
+	display: inline-flex !important;
+}
+
+.input-combined-no-text .p-datepicker .p-inputtext,
+.input-combined-no-text .p-datepicker input,
+.input-combined-no-text .p-calendar input,
+.input-combined-no-text .ui-calendar .ui-inputfield {
+	height: 46px !important;
+	padding-right: 40px !important;
+	padding-left: 12px !important;
+	width: 100% !important;
+	font-size: 14px !important;
+	color: #656464 !important;
+	font-weight: 600 !important;
+	font-family: "Barlow" !important;
+	border-radius: 8px !important;
+	box-shadow: none !important;
+	border: 1px solid #ced4da !important;
+}
+
+.input-combined-no-text .p-datepicker-trigger,
+.input-combined-no-text .p-datepicker button,
+.input-combined-no-text .p-calendar button,
+.input-combined-no-text .ui-calendar .ui-button.ui-button-icon-only {
+	width: 24px !important;
+	height: 24px !important;
+	min-width: 24px !important;
+	position: absolute !important;
+	right: 8px !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+	border-radius: 8px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background: #DEDEDE !important;
+	border: none !important;
+	z-index: 10 !important;
+	padding: 0 !important;
+}
+
+.input-combined-no-text .p-datepicker-trigger .p-icon,
+.input-combined-no-text .p-datepicker button .p-icon,
+.input-combined-no-text .p-calendar button .p-icon,
+.input-combined-no-text .p-datepicker-trigger svg,
+.input-combined-no-text .p-datepicker button svg,
+.input-combined-no-text .p-calendar button svg,
+.input-combined-no-text .ui-calendar .ui-button.ui-button-icon-only .ui-icon-calendar {
+	font-size: 12px !important;
+	width: 12px !important;
+	height: 12px !important;
+	color: black !important;
+}
+
+.input-combined-no-text .p-datepicker-trigger:hover,
+.input-combined-no-text .p-datepicker button:hover,
+.input-combined-no-text .p-calendar button:hover {
+	background: #CACACA !important;
+}
+
+.btn-limpar {
+	background: #6837DF !important;
+	border-color: #6837DF !important;
+	border-radius: 50px !important;
+	height: 46px !important;
+	width: 100% !important;
+	padding: 0 20px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	font-weight: 600 !important;
+	font-size: 12px !important;
+	color: white !important;
+	text-transform: uppercase;
+}
+
+.btn-limpar:hover {
+	background: #5829C7 !important;
+	border-color: #5829C7 !important;
+}
+
+.btn-limpar .ui-button-text {
+	padding: 0 !important;
 }
 		</style>
 	</ui:define>
@@ -75,6 +248,34 @@ body .ui-datalist .ui-datalist-content {
 						<p:ajax event="keyup" delay="100" update="@form" process="@this" />
 					</p:inputText>
 					<i class="fa-solid fa-magnifying-glass"></i>
+				</div>
+				<div class="col-md-3 input-combined-no-text">
+					<p:datePicker 
+						showIcon="true"
+						value="#{restricaoDataController.dataInicial}" 
+						pattern="dd/MM/yyyy"
+						placeholder="Data Inicial"
+						locale="pt">
+						<p:ajax update="@form" process="@this" />
+					</p:datePicker>
+				</div>
+				<div class="col-md-3 input-combined-no-text">
+					<p:datePicker 
+						showIcon="true"
+						value="#{restricaoDataController.dataFinal}" 
+						pattern="dd/MM/yyyy"
+						placeholder="Data Final"
+						locale="pt">
+						<p:ajax update="@form" process="@this" />
+					</p:datePicker>
+				</div>
+				<div class="col-md-2">
+					<p:commandButton 
+						value="Limpar" 
+						styleClass="btn-limpar"
+						actionListener="#{restricaoDataController.limparFiltros()}"
+						update="@form"
+						process="@this" />
 				</div>
 			</div>
 		</div>
@@ -97,23 +298,21 @@ body .ui-datalist .ui-datalist-content {
 					actionListener="#{restricaoDataController.restricaoSelecionada(restricao)}"
 					update="form:dlgRestricao" process="@this"
 					oncomplete="PF('dlgRestricao').show()">
-					<div class="card-list">
-						<div style="flex: 1;">
-							<label class="title-list">Data</label>
-							<h:outputText styleClass="subtitle-list" value="#{restricao.data}">
-								<f:convertDateTime pattern="dd/MM/yyyy" />
-							</h:outputText>
-						</div>
-						<div style="flex: 2;">
-							<label class="title-list">Descrição</label>
-							<p:outputLabel styleClass="subtitle-list"
-								value="#{restricao.descricao}" />
-						</div>
-						<div style="flex: 1;">
-							<label class="title-list">Tipo</label>
+					<div class="card-list restricao-card">
+						<div class="restricao-card-header">
+							<div class="restricao-data">
+								<i class="fa-solid fa-calendar"></i>
+								<h:outputText value="#{restricao.data}">
+									<f:convertDateTime pattern="dd/MM/yyyy" />
+								</h:outputText>
+							</div>
 							<span class="restricao-tipo-badge #{restricao.tipo == 'G' ? 'geral' : 'funcionario'}">
+								<i class="fa-solid #{restricao.tipo == 'G' ? 'fa-users' : 'fa-user-tie'}"></i>
 								#{restricao.tipo == 'G' ? 'Geral' : restricao.funcionario.nome}
 							</span>
+						</div>
+						<div class="restricao-card-body">
+							<p:outputLabel value="#{restricao.descricao}" />
 						</div>
 					</div>
 				</p:commandLink>
@@ -157,55 +356,76 @@ body .ui-datalist .ui-datalist-content {
 					</div>
 				</div>
 
-				<p:messages id="msgs" closable="true" showIcon="true" autoUpdate="true" />
+				<div class="dialog-scroll">
+					<p:messages id="msgs" closable="true" showIcon="true" autoUpdate="true" />
 
-				<div class="row">
-					<div class="col-md-6">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Data *" />
-							<p:datePicker value="#{restricaoDataController.restricaoModel.data}"
-								pattern="dd/MM/yyyy"
-								styleClass="senha-login"
-								locale="pt"
-								showIcon="true" />
+					<div class="section-title mt10">
+						<i class="fa-solid fa-calendar-days"></i>
+						<label>Informações da Restrição</label>
+					</div>
+
+					<div class="row">
+						<div class="col-md-6">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Data *" />
+								<p:datePicker id="dataRestricao" 
+									styleClass="senha-login" 
+									pattern="dd/MM/yyyy"
+									value="#{restricaoDataController.restricaoModel.data}" 
+									showIcon="true" 
+									locale="pt"
+									required="true"
+									requiredMessage="A data é obrigatória." />
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Tipo de Restrição *" />
+								<p:selectOneMenu value="#{restricaoDataController.restricaoModel.tipo}"
+									styleClass="senha-login">
+									<f:selectItem itemLabel="Geral (Todos os funcionários)" itemValue="G" />
+									<f:selectItem itemLabel="Funcionário Específico" itemValue="F" />
+									<p:ajax event="change" update="dlgRestricaoForm" process="@this" />
+								</p:selectOneMenu>
+							</div>
 						</div>
 					</div>
-					<div class="col-md-6">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Tipo *" />
-							<p:selectOneMenu value="#{restricaoDataController.restricaoModel.tipo}"
-								styleClass="senha-login">
-								<f:selectItem itemLabel="Geral (Todos)" itemValue="G" />
-								<f:selectItem itemLabel="Funcionário Específico" itemValue="F" />
-								<p:ajax event="change" update="dlgRestricaoForm" 
-									listener="#{restricaoDataController.onTipoChange()}" />
-							</p:selectOneMenu>
-						</div>
-					</div>
-				</div>
 
-				<div class="row" rendered="#{restricaoDataController.restricaoModel.tipo == 'F'}">
-					<div class="col-md-12">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Funcionário *" />
-							<p:selectOneMenu value="#{restricaoDataController.funcionarioId}"
-								styleClass="senha-login">
-								<f:selectItem itemLabel="Selecione..." itemValue="" />
-								<f:selectItems value="#{restricaoDataController.lstFuncionario}"
-									var="func" itemLabel="#{func.nome}" itemValue="#{func.id}" />
-							</p:selectOneMenu>
+					<ui:fragment rendered="#{restricaoDataController.restricaoModel.tipo == 'F'}">
+						<div class="section-title mt20">
+							<i class="fa-solid fa-user-tie"></i>
+							<label>Selecionar Funcionário</label>
 						</div>
-					</div>
-				</div>
 
-				<div class="row">
-					<div class="col-md-12">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Descrição *" />
-							<p:inputTextarea value="#{restricaoDataController.restricaoModel.descricao}"
-								rows="3"
-								styleClass="senha-login"
-								placeholder="Ex: Feriado Nacional - Natal" />
+						<div class="row">
+							<div class="col-md-12">
+								<div class="input-combined">
+									<p:outputLabel styleClass="title-input" value="Funcionário *" />
+									<p:selectOneMenu value="#{restricaoDataController.funcionarioId}"
+										styleClass="senha-login">
+										<f:selectItem itemLabel="Selecione um funcionário..." itemValue="" />
+										<f:selectItems value="#{restricaoDataController.lstFuncionario}"
+											var="func" itemLabel="#{func.nome}" itemValue="#{func.id}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+					</ui:fragment>
+
+					<div class="section-title mt20">
+						<i class="fa-solid fa-circle-info"></i>
+						<label>Descrição</label>
+					</div>
+
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Motivo da Restrição *" />
+								<p:inputTextarea value="#{restricaoDataController.restricaoModel.descricao}"
+									rows="3"
+									styleClass="senha-login"
+									placeholder="Ex: Feriado Nacional - Natal, Férias, Licença médica..." />
+							</div>
 						</div>
 					</div>
 				</div>

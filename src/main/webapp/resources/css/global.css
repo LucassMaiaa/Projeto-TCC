@@ -893,7 +893,6 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
     position: relative;
     min-height: 82px;
     display: flex;
-    align-items: center;
 }
 
 .card-list::before{

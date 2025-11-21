@@ -2,6 +2,7 @@ package com.barbersys.controller;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,8 @@ public class RestricaoDataController implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String descricaoFiltro;
+	private Date dataInicial;
+	private Date dataFinal;
 	private RestricaoData restricaoModel = new RestricaoData();
 	private LazyDataModel<RestricaoData> lstRestricoes;
 	private List<Funcionario> lstFuncionario;
@@ -47,16 +50,22 @@ public class RestricaoDataController implements Serializable {
 			@Override
 			public List<RestricaoData> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 					Map<String, FilterMeta> filterBy) {
-				return RestricaoDataDAO.buscarRestricoes(descricaoFiltro, first, pageSize);
+				return RestricaoDataDAO.buscarRestricoes(descricaoFiltro, dataInicial, dataFinal, first, pageSize);
 			}
 
 			@Override
 			public int count(Map<String, FilterMeta> filterBy) {
-				return RestricaoDataDAO.restricaoCount(descricaoFiltro);
+				return RestricaoDataDAO.restricaoCount(descricaoFiltro, dataInicial, dataFinal);
 			}
 		};
 		
 		lstFuncionario = FuncionarioDAO.buscarTodosFuncionarios();
+	}
+	
+	public void limparFiltros() {
+		descricaoFiltro = null;
+		dataInicial = null;
+		dataFinal = null;
 	}
 	
 	private void exibirAlerta(String icon, String title) {

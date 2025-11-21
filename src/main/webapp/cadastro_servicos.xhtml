@@ -6,7 +6,7 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
 
 <ui:composition template="/WEB-INF/template.xhtml">
-	<ui:define name="title">Cadastro de Tipos de Pagamento - BarberSys</ui:define>
+	<ui:define name="title">Cadastro de Serviços - BarberSys</ui:define>
 	<ui:define name="extra-css">
 		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
 		<style>
@@ -103,14 +103,14 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 	<ui:define name="content">
 	
 		<div class="flex space-between">
-			<p:outputLabel class="title-page" value="Cadastro de Tipos de Pagamento" />
+			<p:outputLabel class="title-page" value="Cadastro de Serviços" />
 		</div>
 
 		<div class="header-filters">
 			<div class="row">
 				<div class="col-md-6 input-combined-no-text">
-					<p:inputText value="#{pagamentoController.nomePagamento}"
-						autocomplete="off" placeholder="Pesquisar tipo de pagamento">
+					<p:inputText value="#{servicosController.nomeServicos}"
+						autocomplete="off" placeholder="Pesquisar serviço">
 						<p:ajax event="keyup" delay="100" update="@form"
 							process="@this" />
 					</p:inputText>
@@ -120,7 +120,7 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 					<div class="content-filter ">
 						<i class="fa-solid fa-filter"></i>
 						<p:selectOneButton
-							value="#{pagamentoController.statusSelecionado}"
+							value="#{servicosController.statusSelecionado}"
 							unselectable="false">
 							<f:selectItem itemLabel="Todos" itemValue="" />
 							<f:selectItem itemLabel="Ativos" itemValue="A" />
@@ -130,71 +130,80 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 					</div>
 				</div>
 			</div>
-
 		</div>
 
 		<div class="flex align-center mt15 mb15">
 			<p:commandButton
-				actionListener="#{pagamentoController.novoPagamento()}"
-				update="form:dlgPag" process="@form" class="btn-circle-green"
-				icon="fa fa-plus" oncomplete="PF('dlgPag').show()" />
-			<label class="title-button ml8">Novo Tipo de Pagamento</label>
+				actionListener="#{servicosController.novoServico()}"
+				update="form:dlgService" process="@form"
+				class="btn-circle-green" icon="fa fa-plus"
+				oncomplete="PF('dlgService').show()" />
+			<label class="title-button ml8">Novo Serviço</label>
 		</div>
 
 		<div>
 			<p:dataList rowIndexVar="row" class="dataList-custom"
-				value="#{pagamentoController.lstPagamento}" var="pagamento"
-				paginator="true" paginatorPosition="bottom" rows="13"
+				value="#{servicosController.lstServicos}" var="servico"
+				paginator="true" paginatorPosition="bottom" rows="16"
 				lazy="true" emptyMessage="Nenhum dado encontrado">
 				<p:commandLink
-					actionListener="#{pagamentoController.pagamentoSelecionado(pagamento)}"
-					update="form:dlgPag" process="@this"
-					oncomplete="PF('dlgPag').show()">
+					actionListener="#{servicosController.servicoSelecionado(servico)}"
+					update="form:dlgService" process="@this"
+					oncomplete="PF('dlgService').show()">
 					<div
-						class="card-list #{pagamento.status eq 'I' ? 'inativo' : 'ativo'}">
+						class="card-list #{servico.status eq 'I' ? 'inativo' : 'ativo'}">
 						<div>
 							<p:outputLabel styleClass="subtitle-list"
-								value="#{pagamento.nome}" />
+								value="#{servico.nome}" />
 						</div>
-						<div></div>
+						<div>
+							<p:outputLabel styleClass="subtitle-list"
+								value="#{servico.minutos} Minutos" />
+							<p:outputLabel styleClass="subtitle-list"
+								value="#{servico.preco}">
+								<f:convertNumber type="currency" currencySymbol="R$"
+									minFractionDigits="2" maxFractionDigits="2" />
+							</p:outputLabel>
+						</div>
 					</div>
 				</p:commandLink>
 			</p:dataList>
 		</div>
 
-		<p:dialog id="dlgPag" widgetVar="dlgPag" modal="true"
+		<p:dialog id="dlgService" widgetVar="dlgService" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
-			<h:panelGroup id="dlgPagForm">
+			<h:panelGroup id="dlgServiceForm">
 				<div class="header-modal">
 					<div class="flex align-center">
 						<div class="icon-circle">
-							<ui:fragment rendered="#{pagamentoController.editarModel eq 'A'}">
+							<ui:fragment rendered="#{servicosController.editarModel eq 'A'}">
 								<i class="fa-solid fa-pen"></i>
 							</ui:fragment>
-							<ui:fragment rendered="#{pagamentoController.editarModel eq 'I'}">
-								<i class="fa-solid fa-money-check-dollar"></i>
+							<ui:fragment rendered="#{servicosController.editarModel eq 'I'}">
+								<i class="fa-solid fa-scissors"></i>
 							</ui:fragment>
 						</div>
-						<label>#{pagamentoController.editarModel eq 'A' ? 'Editar
-							tipo de Pagamento' : 'Novo tipo de Pagamento'}</label>
+						<label>#{servicosController.editarModel eq 'A' ? 'Editar
+							Serviço' : 'Novo Serviço'}</label>
 					</div>
 					<div class="flex align-center">
-						<ui:fragment rendered="#{pagamentoController.editarModel eq 'A'}">
+						<ui:fragment rendered="#{servicosController.editarModel eq 'A'}">
 							<p:commandButton styleClass="btn-trash"
-								onclick="PF('dlgConfirm').show()" icon="fa-solid fa-trash" />
-							<p:commandButton update="dlgPagForm" process="@form"
-								actionListener="#{pagamentoController.atualizarPagamento()}"
+								onclick="PF('dlgConfirmService').show()"
+								icon="fa-solid fa-trash" />
+							<p:commandButton update="dlgServiceForm" process="@form"
+								actionListener="#{servicosController.atualizarServico()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
-						<ui:fragment rendered="#{pagamentoController.editarModel eq 'I'}">
-							<p:commandButton update="dlgPagForm" process="@form"
-								actionListener="#{pagamentoController.adicionarNovoPagamento()}"
+						<ui:fragment rendered="#{servicosController.editarModel eq 'I'}">
+							<p:commandButton update="dlgServiceForm" process="@form"
+								actionListener="#{servicosController.adicionarNovoServico()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
 
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-							onclick="PF('dlgPag').hide()" />
+							onclick="PF('dlgService').hide()" />
 					</div>
 
 				</div>
@@ -203,7 +212,7 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 					<div class="col-md-4">
 						<div class="content-filter no-filter">
 							<p:selectOneButton
-								value="#{pagamentoController.pagamentoModel.status}"
+								value="#{servicosController.servicosModel.status}"
 								unselectable="false">
 								<f:selectItem itemLabel="Ativo" itemValue="A" />
 								<f:selectItem itemLabel="Inativo" itemValue="I" />
@@ -214,48 +223,54 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 				</div>
 
 
-				<p:messages id="msgs" closable="true" showIcon="true"
+				<p:messages id="msgsService" closable="true" showIcon="true"
 					autoUpdate="true" />
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input"
-								value="Nome do tipo de pagamento" />
+							<p:outputLabel styleClass="title-input" value="Nome do serviço" />
 							<p:inputText styleClass="senha-login"
-								value="#{pagamentoController.pagamentoModel.nome}" />
+								value="#{servicosController.servicosModel.nome}" />
 						</div>
 					</div>
 				</div>
-
-				<!-- NOVO CAMPO DE CHECKBOX -->
-				<div class="row" style="margin-top: 15px;">
-				    <div class="col-md-12">
-				        <div class="flex align-center">
-				            <p:selectBooleanCheckbox value="#{pagamentoController.pagamentoModel.integraCaixa}"/>
-				            <p:outputLabel for="@previous" style="margin-left: 8px; margin-bottom: 0; font-weight: normal;" value="Registrar no caixa"/>
-				        </div>
-				    </div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input"
+								value="Tempo estimado do serviço" />
+							<p:inputNumber
+								value="#{servicosController.servicosModel.minutos}" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Preço do serviço" />
+							<p:inputNumber symbol="R$ "
+								value="#{servicosController.servicosModel.preco}" />
+						</div>
+					</div>
 				</div>
 			</h:panelGroup>
 
 		</p:dialog>
 
-		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
-			showEffect="fade" hideEffect="fade" closable="false"
+		<p:dialog id="dlgConfirmService" widgetVar="dlgConfirmService"
+			modal="true" showEffect="fade" hideEffect="fade" closable="false"
 			draggable="false" resizable="false">
-			<h:panelGroup id="dlgConfirmForm">
+			<h:panelGroup id="dlgConfirmServiceForm">
 				<div class="header-modal-confirm">
 					<div>
-						<label>Realmente deseja excluir esse tipo de Pagamento?</label>
+						<label>Realmente deseja excluir esse Serviço?</label>
 					</div>
 				</div>
 
 				<div class="flex align-center justify-center">
 					<p:commandButton styleClass="btn medium btn-confirm"
 						value="Confirmar"
-						actionListener="#{pagamentoController.deletaPagamento()}" />
+						actionListener="#{servicosController.deletaServico()}" />
 					<p:commandButton styleClass="btn medium btn-cancel"
-						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+						value="Cancelar" onclick="PF('dlgConfirmService').hide()" />
 				</div>
 
 			</h:panelGroup>
@@ -266,4 +281,3 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 
 </ui:composition>
 </html>
-

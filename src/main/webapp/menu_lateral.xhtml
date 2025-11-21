@@ -4,25 +4,6 @@
                  xmlns:f="http://xmlns.jcp.org/jsf/core"
                  xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
     <style>
-        #menu-flutuante-cadastro {
-            background: #4A4A4A;
-            width: 354px;
-            position: absolute;
-            left: 42px;
-            border-radius: 8px;
-            padding: 20px;
-            z-index: 1000;
-        }
-
-        #menu-flutuante-cadastro .title-name-top-func {
-            border-bottom: 1px solid #707070;
-            padding-bottom: 7.5px;
-            margin: 0 !important;
-            margin-bottom: 7.5px !important;
-            display: block;
-            color: white;
-        }
-
         .btn-circle-menu-active {
             border-radius: 50% !important;
             width: 40px !important;
@@ -56,13 +37,16 @@
 		    transition: .5s ease all !important;
 		}
 		
-		body .ui-button:nth-child(4).ui-button-icon-only .ui-icon {
-		    left: 45% !important;
+		body .btn-personalized .ui-button.ui-button-icon-only .ui-icon {
+		    position: absolute;
+		    top: 70%;
+		    left: 70% !important;
+		    margin-top: -0.5rem;
+		    margin-left: -0.5rem;
+		    transform: translate(-50%, -50%);
 		}
+				
 		
-		body .ui-button:nth-child(3).ui-button-icon-only .ui-icon {
-		    left: 55% !important;
-		}
 				
     </style>
 
@@ -75,89 +59,43 @@
             <div class="content-botoes-lateral">
                 <p:commandButton 
                     icon="fa fa-house" 
-                    styleClass="#{view.viewId.contains('dashboard') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    styleClass="btn-personalized #{view.viewId.contains('dashboard') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
                     action="/dashboard?faces-redirect=true"
                     immediate="true"
                     ajax="false"/>
 
                 <p:commandButton 
                     icon="fa fa-calendar-days" 
-                    styleClass="#{view.viewId.contains('agendamento') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    styleClass="btn-personalized #{view.viewId.contains('agendamento') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
                     action="/agendamento?faces-redirect=true"
                     immediate="true"
                     ajax="false"/>
 
                 <p:commandButton 
                     icon="fa fa-file-lines" 
-                    styleClass="#{view.viewId.contains('relatorios') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    styleClass="btn-personalized #{view.viewId.contains('relatorios') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
                     action="/relatorios?faces-redirect=true"
+                    immediate="true"
+                    ajax="false"/>
+                    
+                <p:commandButton 
+                    icon="fa fa-folder-plus" 
+                    styleClass="btn-personalized #{view.viewId.contains('cadastros') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/cadastros?faces-redirect=true"
                     immediate="true"
                     ajax="false"/>
 
                 <p:commandButton 
                     icon="fa fa-money-bill-transfer" 
-                    styleClass="#{view.viewId.contains('controle_caixa') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    styleClass="btn-personalized #{view.viewId.contains('controle_caixa') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
                     action="/controle_caixa?faces-redirect=true"
                     immediate="true"
                     ajax="false"/>
-
-                <div class="relative">
-                    <div id="menu-flutuante-cadastro" style="display: none;" onclick="event.stopPropagation()">
-                        <label class="title-name-top-func">Cadastros</label>
-
-                        <h:commandLink immediate="true" action="/cadastro_clientes.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Clientes</h:commandLink>
-                        <h:commandLink immediate="true" action="/cadastro_funcionario.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Funcionários</h:commandLink>
-                        <h:commandLink outcome="/usuarios" styleClass="title-menu-flutuante">Usuários</h:commandLink>
-                        <h:commandLink immediate="true" action="/cadastro_pagamento.xhtml?faces-redirect=true" styleClass="title-menu-flutuante">Tipo de pagamento/serviços</h:commandLink>
-                    </div>
-
-                    <div class="btn-circle-menu #{view.viewId.contains('cadastro_clientes') ? 'btn-circle-menu-active' : 'btn-circle-menu'}" onclick="openDiv(event)">
-                        <i class="fa-solid fa-gear"></i>
-                    </div>
-                </div>
             </div>
             <div></div>
         </div>
 
-
     <script>
-	  function openDiv(event) {
-	    event.stopPropagation();
-	    const popup = document.getElementById('menu-flutuante-cadastro');
-	    if (!popup) return;
-	    popup.style.display = 'block';
-	  }
-	
-	  // Fecha o popup se clicar fora
-	  document.addEventListener('click', (event) => {
-	    const popup = document.getElementById('menu-flutuante-cadastro');
-	    const btn = document.querySelector('.btn-circle-menu');
-	    if (!popup) return;
-	    if (!btn) return;
-	
-	    // Se o clique NÃO foi nem no popup e nem no botão, fecha o popup
-	    if (!popup.contains(event.target)) {
-	      if (!btn.contains(event.target)) {
-	        popup.style.display = 'none';
-	      }
-	    }
-	  });
-	
-	  // Se o botão existe, adiciona o listener para abrir o menu
-	  const btn = document.querySelector('.btn-circle-menu');
-	  if (btn) {
-	    btn.addEventListener('click', openDiv);
-	  }
-	
-	  // Reaplica após AJAX do PrimeFaces para manter funcionalidade
-	  if (window.PrimeFaces) {
-	    PrimeFaces.ajax.Queue.onComplete(() => {
-	      const btn = document.querySelector('.btn-circle-menu');
-	      if (btn) {
-	        btn.removeEventListener('click', openDiv); // remove para evitar duplicação
-	        btn.addEventListener('click', openDiv);
-	      }
-	    });
-	  }
-	</script>
+    // Placeholder para scripts futuros se necessário
+    </script>
 </ui:composition>

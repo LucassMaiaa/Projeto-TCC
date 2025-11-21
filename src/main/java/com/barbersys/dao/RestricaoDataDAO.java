@@ -15,7 +15,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class RestricaoDataDAO {
 
-	public static List<RestricaoData> buscarRestricoes(String descricao, int first, int pageSize) {
+	public static List<RestricaoData> buscarRestricoes(String descricao, Date dataInicial, Date dataFinal, int first, int pageSize) {
 		List<RestricaoData> lista = new ArrayList<>();
 		String sql = "SELECT r.*, f.fun_nome FROM restricao_data r " +
 					 "LEFT JOIN funcionario f ON r.fun_codigo = f.fun_codigo " +
@@ -23,6 +23,14 @@ public class RestricaoDataDAO {
 
 		if (descricao != null && !descricao.trim().isEmpty()) {
 			sql += " AND LOWER(r.res_descricao) LIKE ?";
+		}
+		
+		if (dataInicial != null) {
+			sql += " AND r.res_data >= ?";
+		}
+		
+		if (dataFinal != null) {
+			sql += " AND r.res_data <= ?";
 		}
 
 		sql += " ORDER BY r.res_data DESC LIMIT ?, ?";
@@ -34,6 +42,14 @@ public class RestricaoDataDAO {
 
 			if (descricao != null && !descricao.trim().isEmpty()) {
 				ps.setString(paramIndex++, "%" + descricao.toLowerCase() + "%");
+			}
+			
+			if (dataInicial != null) {
+				ps.setDate(paramIndex++, new java.sql.Date(dataInicial.getTime()));
+			}
+			
+			if (dataFinal != null) {
+				ps.setDate(paramIndex++, new java.sql.Date(dataFinal.getTime()));
 			}
 
 			ps.setInt(paramIndex++, first);
@@ -66,19 +82,37 @@ public class RestricaoDataDAO {
 		return lista;
 	}
 
-	public static int restricaoCount(String descricao) {
+	public static int restricaoCount(String descricao, Date dataInicial, Date dataFinal) {
 		int total = 0;
 		String sql = "SELECT COUNT(*) FROM restricao_data WHERE res_status = 'A'";
 
 		if (descricao != null && !descricao.trim().isEmpty()) {
 			sql += " AND LOWER(res_descricao) LIKE ?";
 		}
+		
+		if (dataInicial != null) {
+			sql += " AND res_data >= ?";
+		}
+		
+		if (dataFinal != null) {
+			sql += " AND res_data <= ?";
+		}
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 
+			int paramIndex = 1;
+			
 			if (descricao != null && !descricao.trim().isEmpty()) {
-				ps.setString(1, "%" + descricao.toLowerCase() + "%");
+				ps.setString(paramIndex++, "%" + descricao.toLowerCase() + "%");
+			}
+			
+			if (dataInicial != null) {
+				ps.setDate(paramIndex++, new java.sql.Date(dataInicial.getTime()));
+			}
+			
+			if (dataFinal != null) {
+				ps.setDate(paramIndex++, new java.sql.Date(dataFinal.getTime()));
 			}
 
 			ResultSet rs = ps.executeQuery();

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<!-- Usando o template com sidebar -->
+<ui:composition template="/WEB-INF/template-with-sidebar.xhtml">
+
+	<!-- Título da página -->
+	<ui:define name="title">Cadastros - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página -->
+	<ui:define name="extra-css">
+		<style>
+.cadastro-card {
+	border: 1px solid #DDE3DF;
+	border-radius: 8px;
+	padding: 20px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	text-align: center;
+	background: white;
+	height: 180px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.cadastro-card:hover {
+	background: #F6F7FB;
+	border-color: #E74A46;
+	transform: translateY(-5px);
+	box-shadow: 0 4px 12px rgba(231, 74, 70, 0.2);
+}
+
+.cadastro-card i {
+	font-size: 48px;
+	color: #E74A46;
+	margin-bottom: 15px;
+}
+
+.cadastro-card h3 {
+	font-size: 16px;
+	font-weight: 600;
+	color: #2C3E50;
+	margin: 0;
+}
+
+.cadastro-card p {
+	font-size: 14px;
+	color: #7F8C8D;
+	margin-top: 8px;
+}
+
+.grid-cadastros {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+	gap: 20px;
+	margin-top: 30px;
+}
+		</style>
+	</ui:define>
+
+	<!-- Conteúdo CENTRAL da página -->
+	<ui:define name="content">
+	
+		<!-- Título -->
+		<div class="flex space-between align-items-center">
+			<p:outputLabel class="title-page" value="Cadastros" />
+		</div>
+
+		<!-- Grid de Cadastros -->
+		<div class="grid-cadastros">
+			
+			<!-- Card Cadastro de Clientes -->
+			<h:commandLink action="/cadastro_clientes?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="cadastro-card">
+					<i class="fa-solid fa-users"></i>
+					<h3>Clientes</h3>
+					<p>Gerenciar clientes</p>
+				</div>
+			</h:commandLink>
+
+			<!-- Card Cadastro de Funcionários -->
+			<h:commandLink action="/cadastro_funcionario?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="cadastro-card">
+					<i class="fa-solid fa-user-tie"></i>
+					<h3>Funcionários</h3>
+					<p>Gerenciar funcionários</p>
+				</div>
+			</h:commandLink>
+
+			<!-- Card Cadastro de Tipos de Pagamento -->
+			<h:commandLink action="/cadastro_pagamento?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="cadastro-card">
+					<i class="fa-solid fa-credit-card"></i>
+					<h3>Tipos de Pagamento</h3>
+					<p>Formas de pagamento</p>
+				</div>
+			</h:commandLink>
+
+			<!-- Card Cadastro de Serviços -->
+			<h:commandLink action="/cadastro_servicos?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="cadastro-card">
+					<i class="fa-solid fa-scissors"></i>
+					<h3>Serviços</h3>
+					<p>Gerenciar serviços</p>
+				</div>
+			</h:commandLink>
+
+			<!-- Card Cadastro de Restrição de Data -->
+			<h:commandLink action="/cadastro_restricao_data?faces-redirect=true" immediate="true" style="text-decoration: none;">
+				<div class="cadastro-card">
+					<i class="fa-solid fa-calendar-xmark"></i>
+					<h3>Restrição de Datas</h3>
+					<p>Bloquear datas específicas</p>
+				</div>
+			</h:commandLink>
+
+		</div>
+	
+	</ui:define>
+
+</ui:composition>
+</html>
