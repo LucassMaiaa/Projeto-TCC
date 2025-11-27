@@ -16,15 +16,21 @@ import java.util.List;
 
 public class RelatorioFeedbackPDF {
 
-    private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(231, 74, 70));
-    private static final Font FONT_SUBTITLE = new Font(Font.HELVETICA, 12, Font.NORMAL, new Color(127, 140, 141));
-    private static final Font FONT_HEADER = new Font(Font.HELVETICA, 9, Font.BOLD, Color.WHITE);
-    private static final Font FONT_CELL = new Font(Font.HELVETICA, 9, Font.NORMAL, new Color(52, 73, 94));
-    private static final Font FONT_CELL_BOLD = new Font(Font.HELVETICA, 9, Font.BOLD, new Color(52, 73, 94));
-
-    private static final Color COLOR_HEADER = new Color(231, 74, 70); // #E74A46
-    private static final Color COLOR_ROW_EVEN = new Color(246, 247, 251);
-    private static final Color COLOR_RATING = new Color(231, 74, 70); // #E74A46
+    // CORES CLEAN ESTILO EXCEL
+    private static final Color COR_PRETO = Color.BLACK;
+    private static final Color COR_CINZA_TEXTO = new Color(64, 64, 64);
+    private static final Color COR_CINZA_HEADER = new Color(217, 217, 217);
+    private static final Color COR_BRANCO = Color.WHITE;
+    private static final Color COR_BORDA_EXCEL = new Color(208, 206, 206);
+    private static final Color COR_AMARELO = new Color(255, 193, 7);
+    private static final Color COR_AMARELO_CLARO = new Color(255, 244, 230);
+    
+    // FONTES CLEAN
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 16, Font.BOLD, COR_PRETO);
+    private static final Font SUBTITLE_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_CINZA_TEXTO);
+    private static final Font HEADER_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
+    private static final Font CELL_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_PRETO);
+    private static final Font CELL_BOLD_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
 
     public static void gerar(List<Avaliacao> avaliacoes, String filtroNota, Long filtroFuncionarioId, java.util.Date dataInicial, java.util.Date dataFinal) {
         Document document = new Document(PageSize.A4, 40, 40, 50, 50);
@@ -43,61 +49,35 @@ public class RelatorioFeedbackPDF {
 
             document.open();
 
-            // Título do relatório
-            Paragraph titulo = new Paragraph("Relatório de Feedback dos Serviços", FONT_TITLE);
-            titulo.setAlignment(Element.ALIGN_CENTER);
-            titulo.setSpacingAfter(10);
+            // Título em preto à esquerda
+            Paragraph titulo = new Paragraph("Relatório de Feedback dos Serviços", TITLE_FONT);
+            titulo.setAlignment(Element.ALIGN_LEFT);
+            titulo.setSpacingAfter(8);
             document.add(titulo);
 
-            // Subtítulo com data de geração
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            Paragraph subtitulo = new Paragraph("Gerado em: " + sdf.format(new java.util.Date()), FONT_SUBTITLE);
-            subtitulo.setAlignment(Element.ALIGN_CENTER);
-            subtitulo.setSpacingAfter(5);
-            document.add(subtitulo);
-
-            // Informações de filtros aplicados
+            // Período
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            boolean temFiltro = false;
-            StringBuilder filtrosTexto = new StringBuilder();
-            
-            if (filtroNota != null && !filtroNota.isEmpty()) {
-                filtrosTexto.append("Avaliação: ").append(filtroNota).append(".0");
-                temFiltro = true;
-            }
-            
-            if (filtroFuncionarioId != null) {
-                if (temFiltro) filtrosTexto.append(" | ");
-                filtrosTexto.append("Funcionário selecionado");
-                temFiltro = true;
-            }
-            
-            if (dataInicial != null) {
-                if (temFiltro) filtrosTexto.append(" | ");
-                filtrosTexto.append("Data inicial: ").append(dateFormat.format(dataInicial));
-                temFiltro = true;
-            }
-            
-            if (dataFinal != null) {
-                if (temFiltro) filtrosTexto.append(" | ");
-                filtrosTexto.append("Data final: ").append(dateFormat.format(dataFinal));
-                temFiltro = true;
-            }
-            
-            if (temFiltro) {
-                Paragraph filtros = new Paragraph("Filtros aplicados: " + filtrosTexto.toString(), FONT_SUBTITLE);
-                filtros.setAlignment(Element.ALIGN_CENTER);
-                filtros.setSpacingAfter(15);
-                document.add(filtros);
+            String periodoTexto = "Período: ";
+            if (dataInicial != null && dataFinal != null) {
+                periodoTexto += dateFormat.format(dataInicial) + " até " + dateFormat.format(dataFinal);
+            } else if (dataInicial != null) {
+                periodoTexto += "A partir de " + dateFormat.format(dataInicial);
+            } else if (dataFinal != null) {
+                periodoTexto += "Até " + dateFormat.format(dataFinal);
             } else {
-                document.add(new Paragraph(" ", FONT_SUBTITLE));
-                document.add(new Paragraph(" ", FONT_SUBTITLE));
+                periodoTexto += "Todos os registros";
             }
+            Paragraph periodo = new Paragraph(periodoTexto, SUBTITLE_FONT);
+            periodo.setAlignment(Element.ALIGN_LEFT);
+            periodo.setSpacingAfter(3);
+            document.add(periodo);
 
-            // Total de registros
-            Paragraph total = new Paragraph("Total de avaliações: " + avaliacoes.size(), FONT_CELL_BOLD);
-            total.setSpacingAfter(15);
-            document.add(total);
+            // Data de geração
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Paragraph dataGeracao = new Paragraph("Data de Geração: " + sdf.format(new java.util.Date()), SUBTITLE_FONT);
+            dataGeracao.setAlignment(Element.ALIGN_LEFT);
+            dataGeracao.setSpacingAfter(20);
+            document.add(dataGeracao);
 
             // Criação da tabela
             PdfPTable table = new PdfPTable(5);
@@ -114,11 +94,10 @@ public class RelatorioFeedbackPDF {
 
             // Preenchendo a tabela com os dados
             SimpleDateFormat dataTabela = new SimpleDateFormat("dd/MM/yyyy");
-            int index = 0;
             int codigo = 1;
             
             for (Avaliacao avaliacao : avaliacoes) {
-                Color bgColor = (index % 2 == 0) ? Color.WHITE : COLOR_ROW_EVEN;
+                Color bgColor = COR_BRANCO;
                 
                 // Código (usa índice sequencial)
                 adicionarCelulaDados(table, String.valueOf(codigo++), Element.ALIGN_CENTER, bgColor);
@@ -135,16 +114,17 @@ public class RelatorioFeedbackPDF {
                     : "-";
                 adicionarCelulaDados(table, nomeFuncionario, Element.ALIGN_LEFT, bgColor);
                 
-                // Avaliação (nota numérica)
+                // Avaliação (nota com destaque amarelo)
                 String notaFormatada = avaliacao.getNota() != null 
                     ? String.format("%.1f", avaliacao.getNota().doubleValue())
                     : "-";
-                PdfPCell cellNota = new PdfPCell(new Phrase(notaFormatada, new Font(Font.HELVETICA, 10, Font.BOLD, COLOR_RATING)));
+                PdfPCell cellNota = new PdfPCell(new Phrase(notaFormatada, CELL_BOLD_FONT));
                 cellNota.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cellNota.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellNota.setPadding(8);
-                cellNota.setBackgroundColor(bgColor);
-                cellNota.setBorder(Rectangle.NO_BORDER);
+                cellNota.setPadding(7);
+                cellNota.setBackgroundColor(COR_AMARELO_CLARO);
+                cellNota.setBorderWidth(1);
+                cellNota.setBorderColor(COR_BORDA_EXCEL);
                 table.addCell(cellNota);
                 
                 // Comentários
@@ -152,18 +132,9 @@ public class RelatorioFeedbackPDF {
                     ? avaliacao.getComentario() 
                     : "Sem comentários";
                 adicionarCelulaDados(table, comentario, Element.ALIGN_LEFT, bgColor);
-                
-                index++;
             }
 
             document.add(table);
-
-            // Rodapé
-            document.add(new Paragraph(" "));
-            Paragraph rodape = new Paragraph("BarberSys - Sistema de Gestão de Barbearias", FONT_SUBTITLE);
-            rodape.setAlignment(Element.ALIGN_CENTER);
-            rodape.setSpacingBefore(20);
-            document.add(rodape);
 
             document.close();
             facesContext.responseComplete();
@@ -175,22 +146,24 @@ public class RelatorioFeedbackPDF {
     }
 
     private static void adicionarCelulaCabecalho(PdfPTable table, String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_HEADER));
-        cell.setBackgroundColor(COLOR_HEADER);
+        PdfPCell cell = new PdfPCell(new Phrase(texto, HEADER_FONT));
+        cell.setBackgroundColor(COR_CINZA_HEADER);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(10);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPadding(8);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
 
     private static void adicionarCelulaDados(PdfPTable table, String texto, int alinhamento, Color bgColor) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_CELL));
+        PdfPCell cell = new PdfPCell(new Phrase(texto, CELL_FONT));
         cell.setHorizontalAlignment(alinhamento);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(8);
+        cell.setPadding(7);
         cell.setBackgroundColor(bgColor);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
 

@@ -45,7 +45,10 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
                     
                     try {
                         // Adiciona uma mensagem para ser exibida na tela de login
-                        fc.getExternalContext().getFlash().setKeepMessages(true);
+                        // Verifica se o Flash está disponível antes de usar
+                        if (fc.getExternalContext().getFlash() != null) {
+                            fc.getExternalContext().getFlash().setKeepMessages(true);
+                        }
                         fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
                                 "Sua sessão expirou.", "Por favor, faça o login novamente."));
 

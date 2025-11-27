@@ -67,70 +67,87 @@
 	<!-- Conteúdo CENTRAL da página -->
 	<ui:define name="content">
 	
-		<!-- Título -->
-		<div class="flex space-between align-items-center">
-			<p:outputLabel class="title-page" value="Relatórios" />
-		</div>
-
 		<!-- Grid de Relatórios -->
-		<div class="grid-relatorios">
+		<div>
+			<div class="title-page">
+				Selecione um relatório
+			</div>
 			
-			<!-- Card Relatório de Feedback -->
-			<h:commandLink action="/relatorio_feedback?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-star"></i>
-					<h3>Feedback dos Serviços</h3>
-					<p>Avaliações e comentários</p>
-				</div>
-			</h:commandLink>
+			<div class="grid-relatorios">
+				
+				<!-- Card Relatório de Feedback -->
+				<h:commandLink action="/relatorio_feedback?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-star"></i>
+						<h3>Feedback dos Serviços</h3>
+						<p>Avaliações e comentários</p>
+					</div>
+				</h:commandLink>
 
-			<!-- Card Relatório de Agendamentos -->
-			<h:commandLink action="/relatorio_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-calendar-check"></i>
-					<h3>Agendamentos Sintéticos</h3>
-					<p>Relatório sintético por dia</p>
-				</div>
-			</h:commandLink>
+				<!-- Card Relatório de Agendamentos -->
+				<h:commandLink action="/relatorio_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-calendar-check"></i>
+						<h3>Agendamentos Sintéticos</h3>
+						<p>Relatório sintético por dia</p>
+					</div>
+				</h:commandLink>
 
-			<!-- Card Relatório Analítico de Agendamentos -->
-			<h:commandLink action="/relatorio_analitico_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-list-check"></i>
-					<h3>Agendamentos Analíticos</h3>
-					<p>Detalhado por agendamento</p>
-				</div>
-			</h:commandLink>
+				<!-- Card Relatório Analítico de Agendamentos -->
+				<h:commandLink action="/relatorio_analitico_agendamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-list-check"></i>
+						<h3>Agendamentos Analíticos</h3>
+						<p>Detalhado por agendamento</p>
+					</div>
+				</h:commandLink>
 
-			<!-- Card Relatório de Pagamentos -->
-			<h:commandLink action="/relatorio_pagamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-dollar-sign"></i>
-					<h3>Relatório de Pagamentos</h3>
-					<p>Pagamentos e pendências</p>
-				</div>
-			</h:commandLink>
+				<!-- Card Relatório de Pagamentos -->
+				<h:commandLink action="/relatorio_pagamentos?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-dollar-sign"></i>
+						<h3>Relatório de Pagamentos</h3>
+						<p>Pagamentos e pendências</p>
+					</div>
+				</h:commandLink>
 
-			<!-- Card Relatório de Faturamento Mensal -->
-			<h:commandLink action="/relatorio_faturamento?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-chart-line"></i>
-					<h3>Faturamento Mensal</h3>
-					<p>Faturamento por serviço</p>
-				</div>
-			</h:commandLink>
+				<!-- Card Relatório de Faturamento Mensal -->
+				<h:commandLink action="/relatorio_faturamento?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-chart-line"></i>
+						<h3>Faturamento Mensal</h3>
+						<p>Faturamento por serviço</p>
+					</div>
+				</h:commandLink>
 
-			<!-- Card Relatório de Produtividade -->
-			<h:commandLink action="/relatorio_produtividade?faces-redirect=true" immediate="true" style="text-decoration: none;">
-				<div class="relatorio-card">
-					<i class="fa-solid fa-user-check"></i>
-					<h3>Produtividade dos Funcionários</h3>
-					<p>Desempenho e avaliações</p>
-				</div>
-			</h:commandLink>
+				<!-- Card Relatório de Produtividade -->
+				<h:commandLink action="/relatorio_produtividade?faces-redirect=true" immediate="true" style="text-decoration: none;">
+					<div class="relatorio-card">
+						<i class="fa-solid fa-user-check"></i>
+						<h3>Produtividade dos Funcionários</h3>
+						<p>Desempenho e avaliações</p>
+					</div>
+				</h:commandLink>
 
+			</div>
 		</div>
 	
+	</ui:define>
+	
+	<!-- SIDEBAR LATERAL DIREITA com imagem -->
+	<ui:define name="sidebar">
+		<div style="background: white; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center;">
+			<img class="img-custom" src="#{facesContext.externalContext.requestContextPath}/resources/images/empty-relatórios.png" 
+				style="max-width: 280px; width: 100%; margin-bottom: 32px; opacity: 0.9;" />
+			<div style="max-width: 320px;">
+				<h3 style="font-family: 'Barlow', sans-serif; font-size: 20px; font-weight: 600; color: #374151; margin: 0 0 12px 0; line-height: 1.4;">
+					Selecione um relatório
+				</h3>
+				<p style="font-family: 'Barlow', sans-serif; font-size: 14px; font-weight: 400; color: #6B7280; margin: 0; line-height: 1.6;">
+					Escolha um dos relatórios ao lado para visualizar informações detalhadas sobre seu negócio
+				</p>
+			</div>
+		</div>
 	</ui:define>
 
 </ui:composition>

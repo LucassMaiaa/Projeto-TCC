@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Redefinir Senha - BarberSys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    </h:head>
+
+    <h:body>
+        <style>
+            html, body {
+                margin: 0;
+                height: 100vh;
+            }
+            
+            body .ui-widget {
+                font-family: 'Barlow', sans-serif;
+            }
+            
+            @font-face {
+                font-family: 'New Order';
+                src: url("#{resource['fonts:NewOrder-Regular.otf']}") format('opentype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            
+            .main {
+                padding: 20px;
+                height: 100vh;
+                box-sizing: border-box;
+                display: flex;
+                background-image: linear-gradient(270deg, #fbfbfb, #e7f3f5);
+            }
+            
+            .content-desc {
+                box-shadow: 0 0px 5px #d3d3d3;
+                border-radius: 8px;
+                height: 100%;
+                background-image: url(/BarberSys/resources/images/login-barber.svg);
+                background-repeat: no-repeat;
+                background-position: top right;
+                background-size: cover;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 14.5em 5.625em 5.625em;
+                clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+            }
+            
+            .text-desc {
+                font-size: 55px !important;
+                text-shadow: 0 0px 1px #1C1E39;
+                width: 24ch;
+                display: inline-block;
+                font-family: 'New Order', sans-serif !important;
+                color: white;
+                font-weight: 500;
+            }
+            
+            .content-login {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 4em;
+            }
+            
+            .content-login img {
+                align-self: center;
+                margin-bottom: 4.375em;
+            }
+            
+            .input-combined {
+                position: relative;
+                margin-bottom: 1em;
+            }
+            
+            .input-combined input {
+                width: 100%;
+                min-height: 60px;
+                border: 1px solid #D5D5D5;
+                border-radius: 4px;
+                position: relative;
+                padding: 15px 5px 0 40px;
+            }
+            
+            .input-combined input[type="password"],
+            .input-combined .ui-password input {
+                background-image: url(#{request.contextPath}/resources/images/icon_login_senha.svg);
+                background-repeat: no-repeat;
+                background-position: 8px center;
+            }
+            
+            .input-combined .title-input {
+                position: absolute;
+                z-index: 1;
+                left: 49px;
+            }
+            
+            .flex {
+                display: flex;
+            }
+            
+            .flex-center {
+                justify-content: center;
+            }
+            
+            .text-links-black {
+                font-weight: bold;
+                color: black !important;
+                font-size: 14px !important;
+                text-decoration: none;
+            }
+            
+            .text-links-black:hover {
+                text-decoration: underline !important;
+            }
+            
+            hr {
+                width: 100%;
+                margin: 1.5em 0;
+                border-color: #EBEBEB;
+            }
+        </style>
+
+        <div class="main">
+            <div class="col-md-7 content-desc">
+                <p class="text-desc">
+                    Agendamentos fáceis, horários organizados e clientes satisfeitos
+                </p>
+            </div>
+
+            <div class="col-md-5 content-login">
+                <img src="resources/images/logo_barber.png" width="150" alt="Logo" />
+
+                <h:form id="formRedefinir">
+                    <p:messages id="messages" showDetail="true" closable="true" />
+
+                    <div class="input-combined">
+                        <p:outputLabel styleClass="title-input" value="Nova Senha" />
+                        <p:password id="novaSenha" 
+                                    value="#{recuperacaoSenhaController.novaSenha}"
+                                    required="true"
+                                    requiredMessage="Nova senha é obrigatória"
+                                    feedback="false"/>
+                    </div>
+
+                    <div class="input-combined">
+                        <p:outputLabel styleClass="title-input" value="Confirmar Nova Senha" />
+                        <p:password id="confirmarSenha" 
+                                    value="#{recuperacaoSenhaController.confirmarNovaSenha}"
+                                    required="true"
+                                    requiredMessage="Confirmação de senha é obrigatória"
+                                    feedback="false"/>
+                    </div>
+
+                    <div class="flex flex-center">
+                        <p:commandButton value="Salvar Nova Senha" 
+                                         styleClass="btn btn-green medium"
+                                         action="#{recuperacaoSenhaController.redefinirSenha}"
+                                         update="messages"
+                                         icon="fa-solid fa-check-circle" />
+                    </div>
+
+                    <hr />
+
+                    <div class="flex flex-center">
+                        <h:outputLink value="login.xhtml" styleClass="text-links-black">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar para Login
+                        </h:outputLink>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </h:body>
+</html>

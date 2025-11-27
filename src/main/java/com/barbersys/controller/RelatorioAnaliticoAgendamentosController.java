@@ -68,7 +68,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
     }
 
     private void carregarClientes() {
-        lstClientes = ClienteDAO.buscarCliente(null, 0, 1000);
+        lstClientes = ClienteDAO.buscarCliente(null, "ATIVO", 0, 1000);
     }
 
     private void carregarFuncionarios() {

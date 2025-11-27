@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <title>Recuperar Senha - BarberSys</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    </h:head>
+
+    <h:body>
+        <style>
+            html, body {
+                margin: 0;
+                height: 100vh;
+            }
+            
+            body .ui-widget {
+                font-family: 'Barlow', sans-serif;
+            }
+            
+            @font-face {
+                font-family: 'New Order';
+                src: url("#{resource['fonts:NewOrder-Regular.otf']}") format('opentype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            
+            .main {
+                padding: 20px;
+                height: 100vh;
+                box-sizing: border-box;
+                display: flex;
+                background-image: linear-gradient(270deg, #fbfbfb, #e7f3f5);
+            }
+            
+            .content-desc {
+                box-shadow: 0 0px 5px #d3d3d3;
+                border-radius: 8px;
+                height: 100%;
+                background-image: url(/BarberSys/resources/images/login-barber.svg);
+                background-repeat: no-repeat;
+                background-position: top right;
+                background-size: cover;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 14.5em 5.625em 5.625em;
+                clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+            }
+            
+            .content-login {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 4em;
+            }
+            
+            .content-login img {
+                align-self: center;
+                margin-bottom: 2em;
+            }
+            
+            .header-recovery {
+                text-align: center;
+                margin-bottom: 2em;
+            }
+            
+            .header-recovery h2 {
+                color: #1F2937;
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 0.5em;
+            }
+            
+            .header-recovery p {
+                color: #6B7280;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+            
+            .input-combined {
+                position: relative;
+                margin-bottom: 1.5em;
+            }
+            
+            .input-combined input {
+                width: 100%;
+                min-height: 60px;
+                border: 1px solid #D5D5D5;
+                border-radius: 4px;
+                position: relative;
+                padding: 15px 5px 0 40px;
+                font-size: 16px;
+            }
+            
+            .input-combined input:focus {
+                outline: none;
+                border-color: #23A4D5;
+            }
+            
+            .input-combined .title-input {
+                position: absolute;
+                top: 5px;
+                left: 40px;
+                font-size: 0.75em;
+                font-weight: bold;
+                color: #6B7280;
+                z-index: 1;
+            }
+            
+            .input-icon {
+                background-image: url(#{request.contextPath}/resources/images/icon_login_email.svg);
+                background-repeat: no-repeat;
+                background-position: 8px center;
+            }
+            
+            .flex {
+                display: flex;
+            }
+            
+            .flex-center {
+                justify-content: center;
+            }
+            
+            .flex-end {
+                justify-content: flex-end;
+            }
+            
+            .text-links-black {
+                font-weight: bold;
+                color: black !important;
+                font-size: 14px !important;
+                text-decoration: none;
+            }
+            
+            .text-links-black:hover {
+                text-decoration: underline !important;
+            }
+            
+            .text-desc {
+                font-size: 55px !important;
+                text-shadow: 0 0px 1px #1C1E39;
+                width: 24ch;
+                display: inline-block;
+                font-family: 'New Order', sans-serif !important;
+                color: white;
+                font-weight: 500;
+            }
+            
+            hr {
+                width: 100%;
+                margin: 1.5em 0;
+                border-color: #EBEBEB;
+            }
+        </style>
+
+        <div class="main">
+            <div class="col-md-7 content-desc">
+                <p class="text-desc">
+                    Profissionalismo que transforma seu estilo
+                </p>
+            </div>
+
+            <div class="col-md-5 content-login">
+                <img src="resources/images/logo_barber.png" width="150" alt="Logo" />
+
+                <div class="header-recovery">
+                    <h2><i class="fa-solid fa-key" style="color: #23A4D5;"></i> Recuperar Senha</h2>
+                    <p>Digite seu CPF ou Email cadastrado para receber<br/>o código de verificação</p>
+                </div>
+
+                <h:form id="formRecuperacao">
+                    <p:messages id="messages" showDetail="true" closable="true" />
+
+                    <div class="input-combined">
+                        <p:outputLabel styleClass="title-input" value="CPF ou Email" />
+                        <p:inputText id="cpfOuEmail" 
+                                     value="#{recuperacaoSenhaController.cpfOuEmail}"
+                                     styleClass="input-icon"
+                                     required="true"
+                                     requiredMessage="CPF ou Email é obrigatório"
+                                     placeholder="000.000.000-00 ou email@exemplo.com" />
+                    </div>
+
+                    <div class="flex flex-center">
+                        <p:commandButton value="Enviar Código" 
+                                         styleClass="btn btn-green medium"
+                                         action="#{recuperacaoSenhaController.solicitarCodigo}"
+                                         update="messages"
+                                         ajax="false"
+                                         icon="fa-solid fa-paper-plane" />
+                    </div>
+
+                    <hr />
+
+                    <div class="flex flex-center">
+                        <h:outputLink value="login.xhtml" styleClass="text-links-black">
+                            <i class="fa-solid fa-arrow-left"></i> Voltar para Login
+                        </h:outputLink>
+                    </div>
+                </h:form>
+            </div>
+        </div>
+    </h:body>
+</html>

@@ -256,7 +256,7 @@
         </div>	
       		
         <div class="flex flex-end">
-          <p:commandLink styleClass="text-links-black" value="Esqueceu a senha? clique aqui " />
+          <h:link outcome="recuperar_senha" styleClass="text-links-black" value="Esqueceu a senha? clique aqui" />
         </div>
       		
         <!-- Botão de login: chama o método efetuarLogin no Managed Bean -->
@@ -268,7 +268,7 @@
         <hr/>
       		
         <div class="flex flex-center">
-            <p:commandLink styleClass="text-links-black" value="É novo? cadastre-se clicando aqui "  />
+            <h:link outcome="registro" styleClass="text-links-black" value="É novo? cadastre-se clicando aqui " />
         </div>
       		
       </div>
@@ -287,6 +287,9 @@
                         background: '#fff',
                         backdrop: true
                     });
+                } else if (args && args.redirectUrl) {
+                    // Login bem-sucedido, redireciona para a página apropriada
+                    window.location.href = args.redirectUrl;
                 }
             }
             //]]>

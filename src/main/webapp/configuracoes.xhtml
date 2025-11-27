@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<!-- Usando o template SEM sidebar (full width) -->
+<ui:composition template="/WEB-INF/template.xhtml">
+
+	<!-- Título da página -->
+	<ui:define name="title">Configurações - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página (REDUZIDO) -->
+	<ui:define name="extra-css">
+		<style>
+			/* Mantendo apenas estilos de layout essenciais e animações */
+			.config-container {
+				background: #FFFFFF;
+				border-radius: 12px;
+				padding: 40px;
+				box-shadow: 0 3px 6px #00000029;
+				max-width: 1200px;
+				margin: 0 auto;
+				animation: fadeInUp 0.5s ease-out;
+			}
+
+			.avatar-section {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				margin-bottom: 35px;
+				padding-bottom: 30px;
+				border-bottom: 1px solid #EBEBEB;
+			}
+
+			.avatar-circle-large {
+				width: 120px;
+				height: 120px;
+				border-radius: 50%;
+				background: var(--avatar-color, #23A4D5);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.avatar-circle-large i {
+				font-size: 50px;
+				color: white;
+			}
+
+			.avatar-info {
+				text-align: center;
+			}
+
+			.avatar-name {
+				font-size: 24px;
+				font-weight: 700;
+				color: #1F2937;
+				margin-bottom: 5px;
+				text-transform: uppercase;
+			}
+
+			.avatar-email {
+				font-size: 14px;
+				color: #6B7280;
+				font-weight: 500;
+			}
+
+			.section-divider {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin: 35px 0 25px 0;
+				padding-bottom: 12px;
+				border-bottom: 1px solid #EBEBEB;
+			}
+
+			.section-divider i {
+				font-size: 22px;
+				color: #23A4D5;
+			}
+
+			.section-divider h3 {
+				margin: 0;
+				font-size: 18px;
+				font-weight: 700;
+				color: #374151;
+			}
+
+			.checkbox-container {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+
+			.checkbox-container label {
+				font-weight: 600;
+				color: #374151;
+				cursor: pointer;
+				user-select: none;
+			}
+
+			.action-buttons {
+				display: flex;
+				justify-content: center;
+				gap: 15px;
+				margin-top: 40px;
+				padding-top: 25px;
+				border-top: 1px solid #EBEBEB;
+			}
+
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateY(20px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+
+			body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
+				overflow: visible;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				margin-left: -0.5rem;
+				margin-top: -0.5rem;
+				transform: translate(-2%, -17%);
+			}
+		</style>
+		
+		<script type="text/javascript">
+			function definirCorAvatar() {
+				var sexo = '#{configuracaoController.clienteModel.sexo}';
+				var cor = '#6366F1';
+				
+				if (sexo === 'M') {
+					cor = '#3B82F6';
+				} else if (sexo === 'F') {
+					cor = '#EC4899';
+				} else if (sexo === 'O') {
+					cor = '#8B5CF6';
+				}
+				
+				document.documentElement.style.setProperty('--avatar-color', cor);
+			}
+			
+			function toggleSenhaCliente() {
+				var container = document.getElementById('senhaFieldsContainerCliente');
+				if (container.style.display === 'none' || container.style.display === '') {
+					container.style.display = 'block';
+				} else {
+					container.style.display = 'none';
+				}
+			}
+			
+			window.onload = function() {
+				definirCorAvatar();
+			};
+		</script>
+	</ui:define>
+
+	<!-- Conteúdo da página -->
+	<ui:define name="content">
+		<h:form id="formConfig">
+			<p:messages id="messages" showDetail="true" closable="true" />
+			
+			<div class="config-container">
+				<!-- Avatar e informações do usuário -->
+				<div class="avatar-section">
+					<div class="avatar-circle-large">
+						<i class="fa-solid #{configuracaoController.iconeAvatar}"></i>
+					</div>
+					<div class="avatar-info">
+						<div class="avatar-name">#{configuracaoController.nomeUsuario}</div>
+						<div class="avatar-email">#{configuracaoController.clienteModel.email}</div>
+					</div>
+				</div>
+				
+				<!-- Seção: Dados Pessoais -->
+				<div class="section-divider">
+					<i class="fa-solid fa-user"></i>
+					<h3>Dados Pessoais</h3>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Nome de usuário *" />
+							<p:inputText id="nomeUsuario" value="#{configuracaoController.nomeUsuario}" 
+										 required="true" requiredMessage="Nome de usuário é obrigatório" 
+										 maxlength="100" placeholder="Como você deseja ser chamado no sistema" />
+						</div>
+					</div>
+					
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Nome completo *" />
+							<p:inputText id="nome" value="#{configuracaoController.clienteModel.nome}" 
+										 required="true" requiredMessage="Nome é obrigatório" maxlength="100" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="CPF" />
+							<p:inputMask id="cpf" value="#{configuracaoController.clienteModel.cpf}" 
+										 mask="999.999.999-99" disabled="true" />
+						</div>
+					</div>
+					
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Telefone *" />
+							<p:inputMask id="telefone" value="#{configuracaoController.clienteModel.telefone}" 
+										 mask="(99) 99999-9999" required="true" 
+										 requiredMessage="Telefone é obrigatório" />
+						</div>
+					</div>
+					
+					<div class="col-md-4">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Sexo *" />
+							<p:selectOneMenu id="sexo" value="#{configuracaoController.clienteModel.sexo}" 
+											 required="true" requiredMessage="Sexo é obrigatório">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="Masculino" itemValue="M" />
+								<f:selectItem itemLabel="Feminino" itemValue="F" />
+								<f:selectItem itemLabel="Outro" itemValue="O" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
+							<p:datePicker id="dataNascimento" 
+										  value="#{configuracaoController.clienteModel.dataNascimento}" 
+										  pattern="dd/MM/yyyy" showIcon="true" 
+										  yearRange="1900:2030"
+										  disabled="true"/>
+						</div>
+					</div>
+					
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Email *" />
+							<p:inputText id="email" value="#{configuracaoController.clienteModel.usuario.login}" 
+										 required="true" requiredMessage="Email é obrigatório" maxlength="100"
+										 validatorMessage="Email inválido">
+								<f:validateRegex pattern="^[A-Za-z0-9+_.-]+@(.+)$" />
+							</p:inputText>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Seção: Endereço -->
+				<div class="section-divider">
+					<i class="fa-solid fa-location-dot"></i>
+					<h3>Endereço</h3>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Cep" />
+							<p:inputMask id="cep" value="#{configuracaoController.clienteModel.cep}" 
+										 mask="99999-999" />
+						</div>
+					</div>
+					
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Cidade" />
+							<p:inputText id="cidade" value="#{configuracaoController.clienteModel.cidade}" 
+										 maxlength="100" />
+						</div>
+					</div>
+					
+					<div class="col-md-3">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="UF" />
+							<p:selectOneMenu id="estado" value="#{configuracaoController.clienteModel.estado}">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="AC" itemValue="AC" />
+								<f:selectItem itemLabel="AL" itemValue="AL" />
+								<f:selectItem itemLabel="AP" itemValue="AP" />
+								<f:selectItem itemLabel="AM" itemValue="AM" />
+								<f:selectItem itemLabel="BA" itemValue="BA" />
+								<f:selectItem itemLabel="CE" itemValue="CE" />
+								<f:selectItem itemLabel="DF" itemValue="DF" />
+								<f:selectItem itemLabel="ES" itemValue="ES" />
+								<f:selectItem itemLabel="GO" itemValue="GO" />
+								<f:selectItem itemLabel="MA" itemValue="MA" />
+								<f:selectItem itemLabel="MT" itemValue="MT" />
+								<f:selectItem itemLabel="MS" itemValue="MS" />
+								<f:selectItem itemLabel="MG" itemValue="MG" />
+								<f:selectItem itemLabel="PA" itemValue="PA" />
+								<f:selectItem itemLabel="PB" itemValue="PB" />
+								<f:selectItem itemLabel="PR" itemValue="PR" />
+								<f:selectItem itemLabel="PE" itemValue="PE" />
+								<f:selectItem itemLabel="PI" itemValue="PI" />
+								<f:selectItem itemLabel="RJ" itemValue="RJ" />
+								<f:selectItem itemLabel="RN" itemValue="RN" />
+								<f:selectItem itemLabel="RS" itemValue="RS" />
+								<f:selectItem itemLabel="RO" itemValue="RO" />
+								<f:selectItem itemLabel="RR" itemValue="RR" />
+								<f:selectItem itemLabel="SC" itemValue="SC" />
+								<f:selectItem itemLabel="SP" itemValue="SP" />
+								<f:selectItem itemLabel="SE" itemValue="SE" />
+								<f:selectItem itemLabel="TO" itemValue="TO" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-8">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Rua" />
+							<p:inputText id="rua" value="#{configuracaoController.clienteModel.rua}" 
+										 maxlength="200" />
+						</div>
+					</div>
+					
+					<div class="col-md-2">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Número" />
+							<p:inputText id="numero" value="#{configuracaoController.clienteModel.numero}" 
+										 maxlength="10" />
+						</div>
+					</div>
+					
+					<div class="col-md-2">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Bairro" />
+							<p:inputText id="bairro" value="#{configuracaoController.clienteModel.bairro}" 
+										 maxlength="100" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Complemento" />
+							<p:inputText id="complemento" value="#{configuracaoController.clienteModel.complemento}" 
+										 maxlength="200" />
+						</div>
+					</div>
+				</div>
+				
+				<!-- Seção: Alterar Senha -->
+				<div class="section-divider">
+					<i class="fa-solid fa-lock"></i>
+					<h3>Segurança</h3>
+				</div>
+				
+				<div class="row">
+					<div class="col-md-12">
+						<div class="checkbox-container">
+							<p:selectBooleanCheckbox id="alterarSenhaCliente" 
+													 value="#{configuracaoController.alterarSenha}"
+													 onchange="toggleSenhaCliente();" />
+							<p:outputLabel for="alterarSenhaCliente" value="Desejo alterar minha senha" />
+						</div>
+					</div>
+				</div>
+				
+				<div id="senhaFieldsContainerCliente" style="display: none;">
+					<div class="row">
+						<div class="col-md-4">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Senha atual *" />
+								<p:password id="senhaAtual" value="#{configuracaoController.senhaAtual}" 
+										   feedback="false" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Senha atual é obrigatória" />
+							</div>
+						</div>
+						
+						<div class="col-md-4">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Nova senha *" />
+								<p:password id="novaSenha" value="#{configuracaoController.novaSenha}" 
+										   feedback="true" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Nova senha é obrigatória" 
+										   weakLabel="Fraca" goodLabel="Média" strongLabel="Forte" />
+							</div>
+						</div>
+						
+						<div class="col-md-4">
+							<div class="input-combined">
+								<p:outputLabel styleClass="title-input" value="Confirmar nova senha *" />
+								<p:password id="confirmaNovaSenha" value="#{configuracaoController.confirmaNovaSenha}" 
+										   feedback="false" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Confirmação de senha é obrigatória" />
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Botões de ação -->
+				<div class="action-buttons">
+					<p:commandButton value="Salvar Alterações" 
+									 styleClass="btn btn-green medium"
+									 action="#{configuracaoController.salvarConfiguracoes}"
+									 ajax="false" />
+				</div>
+			</div>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
+</html>

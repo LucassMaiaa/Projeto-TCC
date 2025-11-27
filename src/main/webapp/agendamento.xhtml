@@ -773,7 +773,17 @@ margin-bottom: 0px
 						</div>
 						<label>#{agendamentoController.editarModel eq 'A' ? 'Editar Agendamento' : 'Novo Agendamento'}</label>
 					</div>
-					<div class="flex align-center">
+					<div class="flex align-center" style="gap: 8px;">
+						<!-- Botão Cancelar Agendamento - Aparece apenas ao editar -->
+						<p:commandButton 
+							styleClass="btn-cancelar-agendamento-text" 
+							icon="fa-solid fa-ban"
+							value="Cancelar Agendamento"
+							rendered="#{agendamentoController.editarModel eq 'A'}"
+							type="button"
+							onclick="PF('dlgConfirmCancel').show();" />
+						
+						<!-- Botão Fechar (X) -->
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
 							onclick="PF('dlgAgendar').hide()" />
 					</div>
@@ -1064,7 +1074,7 @@ margin-bottom: 0px
 										<f:selectItem itemLabel="Selecione o sexo" itemValue="" noSelectionOption="true"/>
 										<f:selectItem itemLabel="Masculino" itemValue="M" />
 										<f:selectItem itemLabel="Feminino" itemValue="F" />
-										<f:selectItem itemLabel="Outro" itemValue="O" />
+										<f:selectItem itemLabel="Não definido" itemValue="O" />
 									</p:selectOneMenu>
 								</div>
 							</p:outputPanel>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Criar Conta - BarberSys</title>
+	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+	
+	<style>
+		/* Estilos importados da tela de login para consistência */
+		@font-face {
+		    font-family: 'New Order';
+		    src: url("#{resource['fonts:NewOrder-Regular.otf']}") format('opentype');
+		    font-weight: normal;
+		    font-style: normal;
+		}
+	
+	 	.main{
+	 		padding: 20px;
+	 		height: 100vh;
+	 		box-sizing: border-box;
+	 		display: flex;
+	 		background-image: linear-gradient(270deg, #fbfbfb, #e7f3f5);
+	 	}
+	 	
+		.main-desc{
+			width: 64%;
+		    filter: drop-shadow(0 0px 5px #d3d3d3);
+		}
+
+		.content-desc {
+		    box-shadow: 0 0px 5px #d3d3d3;
+		    border-radius: 8px;
+		    height: 100%;
+		    background-image: url(#{request.contextPath}/resources/images/login-barber.svg);
+		    background-repeat: no-repeat;
+		    background-position: top right;
+		    background-size: cover;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-between;
+		    padding: 14.5em 5.625em 5.625em;
+		    clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+		}
+	 	
+		.content-form {
+		    flex-grow: 1;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: center;
+	        padding: 2em 4em;
+			overflow-y: auto;
+		}
+		
+		.content-form img{
+			align-self: center;
+			margin-bottom: 2em;
+			width: 180px;
+		}
+		
+		.form-grid {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			gap: 1em;
+			margin-top: 1.5em;
+		}
+		
+		.full-width {
+			grid-column: 1 / -1;
+		}
+		
+		.input-combined {
+			position: relative;
+		}
+		
+		.icon-input-custom {
+		    position: absolute;
+		    z-index: 2;
+		    font-size: 16px;
+		    top: 22px;
+		    left: 15px;
+		    color: #0D1657;
+		}
+
+		.input-combined .title-input{
+		    position: absolute;
+		    top: 7px;
+		    left: 47px;
+		    font-size: 12px !important;
+		    font-weight: bold;
+			color: black;
+		}
+
+		.input-combined .ui-inputfield,
+		.input-combined .ui-password-input,
+		.input-combined .ui-selectonemenu,
+		.input-combined .ui-calendar {
+		    height: 60px;
+		    position: relative;
+		    width: 100%;
+		    border-radius: 8px !important;
+			border: 1px solid #D5D5D5 !important;
+			background: #FFF !important;
+			box-sizing: border-box;
+		}
+
+		.input-combined .ui-inputfield,
+		.input-combined .ui-password-input {
+			padding: 22px 7px 0 47px !important;
+		}
+		
+		.input-combined .ui-selectonemenu .ui-selectonemenu-label,
+		.input-combined .ui-calendar .ui-inputfield {
+			padding: 22px 7px 0 0 !important;
+			font-size: 17px !important;
+		    color: #656464 !important;
+		    font-weight: 600 !important;
+		    font-family: "Barlow";
+			border: none !important;
+			background: transparent !important;
+			height: 100%;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		
+		.input-combined .ui-selectonemenu,
+		.input-combined .ui-calendar {
+			padding-left: 47px !important;
+		}
+		
+		.input-combined .ui-inputfield,
+		.input-combined .ui-calendar .ui-inputfield,
+		.input-combined .ui-password-input {
+		    font-size: 17px !important;
+		    color: #656464 !important;
+		    font-weight: 600 !important;
+		    font-family: "Barlow";
+		}
+
+		.input-combined .ui-selectonemenu {
+			width: 100% !important;
+			max-height: 60px;
+		}
+		
+		.input-combined .ui-selectonemenu-trigger {
+			position: absolute;
+			right: 8px;
+			top: 18px;
+		}
+
+		.input-combined .ui-calendar .ui-datepicker-trigger {
+			right: 8px !important;
+			top: 18px !important;
+		}
+		
+		.btn-register.ui-button{
+		    height: 3.125em;
+		    background: #E74A46;
+		    border-radius: 1.5625em;
+		    margin-top: 1.5em;
+		    margin-bottom: 1.5em;
+		    font-weight: bold;
+		    font-size: 1.0625em;
+		    border: none;
+		    min-height: 54px;
+		    transition: all .3s;
+			width: 100%;
+		}
+		
+		.btn-register:hover.ui-button {
+		    background: transparent;
+		    color: black;
+		    border: 1px solid #E74A46;
+		}
+		
+		hr{
+			width: 100%;
+			margin: 1.09375em 0;
+			border-color: #EBEBEB
+		}
+		
+		.flex-center{
+			display: flex;
+			justify-content: center;
+		}
+		
+		.text-links-black {
+		    font-weight: bold;
+		    color: black !important;
+		    font-size: 14px !important;
+		}
+
+		.text-links-black:hover {
+		   text-decoration: underline !important;
+		}
+
+		/* Sobrescreve o estilo do painel de feedback da senha */
+		body .ui-password-panel {
+			margin-top: 5px !important;
+		}
+		
+		.input-combined .ui-selectonemenu .ui-selectonemenu-trigger .ui-icon {
+		    top: -17px;
+		}
+		
+		/* Estilos do texto descritivo */
+		.text-desc {
+		    font-size: 55px !important;
+		    text-shadow: 0 0px 1px #1C1E39;
+		    width: 24ch;
+		    display: inline-block;
+		    font-family: 'New Order', sans-serif !important;
+		    color: white;
+		    font-weight: 500;
+		}
+		
+		.flex {
+			display: flex;
+		}
+		
+		.content-sobre-sistem {
+		    width: 11.9em;
+		    height: 7em;
+		    border: 2px solid #E9E8E8;
+		    border-radius: 8px;
+		    padding: 0.5em;
+		    display: flex;
+		    flex-direction: column;
+		    gap: 8px;
+		}
+		
+		.content-sobre-sistem:nth-child(2) {
+			margin: 0 30px;
+		}
+		
+		.img-custom{
+		    width: 34px;
+		}
+		
+		.text-links {
+    font-weight: bold;
+    color: white !important;
+    font-size: 17px !important;
+}
+	</style>
+</h:head>
+
+<h:body>
+	<h:form styleClass="main">
+		<!-- Coluna da Esquerda (Design) -->
+		<div class="main-desc">
+			<div class="content-desc">
+				<!-- Conteúdo descritivo -->
+				<div>
+					<p:outputLabel styleClass="text-desc" value="Agendamentos fáceis, horários organizados e clientes satisfeitos" />
+				</div>
+				<!-- Bloco de imagens e textos -->
+				<div class="flex">
+					<!-- Conteúdo sobre o sistema -->
+					<div class="content-sobre-sistem">
+						<div>
+							<img class="img-custom" src="#{request.contextPath}/resources/images/icon-agendamento.svg" />
+						</div>
+						<p:outputLabel styleClass="text-links" value="Controle de agendamentos" />
+					</div>
+					<div class="content-sobre-sistem">
+						<div>
+							<img class="img-custom" src="#{request.contextPath}/resources/images/icon-inteligente.svg" />
+						</div>
+						<p:outputLabel styleClass="text-links" value="Sistema inteligente e prático" />
+					</div>
+					<div class="content-sobre-sistem">
+						<div>
+							<img class="img-custom" src="#{request.contextPath}/resources/images/icon-faturar.svg" />
+						</div>
+						<p:outputLabel styleClass="text-links" value="Equipe e faturamento em um só lugar" />
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Coluna da Direita (Formulário) -->
+		<div class="content-form">
+			<img src="#{request.contextPath}/resources/images/logo-login.svg" alt="Logo BarberSys"/>
+			
+			<p:messages id="messages" showDetail="true" closable="true" />
+
+			<div class="form-grid">
+				<!-- Nome Completo -->
+				<div class="input-combined full-width">
+					<i class="icon-input-custom fa-solid fa-user"></i>
+					<p:outputLabel styleClass="title-input" value="Nome Completo *" />
+					<p:inputText value="#{registroController.clienteModel.nome}" maxlength="100" required="true" requiredMessage="Nome é obrigatório" />
+				</div>
+
+				<!-- CPF -->
+				<div class="input-combined">
+					<i class="icon-input-custom fa-solid fa-id-card"></i>
+					<p:outputLabel styleClass="title-input" value="CPF *" />
+					<p:inputMask value="#{registroController.clienteModel.cpf}" mask="999.999.999-99" required="true" requiredMessage="CPF é obrigatório" />
+				</div>
+
+				<!-- Telefone -->
+				<div class="input-combined">
+					<i class="icon-input-custom fa-solid fa-phone"></i>
+					<p:outputLabel styleClass="title-input" value="Telefone *" />
+					<p:inputMask value="#{registroController.clienteModel.telefone}" mask="(99) 99999-9999" required="true" requiredMessage="Telefone é obrigatório" />
+				</div>
+
+				<!-- Data de Nascimento -->
+                <div class="input-combined">
+                    <i class="icon-input-custom fa-solid fa-calendar-days"></i>
+                    <p:outputLabel styleClass="title-input" value="Data de Nascimento *" />
+                    <p:datePicker value="#{registroController.clienteModel.dataNascimento}" 
+                                  pattern="dd/MM/yyyy" 
+                                  required="true" 
+                                  requiredMessage="Data de nascimento é obrigatória"
+                                  showIcon="true" 
+                                  locale="pt" 
+                                  yearNavigator="true" 
+                                  yearRange="1920:#{registroController.anoAtual}" 
+                                  maxdate="#{registroController.hoje}" />
+                </div>
+
+				<!-- Sexo -->
+				<div class="input-combined">
+					<i class="icon-input-custom fa-solid fa-venus-mars"></i>
+					<p:outputLabel styleClass="title-input" value="Sexo *" />
+					<p:selectOneMenu value="#{registroController.clienteModel.sexo}" required="true" requiredMessage="Sexo é obrigatório">
+						<f:selectItem itemLabel="Selecione" itemValue="" />
+						<f:selectItem itemLabel="Masculino" itemValue="M" />
+						<f:selectItem itemLabel="Feminino" itemValue="F" />
+						<f:selectItem itemLabel="Não definido" itemValue="O" />
+					</p:selectOneMenu>
+				</div>
+
+				<!-- Email (usado como login) -->
+				<div class="input-combined full-width">
+					<i class="icon-input-custom fa-solid fa-envelope"></i>
+					<p:outputLabel styleClass="title-input" value="E-mail *" />
+					<p:inputText value="#{registroController.email}" type="email" maxlength="100" required="true" requiredMessage="E-mail é obrigatório" />
+				</div>
+
+				<!-- Senha -->
+				<div class="input-combined">
+					<i class="icon-input-custom fa-solid fa-lock"></i>
+					<p:outputLabel styleClass="title-input" value="Senha *" />
+					<p:password value="#{registroController.clienteModel.usuario.senha}" feedback="true" weakLabel="Fraca" goodLabel="Média" strongLabel="Forte" required="true" requiredMessage="Senha é obrigatória" />
+				</div>
+
+				<!-- Confirmar Senha -->
+				<div class="input-combined">
+					<i class="icon-input-custom fa-solid fa-lock"></i>
+					<p:outputLabel styleClass="title-input" value="Confirmar Senha *" />
+					<p:password value="#{registroController.confirmaSenha}" feedback="false" required="true" requiredMessage="Confirmação de senha é obrigatória" />
+				</div>
+			</div>
+
+			<!-- Botão de Criar Conta -->
+			<p:commandButton value="Criar Conta" 
+							 action="#{registroController.enviarCodigoRegistro}"
+							 update="messages"
+							 styleClass="btn-register" />
+
+			<hr />
+
+			<div class="flex-center">
+				<h:link outcome="login" styleClass="text-links-black" value="Já tem uma conta? Faça o login" />
+			</div>
+		</div>
+	</h:form>
+</h:body>
+
+</html>
+

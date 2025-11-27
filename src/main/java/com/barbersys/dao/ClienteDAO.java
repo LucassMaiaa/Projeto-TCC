@@ -14,10 +14,14 @@ import com.barbersys.util.DatabaseConnection;
 
 public class ClienteDAO {
 
-	public static int clienteCount(String nome) {
+	public static int clienteCount(String nome, String status) {
 		int total = 0;
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM cliente WHERE 1=1");
 
+		if (status != null && !status.trim().isEmpty()) {
+			sql.append(" AND cli_status = ?");
+		}
+		
 		if (nome != null && !nome.trim().isEmpty()) {
 			sql.append(" AND LOWER(cli_nome) LIKE ?");
 		}
@@ -26,6 +30,10 @@ public class ClienteDAO {
 				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
 			int paramIndex = 1;
+
+			if (status != null && !status.trim().isEmpty()) {
+				ps.setString(paramIndex++, status);
+			}
 
 			if (nome != null && !nome.trim().isEmpty()) {
 				ps.setString(paramIndex++, "%" + nome.toLowerCase() + "%");
@@ -62,6 +70,7 @@ public class ClienteDAO {
 		cliente.setBairro(rs.getString("cli_bairro"));
 		cliente.setCidade(rs.getString("cli_cidade"));
 		cliente.setEstado(rs.getString("cli_estado"));
+		cliente.setStatus(rs.getString("cli_status"));
 
 		if (rs.getObject("usu_codigo") != null) {
 			Usuario usuario = new Usuario();
@@ -75,7 +84,7 @@ public class ClienteDAO {
 
 	public static List<Cliente> buscarTodosClientes() {
 		List<Cliente> lista = new ArrayList<>();
-		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo ORDER BY c.cli_codigo DESC";
+		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.cli_status = 'A' ORDER BY c.cli_codigo DESC";
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -93,20 +102,28 @@ public class ClienteDAO {
 		return lista;
 	}
 
-	public static List<Cliente> buscarCliente(String nome, int first, int pageSize) {
+	public static List<Cliente> buscarCliente(String nome, String status, int first, int pageSize) {
 		List<Cliente> lista = new ArrayList<>();
-		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE 1=1";
+		StringBuilder sql = new StringBuilder("SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE 1=1");
 
+		if (status != null && !status.trim().isEmpty()) {
+			sql.append(" AND c.cli_status = ?");
+		}
+		
 		if (nome != null && !nome.trim().isEmpty()) {
-			sql += " AND LOWER(c.cli_nome) LIKE ?";
+			sql.append(" AND LOWER(c.cli_nome) LIKE ?");
 		}
 
-		sql += " ORDER BY c.cli_codigo DESC LIMIT ?, ?";
+		sql.append(" ORDER BY c.cli_codigo DESC LIMIT ?, ?");
 
 		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement ps = conn.prepareStatement(sql)) {
+				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
 			int paramIndex = 1;
+
+			if (status != null && !status.trim().isEmpty()) {
+				ps.setString(paramIndex++, status);
+			}
 
 			if (nome != null && !nome.trim().isEmpty()) {
 				ps.setString(paramIndex++, "%" + nome.toLowerCase() + "%");
@@ -177,7 +194,7 @@ public class ClienteDAO {
 		String sql = "UPDATE cliente SET cli_nome = ?, cli_email = ?, cli_telefone = ?, cli_cpf = ?, " +
 					 "cli_sexo = ?, cli_data_nascimento = ?, cli_observacoes = ?, " +
 					 "cli_cep = ?, cli_rua = ?, cli_numero = ?, cli_complemento = ?, " +
-					 "cli_bairro = ?, cli_cidade = ?, cli_estado = ? " +
+					 "cli_bairro = ?, cli_cidade = ?, cli_estado = ?, cli_status = ? " +
 					 "WHERE cli_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
@@ -207,7 +224,8 @@ public class ClienteDAO {
 			stmt.setString(12, cliente.getBairro());
 			stmt.setString(13, cliente.getCidade());
 			stmt.setString(14, cliente.getEstado());
-			stmt.setLong(15, cliente.getId());
+			stmt.setString(15, cliente.getStatus());
+			stmt.setLong(16, cliente.getId());
 
 			stmt.executeUpdate();
 		} catch (SQLException e) {
@@ -217,7 +235,7 @@ public class ClienteDAO {
 	}
 
 	public static void deletar(Cliente cliente) throws SQLException {
-		String sql = "DELETE FROM cliente WHERE cli_codigo = ?";
+		String sql = "UPDATE cliente SET cli_status = 'I' WHERE cli_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -227,7 +245,7 @@ public class ClienteDAO {
 
             if (cliente.getUsuario() != null && cliente.getUsuario().getId() != null && cliente.getUsuario().getId() > 0) {
                 UsuarioDAO usuarioDAO = new UsuarioDAO();
-                usuarioDAO.deletar(cliente.getUsuario());
+                usuarioDAO.inativar(cliente.getUsuario());
             }
 
 		} catch (SQLException e) {
@@ -239,8 +257,8 @@ public class ClienteDAO {
 	public static void salvar(Cliente cliente) throws SQLException {
 		String sql = "INSERT INTO cliente (cli_nome, cli_email, cli_telefone, cli_cpf, usu_codigo, " +
 					 "cli_sexo, cli_data_nascimento, cli_observacoes, " +
-					 "cli_cep, cli_rua, cli_numero, cli_complemento, cli_bairro, cli_cidade, cli_estado) " +
-					 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					 "cli_cep, cli_rua, cli_numero, cli_complemento, cli_bairro, cli_cidade, cli_estado, cli_status) " +
+					 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'A')";
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			
@@ -281,6 +299,79 @@ public class ClienteDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
             throw e;
+		}
+	}
+	
+	public static Cliente buscarPorCPFRecuperacao(String cpf) {
+		String cpfLimpo = cpf.replaceAll("[^0-9]", "");
+		String sql = "SELECT c.*, u.* FROM cliente c " +
+				"LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo " +
+				"WHERE c.cli_cpf = ? AND c.cli_status = 'A'";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, cpfLimpo);
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				Cliente cliente = mapResultSetToCliente(rs);
+				return cliente;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static Cliente buscarPorEmailRecuperacao(String email) {
+		String sql = "SELECT c.*, u.* FROM cliente c " +
+				"LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo " +
+				"WHERE LOWER(u.usu_login) = LOWER(?) AND c.cli_status = 'A'";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			System.out.println("Buscando cliente por login: " + email);
+			ps.setString(1, email.trim());
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				Cliente cliente = mapResultSetToCliente(rs);
+				System.out.println("Cliente encontrado: " + cliente.getNome());
+				return cliente;
+			} else {
+				System.out.println("Nenhum cliente encontrado com login: " + email);
+			}
+			
+		} catch (Exception e) {
+			System.err.println("Erro ao buscar cliente por login: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static boolean atualizarSenha(Long clienteId, String novaSenha) {
+		return atualizarSenhaCliente(clienteId, novaSenha);
+	}
+	
+	public static boolean atualizarSenhaCliente(Long clienteId, String novaSenha) {
+		String sql = "UPDATE usuario u INNER JOIN cliente c ON u.usu_codigo = c.usu_codigo " +
+					 "SET u.usu_senha = ? WHERE c.cli_codigo = ?";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, novaSenha);
+			ps.setLong(2, clienteId);
+			
+			int rows = ps.executeUpdate();
+			return rows > 0;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 

@@ -124,6 +124,34 @@ body .ui-dialog#dlgCli {
 .dialog-scroll::-webkit-scrollbar-thumb:hover {
 	background: #9E9E9E;
 }
+
+body .ui-dialog:has( .header-modal) .ui-dialog-content, body .ui-dialog:has( .header-modal-confirm) .ui-dialog-content {
+   min-width: 1100px;
+}
+
+/* Ajustes para o modal de validação de email */
+body .ui-dialog.dialog-validar-email .ui-dialog-content {
+    min-width: 500px !important;
+}
+
+.dialog-validar-email .input-combined .title-input {
+    left: 12px !important;
+}
+
+.dialog-validar-email .input-combined .ui-inputfield {
+  height: 60px !important;
+    position: relative !important;
+    width: 100% !important;
+    border-radius: 8px !important;
+    border: 1px solid #D5D5D5 !important;
+    background: #FFF !important;
+    box-sizing: border-box !important;
+    padding: 22px 9px 0 !important;
+    font-size: 17px !important;
+    color: #656464 !important;
+    font-weight: 600 !important;
+    font-family: "Barlow" !important;
+}
 		</style>
 	</ui:define>
 
@@ -137,6 +165,19 @@ body .ui-dialog#dlgCli {
 
 				<div class="header-filters">
 					<div class="row">
+						<div class="col-md-4">
+							<div class="content-filter ">
+								<i class="fa-solid fa-filter"></i>
+								<p:selectOneButton
+									value="#{clienteController.statusSelecionado}"
+									unselectable="false">
+									<f:selectItem itemLabel="Todos" itemValue="" />
+									<f:selectItem itemLabel="Ativos" itemValue="A" />
+									<f:selectItem itemLabel="Inativos" itemValue="I" />
+									<p:ajax update="@form" process="@this" />
+								</p:selectOneButton>
+							</div>
+						</div>
 						<div class="col-md-3 input-combined-no-text">
 							<p:inputText value="#{clienteController.nomeCliente}" autocomplete="off"
 								placeholder="Pesquisar cliente">
@@ -165,7 +206,7 @@ body .ui-dialog#dlgCli {
 							actionListener="#{clienteController.clienteSelecionado(clientes)}"
 							update="form:dlgCli" process="@this"
 							oncomplete="PF('dlgCli').show()">
-							<div class="card-list">
+							<div class="card-list #{clientes.status == 'I' ? 'inativo' : 'ativo'}">
 								<div>
 									<label class="title-list">Cliente</label>
 									<p:outputLabel styleClass="subtitle-list"
@@ -201,17 +242,14 @@ body .ui-dialog#dlgCli {
 					<div class="flex align-center">
 						<ui:fragment
 							rendered="#{clienteController.editarModel eq 'A'}">
-							<p:commandButton
-								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
-								icon="fa-solid fa-trash" />
 							<p:commandButton update="dlgCliForm" process="@form"
-								actionListener="#{clienteController.atualizarCliente()}"
+								actionListener="#{clienteController.prepararSalvarCliente()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
 						<ui:fragment
 							rendered="#{clienteController.editarModel eq 'I'}">
 							<p:commandButton update="dlgCliForm" process="@form"
-								actionListener="#{clienteController.adicionarNovoCliente()}"
+								actionListener="#{clienteController.prepararSalvarCliente()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
 
@@ -222,6 +260,20 @@ body .ui-dialog#dlgCli {
 				</div>
 
 				<div class="dialog-scroll">
+				
+				<div class="row">
+					<div class="col-md-4">
+						<div class="content-filter no-filter">
+							<p:selectOneButton
+								value="#{clienteController.clienteModel.status}"
+								unselectable="false">
+								<f:selectItem itemLabel="Ativo" itemValue="A" />
+								<f:selectItem itemLabel="Inativo" itemValue="I" />
+								<p:ajax update="@this" process="@this" />
+							</p:selectOneButton>
+						</div>
+					</div>
+				</div>
 
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
@@ -236,6 +288,7 @@ body .ui-dialog#dlgCli {
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Login" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
+								placeholder="Digite o login"
 								value="#{clienteController.clienteModel.usuario.login}" />
 						</div>
 					</div>
@@ -271,38 +324,29 @@ body .ui-dialog#dlgCli {
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Nome Completo" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
+								placeholder="Digite o nome completo"
 								value="#{clienteController.clienteModel.nome}" />
 						</div>
 					</div>
 				</div>
 
 				<div class="row">
-					<div class="col-md-4">
+					<div class="col-md-6">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="CPF" />
 							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
+								placeholder="000.000.000-00"
 								value="#{clienteController.clienteModel.cpf}" />
 						</div>
 					</div>
-					<div class="col-md-4">
+					<div class="col-md-6">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
 							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
+								placeholder="dd/mm/aaaa"
 								value="#{clienteController.clienteModel.dataNascimento}" 
 								showIcon="true" locale="pt" yearNavigator="true" 
 								yearRange="1920:2024" maxdate="#{clienteController.hoje}" />
-						</div>
-					</div>
-					<div class="col-md-4">
-						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Sexo" />
-							<p:selectOneMenu styleClass="senha-login"
-								value="#{clienteController.clienteModel.sexo}">
-								<f:selectItem itemLabel="Selecione" itemValue="" />
-								<f:selectItem itemLabel="Masculino" itemValue="M" />
-								<f:selectItem itemLabel="Feminino" itemValue="F" />
-								<f:selectItem itemLabel="Outro" itemValue="O" />
-							</p:selectOneMenu>
 						</div>
 					</div>
 				</div>
@@ -313,14 +357,20 @@ body .ui-dialog#dlgCli {
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Telefone" />
 							<p:inputMask mask="(99) 99999-9999" styleClass="senha-login"
+								placeholder="(00) 00000-0000"
 								value="#{clienteController.clienteModel.telefone}" />
 						</div>
 					</div>
-					<div class="col-md-6">
+										<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Email" />
-							<p:inputText styleClass="senha-login"
-								value="#{clienteController.clienteModel.email}" />
+							<p:outputLabel styleClass="title-input" value="Sexo" />
+							<p:selectOneMenu styleClass="senha-login"
+								value="#{clienteController.clienteModel.sexo}">
+								<f:selectItem itemLabel="Selecione" itemValue="" />
+								<f:selectItem itemLabel="Masculino" itemValue="M" />
+								<f:selectItem itemLabel="Feminino" itemValue="F" />
+								<f:selectItem itemLabel="Outro" itemValue="O" />
+							</p:selectOneMenu>
 						</div>
 					</div>
 				</div>
@@ -436,29 +486,57 @@ body .ui-dialog#dlgCli {
 			</h:panelGroup>
 
 		</p:dialog>
-
-		<p:dialog id="dlgConfirm" widgetVar="dlgConfirm" modal="true"
-			showEffect="fade" hideEffect="fade" closable="false"
-			draggable="false" resizable="false">
-			<h:panelGroup id="dlgConfirmForm">
-				<div class="header-modal-confirm">
-					<div>
-						<label>Realmente deseja excluir esse cliente?</label>
+		
+		<!-- Modal de Validação de Email Padronizado -->
+		<p:dialog id="dlgValidarEmailCliente" widgetVar="dlgValidarEmailCliente" modal="true" 
+			showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false"
+			styleClass="dialog-validar-email">
+			<h:panelGroup id="dlgValidarEmailClienteForm">
+				
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<i class="fa-solid fa-envelope-circle-check"></i>
+						</div>
+						<label>Validar Email</label>
+					</div>
+					<div class="flex align-center">
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgValidarEmailCliente').hide()"/>
 					</div>
 				</div>
 
-				<div class="flex align-center justify-center">
-					<p:commandButton styleClass="btn medium btn-confirm"
-						value="Confirmar"
-						actionListener="#{clienteController.deletaCliente()}" />
-					<p:commandButton styleClass="btn medium btn-cancel"
-						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
+				<div style="padding: 20px 20px 0 20px; text-align: center;">
+					<p style="margin-bottom: 25px; color: #666; font-size: 14px;">
+						Digite o código de 6 dígitos enviado para<br/>
+						<strong>#{clienteController.clienteModel.usuario.login}</strong>
+					</p>
+
+					<div class="input-combined" style="margin: 0 auto 25px auto; max-width: 280px;">
+						<p:outputLabel styleClass="title-input" value="Código de Verificação *" />
+						<p:inputText id="codigoValidacaoCliente" 
+							value="#{clienteController.codigoValidacao}"
+							maxlength="6"/>
+					</div>
 				</div>
 
+				<div class="flex align-center justify-center" style="padding: 0 20px 20px 20px;">
+					<p:commandButton value="Validar" 
+						styleClass="btn medium btn-green"
+						actionListener="#{clienteController.validarCodigoCliente()}"
+						update="dlgValidarEmailClienteForm"
+						process="@form"/>
+						
+					<p:commandButton value="Reenviar Código" 
+						styleClass="btn medium btn-cancel"
+						actionListener="#{clienteController.reenviarCodigoCliente()}"
+						update="dlgValidarEmailClienteForm"
+						process="@this"/>
+				</div>
 			</h:panelGroup>
-
 		</p:dialog>
-		
+
+
 	</ui:define>
 
 </ui:composition>

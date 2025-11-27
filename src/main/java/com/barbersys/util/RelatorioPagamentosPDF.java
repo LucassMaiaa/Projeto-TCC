@@ -18,11 +18,23 @@ import java.util.List;
 
 public class RelatorioPagamentosPDF {
 
-    private static final Color COLOR_HEADER = new Color(231, 74, 70);
-    private static final Color COLOR_PRIMARY = new Color(231, 74, 70);
-    private static final Color COLOR_ROW_EVEN = new Color(245, 245, 245);
-    private static final Color COLOR_SUCCESS = new Color(40, 167, 69);
-    private static final Color COLOR_WARNING = new Color(255, 193, 7);
+    // CORES CLEAN ESTILO EXCEL
+    private static final Color COR_PRETO = Color.BLACK;
+    private static final Color COR_CINZA_TEXTO = new Color(64, 64, 64);
+    private static final Color COR_CINZA_HEADER = new Color(217, 217, 217);
+    private static final Color COR_BRANCO = Color.WHITE;
+    private static final Color COR_BORDA_EXCEL = new Color(208, 206, 206);
+    private static final Color COR_VERDE = new Color(46, 125, 50);
+    private static final Color COR_VERDE_CLARO = new Color(232, 245, 233);
+    private static final Color COR_LARANJA = new Color(245, 124, 0);
+    private static final Color COR_LARANJA_CLARO = new Color(255, 244, 230);
+    
+    // FONTES CLEAN
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 16, Font.BOLD, COR_PRETO);
+    private static final Font SUBTITLE_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_CINZA_TEXTO);
+    private static final Font HEADER_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
+    private static final Font CELL_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_PRETO);
+    private static final Font CELL_BOLD_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
 
     public static void gerarPDF(List<PagamentoRelatorio> pagamentos, 
                                  java.util.Date dataInicial, 
@@ -43,42 +55,33 @@ public class RelatorioPagamentosPDF {
         
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         
-        // Título
-        Font fontTitulo = new Font(Font.HELVETICA, 18, Font.BOLD, COLOR_PRIMARY);
-        Paragraph titulo = new Paragraph("Relatório de Pagamentos", fontTitulo);
-        titulo.setAlignment(Element.ALIGN_CENTER);
-        titulo.setSpacingAfter(10);
+        // Título em preto à esquerda
+        Paragraph titulo = new Paragraph("Relatório de Pagamentos", TITLE_FONT);
+        titulo.setAlignment(Element.ALIGN_LEFT);
+        titulo.setSpacingAfter(8);
         document.add(titulo);
         
         // Período
-        if (dataInicial != null || dataFinal != null) {
-            Font fontPeriodo = new Font(Font.HELVETICA, 10, Font.NORMAL, Color.DARK_GRAY);
-            String periodoTexto = "Período: ";
-            if (dataInicial != null && dataFinal != null) {
-                periodoTexto += sdf.format(dataInicial) + " até " + sdf.format(dataFinal);
-            } else if (dataInicial != null) {
-                periodoTexto += "A partir de " + sdf.format(dataInicial);
-            } else {
-                periodoTexto += "Até " + sdf.format(dataFinal);
-            }
-            Paragraph periodo = new Paragraph(periodoTexto, fontPeriodo);
-            periodo.setAlignment(Element.ALIGN_CENTER);
-            periodo.setSpacingAfter(5);
-            document.add(periodo);
+        String periodoTexto = "Período: ";
+        if (dataInicial != null && dataFinal != null) {
+            periodoTexto += sdf.format(dataInicial) + " até " + sdf.format(dataFinal);
+        } else if (dataInicial != null) {
+            periodoTexto += "A partir de " + sdf.format(dataInicial);
+        } else if (dataFinal != null) {
+            periodoTexto += "Até " + sdf.format(dataFinal);
+        } else {
+            periodoTexto += "Todos os registros";
         }
+        Paragraph periodo = new Paragraph(periodoTexto, SUBTITLE_FONT);
+        periodo.setAlignment(Element.ALIGN_LEFT);
+        periodo.setSpacingAfter(3);
+        document.add(periodo);
         
         // Data de geração
-        Font fontData = new Font(Font.HELVETICA, 8, Font.NORMAL, Color.GRAY);
-        Paragraph dataGeracao = new Paragraph("Gerado em: " + sdf.format(new java.util.Date()), fontData);
-        dataGeracao.setAlignment(Element.ALIGN_CENTER);
-        dataGeracao.setSpacingAfter(15);
+        Paragraph dataGeracao = new Paragraph("Data de Geração: " + sdf.format(new java.util.Date()), SUBTITLE_FONT);
+        dataGeracao.setAlignment(Element.ALIGN_LEFT);
+        dataGeracao.setSpacingAfter(20);
         document.add(dataGeracao);
-        
-        // Total de registros
-        Font fontTotal = new Font(Font.HELVETICA, 10, Font.BOLD, Color.DARK_GRAY);
-        Paragraph total = new Paragraph("Total de registros: " + pagamentos.size(), fontTotal);
-        total.setSpacingAfter(10);
-        document.add(total);
         
         // Criação da tabela
         PdfPTable table = new PdfPTable(6);
@@ -105,7 +108,7 @@ public class RelatorioPagamentosPDF {
         int countPendente = 0;
         
         for (PagamentoRelatorio pagamento : pagamentos) {
-            Color bgColor = (index % 2 == 0) ? Color.WHITE : COLOR_ROW_EVEN;
+            Color bgColor = COR_BRANCO; // Todas brancas
             
             // Código (usa índice sequencial)
             adicionarCelulaDados(table, String.valueOf(codigo++), Element.ALIGN_CENTER, bgColor);
@@ -134,27 +137,29 @@ public class RelatorioPagamentosPDF {
             
             // Status
             String statusTexto = "";
-            Color statusColor = Color.BLACK;
+            Color bgColorStatus = COR_BRANCO;
             if ("S".equals(pagamento.getStatusPagamento())) {
                 statusTexto = "Pago";
-                statusColor = COLOR_SUCCESS;
+                bgColorStatus = COR_VERDE_CLARO;
                 totalPago += (pagamento.getValor() != null ? pagamento.getValor() : 0.0);
                 countPago++;
             } else if ("N".equals(pagamento.getStatusPagamento())) {
                 statusTexto = "Pendente";
-                statusColor = COLOR_WARNING;
+                bgColorStatus = COR_LARANJA_CLARO;
                 totalPendente += (pagamento.getValor() != null ? pagamento.getValor() : 0.0);
                 countPendente++;
             } else {
                 statusTexto = "-";
+                bgColorStatus = COR_BRANCO;
             }
             
-            PdfPCell cellStatus = new PdfPCell(new Phrase(statusTexto, new Font(Font.HELVETICA, 9, Font.BOLD, statusColor)));
+            PdfPCell cellStatus = new PdfPCell(new Phrase(statusTexto, CELL_BOLD_FONT));
             cellStatus.setHorizontalAlignment(Element.ALIGN_CENTER);
             cellStatus.setVerticalAlignment(Element.ALIGN_MIDDLE);
-            cellStatus.setPadding(8);
-            cellStatus.setBackgroundColor(bgColor);
-            cellStatus.setBorder(Rectangle.NO_BORDER);
+            cellStatus.setPadding(7);
+            cellStatus.setBackgroundColor(bgColorStatus);
+            cellStatus.setBorderWidth(1);
+            cellStatus.setBorderColor(COR_BORDA_EXCEL);
             table.addCell(cellStatus);
             
             index++;
@@ -163,17 +168,15 @@ public class RelatorioPagamentosPDF {
         document.add(table);
         
         // Resumo final
-        document.add(new Paragraph(" "));
+        document.add(new Paragraph("\n\n"));
         
-        Font fontResumo = new Font(Font.HELVETICA, 10, Font.BOLD, Color.DARK_GRAY);
-        Paragraph resumoTitulo = new Paragraph("Resumo:", fontResumo);
+        Paragraph resumoTitulo = new Paragraph("Resumo:", CELL_BOLD_FONT);
         resumoTitulo.setSpacingBefore(10);
         document.add(resumoTitulo);
         
-        Font fontResumoItem = new Font(Font.HELVETICA, 9, Font.NORMAL, Color.DARK_GRAY);
-        document.add(new Paragraph(String.format("Pagos: %d (R$ %.2f)", countPago, totalPago), fontResumoItem));
-        document.add(new Paragraph(String.format("Pendentes: %d (R$ %.2f)", countPendente, totalPendente), fontResumoItem));
-        document.add(new Paragraph(String.format("Total Geral: %d (R$ %.2f)", pagamentos.size(), totalPago + totalPendente), new Font(Font.HELVETICA, 9, Font.BOLD, Color.DARK_GRAY)));
+        document.add(new Paragraph(String.format("Pagos: %d (R$ %.2f)", countPago, totalPago), CELL_FONT));
+        document.add(new Paragraph(String.format("Pendentes: %d (R$ %.2f)", countPendente, totalPendente), CELL_FONT));
+        document.add(new Paragraph(String.format("Total Geral: %d (R$ %.2f)", pagamentos.size(), totalPago + totalPendente), CELL_BOLD_FONT));
         
         document.close();
         output.flush();
@@ -181,24 +184,24 @@ public class RelatorioPagamentosPDF {
     }
     
     private static void adicionarCelulaCabecalho(PdfPTable table, String texto) {
-        Font fontCabecalho = new Font(Font.HELVETICA, 10, Font.BOLD, Color.WHITE);
-        PdfPCell cell = new PdfPCell(new Phrase(texto, fontCabecalho));
-        cell.setBackgroundColor(COLOR_HEADER);
+        PdfPCell cell = new PdfPCell(new Phrase(texto, HEADER_FONT));
+        cell.setBackgroundColor(COR_CINZA_HEADER);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(10);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPadding(8);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
     
     private static void adicionarCelulaDados(PdfPTable table, String texto, int alinhamento, Color bgColor) {
-        Font fontDados = new Font(Font.HELVETICA, 9, Font.NORMAL, Color.DARK_GRAY);
-        PdfPCell cell = new PdfPCell(new Phrase(texto, fontDados));
+        PdfPCell cell = new PdfPCell(new Phrase(texto, CELL_FONT));
         cell.setHorizontalAlignment(alinhamento);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(8);
+        cell.setPadding(7);
         cell.setBackgroundColor(bgColor);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
 }

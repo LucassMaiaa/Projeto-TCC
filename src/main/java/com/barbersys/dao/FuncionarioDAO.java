@@ -346,5 +346,95 @@ public class FuncionarioDAO {
             throw e;
 		}
 	}
+	
+	public static Funcionario buscarPorCPFRecuperacao(String cpf) {
+		String cpfLimpo = cpf.replaceAll("[^0-9]", "");
+		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_cpf = ? AND f.fun_status = 'A'";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, cpfLimpo);
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				return mapResultSetToFuncionario(rs);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static Funcionario buscarPorEmailRecuperacao(String email) {
+		String sql = "SELECT f.*, u.* FROM funcionario f " +
+					 "LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo " +
+					 "WHERE LOWER(u.usu_login) = LOWER(?) AND f.fun_status = 'A'";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			System.out.println("Buscando funcionário por login: " + email);
+			ps.setString(1, email.trim());
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				Funcionario func = mapResultSetToFuncionario(rs);
+				if (func.getUsuario() != null) {
+					func.getUsuario().setUser(rs.getString("usu_user"));
+				}
+				System.out.println("Funcionário encontrado: " + func.getNome());
+				return func;
+			} else {
+				System.out.println("Nenhum funcionário encontrado com login: " + email);
+			}
+		} catch (Exception e) {
+			System.err.println("Erro ao buscar funcionário por login: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static Funcionario buscarPorTelefoneRecuperacao(String telefone) {
+		String telefoneLimpo = telefone.replaceAll("[^0-9]", "");
+		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_telefone = ? AND f.fun_status = 'A'";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, telefoneLimpo);
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				return mapResultSetToFuncionario(rs);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static boolean atualizarSenha(Long funcionarioId, String novaSenha) {
+		return atualizarSenhaFuncionario(funcionarioId, novaSenha);
+	}
+	
+	public static boolean atualizarSenhaFuncionario(Long funcionarioId, String novaSenha) {
+		String sql = "UPDATE usuario u INNER JOIN funcionario f ON u.usu_codigo = f.usu_codigo " +
+					 "SET u.usu_senha = ? WHERE f.fun_codigo = ?";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, novaSenha);
+			ps.setLong(2, funcionarioId);
+			
+			int rows = ps.executeUpdate();
+			return rows > 0;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 }

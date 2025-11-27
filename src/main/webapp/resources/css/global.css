@@ -340,6 +340,36 @@ a {
     text-decoration: none !important;
 }
 
+/* Botão Ajuda */
+.btn-ajuda-header{
+    height: 40px;
+    background: #6366F1  !important;
+    border: none !important;
+    color: white !important;
+    transition: .5s ease all !important;
+    padding: 0 16px !important;
+}
+
+.btn-ajuda-header.ui-button{
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.btn-ajuda-header:hover{
+    background: #6366F1 !important;
+    color: white !important;
+    text-decoration: none !important;
+}
+
+.btn-ajuda-header.ui-button .ui-button-text {
+    padding: .5rem 1rem .5rem 1.8rem !important;
+}
+
+.btn-ajuda-header.ui-button .ui-button-icon-left {
+    margin-right: 0.5rem;
+}
+
 .btn-x.ui-button{
 	border-radius: 50% ;
     width: 40px !important;
@@ -356,6 +386,56 @@ a {
 
 .btn-x.ui-button.ui-button-icon-only .ui-icon {
     left: 55% !important;
+}
+
+/* Botão Cancelar Agendamento (no header do modal) */
+.btn-cancelar-agendamento.ui-button {
+	border-radius: 50%;
+    width: 40px !important;
+    height: 40px;
+    background: #FEE2E2;
+    color: #DC2626;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar-agendamento:hover {
+    background: #FECACA !important;
+    color: #B91C1C !important;
+    transform: scale(1.05);
+}
+
+.btn-cancelar-agendamento.ui-button.ui-button-icon-only .ui-icon {
+    left: 55% !important;
+}
+
+/* Botão Cancelar Agendamento com texto */
+.btn-cancelar-agendamento-text.ui-button {
+	border-radius: 8px;
+    height: 40px;
+    padding: 0 16px;
+    background: #FEE2E2;
+    color: #DC2626;
+    border: none;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.btn-cancelar-agendamento-text:hover {
+    background: #FECACA !important;
+    color: #B91C1C !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.btn-cancelar-agendamento-text.ui-button .ui-button-text {
+    padding: 0.5rem 0.5rem 0.5rem 2rem !important;
+}
+
+.btn-cancelar-agendamento-text.ui-button .ui-icon {
+    left: 12px !important;
 }
 
 .btn-sair-header.ui-button .ui-button-text {
@@ -458,7 +538,7 @@ a {
 .title-page{
     font-size: 30px !important;
     font-weight: bold;
-    font-family: "New Order";
+    font-family: "Barlow";
 }
 
 .title-button{
@@ -891,6 +971,7 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
     box-shadow: 0 3px 6px #00000029;
     transition: all .2s ease;
     position: relative;
+    align-items: center;
     min-height: 82px;
     display: flex;
 }
@@ -915,6 +996,269 @@ body .ui-dialog:has( .header-modal-confirm) .ui-dialog-titlebar{
 
 .card-list div{
 	pointer-events: none;
+}
+
+/* ============================================= */
+/* === ESTILOS PAINEL DE NOTIFICAÇÕES === */
+/* ============================================= */
+
+/* Painel Geral - SUPER ESPECÍFICO */
+body .ui-overlaypanel.notif-panel,
+.notif-panel.ui-overlaypanel,
+.ui-overlaypanel.notif-panel {
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+	border-radius: 12px !important;
+	border: 1px solid #e5e7eb !important;
+	background: white !important;
+}
+
+body .notif-panel .ui-overlaypanel-content,
+.notif-panel .ui-overlaypanel-content {
+	padding: 0 !important;
+	border-radius: 12px !important;
+	background: white !important;
+}
+
+/* Cabeçalho - SUPER ESPECÍFICO */
+body .notif-panel .notif-header,
+.notif-panel .notif-header,
+.notif-header {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 16px !important;
+	border-bottom: 1px solid #f0f0f0 !important;
+	background-color: #fff !important;
+	border-radius: 12px 12px 0 0 !important;
+	margin: 0 !important;
+}
+
+body .notif-panel .notif-title,
+.notif-panel .notif-title,
+.notif-title {
+	font-weight: 600 !important;
+	font-size: 16px !important;
+	color: #333 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* Botão Limpar todas - MÁXIMA ESPECIFICIDADE */
+body .notif-panel .notif-clear-all.ui-button,
+.notif-panel .notif-clear-all.ui-button,
+.notif-clear-all.ui-button {
+	font-size: 12px !important;
+	font-weight: 500 !important;
+	color: #6366F1 !important;
+	text-decoration: none !important;
+	background: transparent !important;
+	border: none !important;
+	padding: 4px 8px !important;
+	border-radius: 6px !important;
+	transition: all 0.2s ease !important;
+	box-shadow: none !important;
+	min-width: auto !important;
+	height: auto !important;
+	line-height: normal !important;
+}
+body .notif-panel .notif-clear-all.ui-button:hover,
+.notif-clear-all.ui-button:hover {
+	background-color: #f1f1fe !important;
+	color: #6366F1 !important;
+	transform: none !important;
+}
+body .notif-panel .notif-clear-all.ui-button .ui-button-text,
+.notif-clear-all.ui-button .ui-button-text {
+	padding: 0 !important;
+	line-height: normal !important;
+}
+
+/* Lista de Notificações - SUPER ESPECÍFICO */
+body .notif-panel .notif-list,
+.notif-panel .notif-list,
+.notif-list {
+	margin: 0 !important;
+	padding: 8px 0 !important;
+	list-style: none !important;
+	max-height: 400px !important;
+	overflow-y: auto !important;
+	background: white !important;
+}
+
+/* Item da Lista - SUPER ESPECÍFICO */
+body .notif-panel .notif-item,
+.notif-panel .notif-item,
+.notif-list .notif-item {
+	display: flex !important;
+	align-items: flex-start !important;
+	padding: 12px 16px !important;
+	border-bottom: 1px solid #f0f0f0 !important;
+	transition: all 0.2s ease !important;
+	position: relative !important;
+	background-color: #fff !important;
+	margin: 0 !important;
+}
+body .notif-panel .notif-item:last-child,
+.notif-panel .notif-item:last-child {
+	border-bottom: none !important;
+}
+body .notif-panel .notif-item:hover,
+.notif-panel .notif-item:hover {
+	background-color: #f8f8fa !important;
+}
+body .notif-panel .notif-item:hover .notif-actions,
+.notif-panel .notif-item:hover .notif-actions {
+	opacity: 1 !important;
+	transform: translateY(-50%) translateX(0) !important;
+}
+
+/* Indicador de Não Lido - SUPER ESPECÍFICO */
+body .notif-panel .notif-item.unread .notif-content .notif-message,
+.notif-panel .notif-item.unread .notif-content .notif-message {
+	font-weight: 600 !important;
+}
+body .notif-panel .notif-unread-dot,
+.notif-panel .notif-unread-dot,
+.notif-unread-dot {
+	flex-shrink: 0 !important;
+	width: 8px !important;
+	height: 8px !important;
+	border-radius: 50% !important;
+	background-color: #6366F1 !important;
+	margin-right: 12px !important;
+	margin-top: 5px !important;
+	transition: transform 0.3s ease !important;
+}
+body .notif-panel .notif-item:hover .notif-unread-dot,
+.notif-panel .notif-item:hover .notif-unread-dot {
+	transform: scale(1.2) !important;
+}
+
+/* Conteúdo (Mensagem e Data) - SUPER ESPECÍFICO */
+body .notif-panel .notif-content,
+.notif-panel .notif-content,
+.notif-content {
+	flex-grow: 1 !important;
+	min-width: 0 !important;
+}
+body .notif-panel .notif-message,
+.notif-panel .notif-message,
+.notif-content .notif-message {
+	font-size: 14px !important;
+	color: #374151 !important;
+	line-height: 1.5 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	word-wrap: break-word !important;
+}
+body .notif-panel .notif-meta,
+.notif-panel .notif-meta,
+.notif-content .notif-meta {
+	font-size: 12px !important;
+	color: #6B7280 !important;
+	margin-top: 4px !important;
+	margin-bottom: 0 !important;
+	padding: 0 !important;
+}
+
+/* Ações (Aparecem no Hover) - MÁXIMA ESPECIFICIDADE */
+body .notif-panel .notif-actions,
+.notif-panel .notif-actions,
+.notif-actions {
+	position: absolute !important;
+	right: 16px !important;
+	top: 50% !important;
+	transform: translateY(-50%) translateX(10px) !important;
+	opacity: 0 !important;
+	display: flex !important;
+	gap: 8px !important;
+	transition: opacity 0.2s ease, transform 0.2s ease !important;
+	background-color: #f8f8fa !important;
+	padding: 4px !important;
+	border-radius: 8px !important;
+	box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important;
+}
+body .notif-panel .notif-actions .ui-button,
+.notif-panel .notif-actions .ui-button,
+.notif-actions .ui-button {
+	width: 32px !important;
+	height: 32px !important;
+	font-size: 14px !important;
+	min-width: 32px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	line-height: 32px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+body .notif-panel .notif-actions .ui-button .ui-button-icon-left,
+.notif-panel .notif-actions .ui-button .ui-button-icon-left,
+.notif-actions .ui-button .ui-button-icon-left {
+	margin: 0 !important;
+	position: static !important;
+}
+
+/* Mensagem de Lista Vazia - SUPER ESPECÍFICO */
+body .notif-panel .notif-empty,
+.notif-panel .notif-empty,
+.notif-empty {
+	padding: 40px 20px !important;
+	text-align: center !important;
+	color: #9CA3AF !important;
+	background-color: #fff !important;
+}
+body .notif-panel .notif-empty-icon,
+.notif-panel .notif-empty-icon,
+.notif-empty .notif-empty-icon {
+	font-size: 40px !important;
+	margin-bottom: 16px !important;
+	opacity: 0.5 !important;
+	display: block !important;
+}
+body .notif-panel .notif-empty-text,
+.notif-panel .notif-empty-text,
+.notif-empty .notif-empty-text {
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	margin: 0 !important;
+	display: block !important;
+}
+
+/* ============================================= */
+/* === ESTILOS MODAL DE AVALIAÇÃO === */
+/* ============================================= */
+
+/* Container das Estrelas */
+.avaliacao-estrelas {
+	text-align: center;
+	margin: 40px 0;
+	padding: 20px;
+	background: #F9FAFB;
+	border-radius: 8px;
+}
+
+/* Estrelas com Hover */
+.avaliacao-estrelas span {
+	cursor: pointer;
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+
+.avaliacao-estrelas span:hover {
+	transform: scale(1.15);
+}
+
+.avaliacao-estrelas i {
+	font-size: 48px;
+	margin: 0 8px;
+	color: #FFD700;
+	filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+	transition: all 0.2s ease;
+}
+
+.avaliacao-estrelas span:hover i {
+	filter: drop-shadow(0 4px 8px rgba(255,215,0,0.5));
 }
 
 .card-list:hover{

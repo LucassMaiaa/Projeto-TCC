@@ -68,6 +68,12 @@ public class Cliente implements Serializable{
 	
 	@Column(name = "cli_estado")
 	private String estado;
+	
+	@Column(name = "cli_ativo")
+	private Boolean ativo = true;
+	
+	@Column(name = "cli_status")
+	private String status = "A"; // A=Ativo, I=Inativo
 
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "usu_codigo")

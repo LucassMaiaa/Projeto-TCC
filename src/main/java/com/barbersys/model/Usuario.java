@@ -28,6 +28,9 @@ public class Usuario implements Serializable {
     @Column(name = "usu_senha")
     private String senha;
     
+    @Column(name = "usu_user")
+    private String user;
+    
     @ManyToOne
     @JoinColumn(name = "per_codigo")
     private Perfil perfil;

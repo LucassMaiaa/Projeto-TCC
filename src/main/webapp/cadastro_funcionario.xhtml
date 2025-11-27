@@ -176,7 +176,7 @@ body .data-list-time.ui-datalist .ui-datalist-content {
 	align-items: center;
 	gap: 10px;
 	padding-bottom: 10px;
-	margin-bottom: 15px;
+	    margin: 15px 0 15px;
 	border-bottom: 2px solid #E7F3F5;
 }
 
@@ -190,6 +190,10 @@ body .data-list-time.ui-datalist .ui-datalist-content {
 	font-weight: 600;
 	color: #2C3E50;
 	margin: 0;
+}
+
+.no-filter{
+margin: 0px
 }
 
 /* Melhorias nos cards de horário */
@@ -255,6 +259,10 @@ body .ui-dialog#dlgFunc {
 	font-weight: 600 !important;
 	color: #546E7A;
 	display: block;
+}
+
+body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
+    transform: translate(2%, -16%);
 }
 		</style>
 	</ui:define>
@@ -324,7 +332,7 @@ body .ui-dialog#dlgFunc {
 
 		<p:dialog id="dlgFunc" widgetVar="dlgFunc" modal="true"
 			showEffect="fade" hideEffect="fade" closable="false"
-			draggable="false" resizable="false" width="700">
+			draggable="false" resizable="false" width="1100">
 			<h:panelGroup id="dlgFuncForm">
 				<div class="header-modal">
 					<div class="flex align-center">
@@ -346,13 +354,13 @@ body .ui-dialog#dlgFunc {
 								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
 								icon="fa-solid fa-trash" />
 							<p:commandButton update="dlgFuncForm" process="@form"
-								actionListener="#{funcionarioController.atualizarFuncionario()}"
+								actionListener="#{funcionarioController.prepararSalvarFuncionario()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
 						<ui:fragment
 							rendered="#{funcionarioController.editarModel eq 'I'}">
 							<p:commandButton update="dlgFuncForm" process="@form"
-								actionListener="#{funcionarioController.adicionarNovoFuncionario()}"
+								actionListener="#{funcionarioController.prepararSalvarFuncionario()}"
 								styleClass="btn btn-green" value="Salvar" />
 						</ui:fragment>
 
@@ -379,7 +387,6 @@ body .ui-dialog#dlgFunc {
 					</div>
 				</div>
 
-
 				<p:messages id="msgs" closable="true" showIcon="true"
 					autoUpdate="true" />
 
@@ -391,10 +398,10 @@ body .ui-dialog#dlgFunc {
                 <div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Login *" />
+							<p:outputLabel styleClass="title-input" value="Login" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.login}" 
-								placeholder="usuario.login" />
+								placeholder="Digite o login" />
 						</div>
 					</div>
 				</div>
@@ -402,19 +409,19 @@ body .ui-dialog#dlgFunc {
 				<div class="row">
                     <div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Senha *" />
+							<p:outputLabel styleClass="title-input" value="Senha" />
 							<p:password id="senhaFunc1" styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.senha}"
 								match="senhaFunc2" feedback="true"
-								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter' : ''}" />
+								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : 'Digite a senha'}" />
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Confirmar Senha *" />
+							<p:outputLabel styleClass="title-input" value="Confirmar Senha" />
 							<p:password id="senhaFunc2" styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.senha}"
-								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter' : ''}" />
+								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : 'Confirme a senha'}" />
 						</div>
 					</div>
 				</div>
@@ -427,10 +434,10 @@ body .ui-dialog#dlgFunc {
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Nome Completo *" />
-							<p:inputText styleClass="senha-login"
+							<p:outputLabel styleClass="title-input" value="Nome Completo" />
+							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.nome}" 
-								placeholder="Ex: João da Silva Santos" />
+								placeholder="Digite o nome completo" />
 						</div>
 					</div>
 				</div>
@@ -621,69 +628,71 @@ body .ui-dialog#dlgFunc {
 								styleClass="senha-login" />
 						</div>
 					</div>
-				</div>
-				
-				<div class="row mt20">
-					<div class="col-md-12">
-						<p:outputLabel styleClass="title-input mb-2" value="Dias da Semana" />
-						<div class="dias-semana-container">
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.domingo}" id="chkDom">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkDom" class="dia-label">Dom</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.segunda}" id="chkSeg">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkSeg" class="dia-label">Seg</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.terca}" id="chkTer">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkTer" class="dia-label">Ter</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quarta}" id="chkQua">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkQua" class="dia-label">Qua</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quinta}" id="chkQui">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkQui" class="dia-label">Qui</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sexta}" id="chkSex">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkSex" class="dia-label">Sex</label>
-							</div>
-							<div class="dia-checkbox">
-								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sabado}" id="chkSab">
-									<p:ajax update="@this" />
-								</p:selectBooleanCheckbox>
-								<label for="chkSab" class="dia-label">Sáb</label>
-							</div>
-						</div>
-					</div>
-				</div>
-				
-				<div class="row mt20">
-					<div class="col-md-12 flex justify-end">
+		
+					<div class="col-md-4 flex justify-center align-center">
 						<p:commandButton update="dttLstHorarios dttLstHorariosAux dlgFuncForm"
 							process="@form"
+							style="    width: 100%;
+    height: 40px;"
 							actionListener="#{funcionarioController.novoHorario()}"
 							class="btn btn-green" value="Adicionar Horário" 
 							icon="fa fa-plus" />
 					</div>
+				
 				</div>
 				
-				<label class="title-item mt30 mb25">Horários Cadastrados</label>
+				<div class="row mt20">
+					<div class="col-md-12">
+						<p:outputLabel styleClass="title-input" value="Dias da Semana" style="display: block; margin-bottom: 12px;" />
+						<div class="dias-semana-container" style="background: #F8F9FA; border: 1px solid #E0E0E0; border-radius: 8px;  padding: 31px 16px 16px 16px; display: flex; justify-content: space-between; ">
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.domingo}" id="chkDom">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkDom" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Dom</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.segunda}" id="chkSeg">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSeg" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Seg</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.terca}" id="chkTer">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkTer" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Ter</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quarta}" id="chkQua">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkQua" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Qua</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.quinta}" id="chkQui">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkQui" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Qui</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sexta}" id="chkSex">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSex" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Sex</label>
+							</div>
+							<div class="dia-checkbox" style="flex: 1; text-align: center;">
+								<p:selectBooleanCheckbox value="#{funcionarioController.horarioModel.sabado}" id="chkSab">
+									<p:ajax update="@this" />
+								</p:selectBooleanCheckbox>
+								<label for="chkSab" class="dia-label" style="margin-top: 8px; font-size: 13px; font-weight: 600;">Sáb</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			
+				
+				<label class="title-item mt20 mb15">Horários Cadastrados</label>
 
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'I'}">
 					<p:dataList id="dttLstHorariosAux" paginator="true"
@@ -831,6 +840,51 @@ body .ui-dialog#dlgFunc {
 				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
 					onclick="PF('dlgHoraAux').hide()" />
 			</div>
+		</p:dialog>
+		
+		<!-- Modal de Validação de Email -->
+		<p:dialog id="dlgValidarEmailFuncionario" widgetVar="dlgValidarEmailFuncionario" modal="true" 
+			closable="false" draggable="false" resizable="false" showHeader="false">
+			<h:panelGroup id="dlgValidarEmailFuncionarioForm">
+				<div class="dialog-header">
+					<div style="display: flex; gap: 10px; align-items: center;">
+						<i class="fa-solid fa-envelope-circle-check" style="font-size: 22px; color: #4CAF50;"></i>
+						<label>Validar Email</label>
+					</div>
+				</div>
+
+				<div class="dialog-scroll">
+					<div style="padding: 20px; text-align: center;">
+						<p style="margin-bottom: 20px; color: #666; font-size: 14px;">
+							Digite o código de 6 dígitos enviado para<br/>
+							<strong>#{funcionarioController.funcionarioModel.usuario.login}</strong>
+						</p>
+
+						<div style="margin-bottom: 20px;">
+							<p:inputText id="codigoValidacaoFuncionario" 
+								value="#{funcionarioController.codigoValidacao}"
+								placeholder="000000"
+								maxlength="6"
+								style="text-align: center; font-size: 24px; letter-spacing: 8px; width: 100%;"
+								styleClass="input-padrao"/>
+						</div>
+
+						<div style="display: flex; gap: 10px; justify-content: center;">
+							<p:commandButton value="Validar" 
+								styleClass="btn btn-green"
+								actionListener="#{funcionarioController.validarCodigoFuncionario()}"
+								update="dlgValidarEmailFuncionarioForm"
+								process="@form"/>
+								
+							<p:commandButton value="Reenviar Código" 
+								styleClass="btn btn-secondary"
+								actionListener="#{funcionarioController.reenviarCodigoFuncionario()}"
+								update="dlgValidarEmailFuncionarioForm"
+								process="@this"/>
+						</div>
+					</div>
+				</div>
+			</h:panelGroup>
 		</p:dialog>
 		
 	</ui:define>

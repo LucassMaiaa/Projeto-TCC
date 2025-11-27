@@ -46,7 +46,20 @@ public class UsuarioController implements Serializable{
             FacesContext.getCurrentInstance().getExternalContext().getSessionMap().put("usuarioLogado", usuarioAutenticado);
             loginFalhou = false;
             PrimeFaces.current().ajax().addCallbackParam("loginFalhou", false);
-            return "dashboard.xhtml?faces-redirect=true";
+            
+            // Determina a URL de redirecionamento com base no perfil
+            Long perfilId = usuarioAutenticado.getPerfil() != null ? usuarioAutenticado.getPerfil().getId() : null;
+            String redirectUrl = "dashboard.xhtml"; // Padrão para Admin
+            
+            if (perfilId == 3L) {
+                redirectUrl = "agendamentoCliente.xhtml";
+            } else if (perfilId == 2L) {
+                redirectUrl = "agendamento.xhtml";
+            }
+            
+            // Adiciona parâmetro de callback para redirecionar via JavaScript
+            PrimeFaces.current().ajax().addCallbackParam("redirectUrl", redirectUrl);
+            return null; // Não faz navegação servidor-side
         } else {
             // Marca que o login falhou para exibir SweetAlert2
             loginFalhou = true;
@@ -57,14 +70,14 @@ public class UsuarioController implements Serializable{
 
     public String getNomeUsuarioLogado() {
         Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
-        if (usuarioLogado != null) {
-            if (usuarioLogado.getClienteAssociado() != null) {
-                return usuarioLogado.getClienteAssociado().getNome();
-            } else if (usuarioLogado.getFuncionarioAssociado() != null) {
-                return usuarioLogado.getFuncionarioAssociado().getNome();
-            }
+        if (usuarioLogado != null && usuarioLogado.getUser() != null && !usuarioLogado.getUser().isEmpty()) {
+            return usuarioLogado.getUser();
         }
         return usuarioLogado != null ? usuarioLogado.getLogin() : "Visitante"; // Fallback
+    }
+    
+    public Usuario getUsuarioLogado() {
+        return (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuarioLogado");
     }
 
     // Método para logout

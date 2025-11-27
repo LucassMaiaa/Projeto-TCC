@@ -16,17 +16,25 @@ import java.util.List;
 
 public class RelatorioAgendamentosPDF {
 
-    private static final Font FONT_TITLE = new Font(Font.HELVETICA, 18, Font.BOLD, new Color(231, 74, 70));
-    private static final Font FONT_SUBTITLE = new Font(Font.HELVETICA, 12, Font.NORMAL, new Color(127, 140, 141));
-    private static final Font FONT_HEADER = new Font(Font.HELVETICA, 9, Font.BOLD, Color.WHITE);
-    private static final Font FONT_CELL = new Font(Font.HELVETICA, 9, Font.NORMAL, new Color(52, 73, 94));
-    private static final Font FONT_CELL_BOLD = new Font(Font.HELVETICA, 9, Font.BOLD, new Color(52, 73, 94));
-
-    private static final Color COLOR_HEADER = new Color(231, 74, 70); // #E74A46
-    private static final Color COLOR_ROW_EVEN = new Color(246, 247, 251);
-    private static final Color COLOR_BADGE_SUCCESS = new Color(16, 185, 129); // #10B981
-    private static final Color COLOR_BADGE_DANGER = new Color(239, 68, 68); // #EF4444
-    private static final Color COLOR_BADGE_INFO = new Color(59, 130, 246); // #3B82F6
+    // CORES CLEAN ESTILO EXCEL
+    private static final Color COR_PRETO = Color.BLACK;
+    private static final Color COR_CINZA_TEXTO = new Color(64, 64, 64);
+    private static final Color COR_CINZA_HEADER = new Color(217, 217, 217);
+    private static final Color COR_BRANCO = Color.WHITE;
+    private static final Color COR_BORDA_EXCEL = new Color(208, 206, 206);
+    private static final Color COR_VERDE = new Color(46, 125, 50);
+    private static final Color COR_VERDE_CLARO = new Color(232, 245, 233);
+    private static final Color COR_LARANJA = new Color(245, 124, 0);
+    private static final Color COR_LARANJA_CLARO = new Color(255, 244, 230);
+    private static final Color COR_VERMELHO = new Color(211, 47, 47);
+    private static final Color COR_VERMELHO_CLARO = new Color(255, 235, 238);
+    
+    // FONTES CLEAN
+    private static final Font TITLE_FONT = new Font(Font.HELVETICA, 16, Font.BOLD, COR_PRETO);
+    private static final Font SUBTITLE_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_CINZA_TEXTO);
+    private static final Font HEADER_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
+    private static final Font CELL_FONT = new Font(Font.HELVETICA, 9, Font.NORMAL, COR_PRETO);
+    private static final Font CELL_BOLD_FONT = new Font(Font.HELVETICA, 9, Font.BOLD, COR_PRETO);
 
     public static void gerar(List<AgendamentoSintetico> agendamentos, java.util.Date dataInicial, java.util.Date dataFinal) {
         Document document = new Document(PageSize.A4, 40, 40, 50, 50);
@@ -45,49 +53,35 @@ public class RelatorioAgendamentosPDF {
 
             document.open();
 
-            // Título do relatório
-            Paragraph titulo = new Paragraph("Relatório Sintético de Agendamentos", FONT_TITLE);
-            titulo.setAlignment(Element.ALIGN_CENTER);
-            titulo.setSpacingAfter(10);
+            // Título em preto à esquerda
+            Paragraph titulo = new Paragraph("Relatório Sintético de Agendamentos", TITLE_FONT);
+            titulo.setAlignment(Element.ALIGN_LEFT);
+            titulo.setSpacingAfter(8);
             document.add(titulo);
 
-            // Subtítulo com data de geração
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            Paragraph subtitulo = new Paragraph("Gerado em: " + sdf.format(new java.util.Date()), FONT_SUBTITLE);
-            subtitulo.setAlignment(Element.ALIGN_CENTER);
-            subtitulo.setSpacingAfter(5);
-            document.add(subtitulo);
-
-            // Informações de filtros aplicados
+            // Período
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            boolean temFiltro = false;
-            StringBuilder filtrosTexto = new StringBuilder();
-            
-            if (dataInicial != null) {
-                filtrosTexto.append("Data inicial: ").append(dateFormat.format(dataInicial));
-                temFiltro = true;
-            }
-            
-            if (dataFinal != null) {
-                if (temFiltro) filtrosTexto.append(" | ");
-                filtrosTexto.append("Data final: ").append(dateFormat.format(dataFinal));
-                temFiltro = true;
-            }
-            
-            if (temFiltro) {
-                Paragraph filtros = new Paragraph("Filtros aplicados: " + filtrosTexto.toString(), FONT_SUBTITLE);
-                filtros.setAlignment(Element.ALIGN_CENTER);
-                filtros.setSpacingAfter(15);
-                document.add(filtros);
+            String periodoTexto = "Período: ";
+            if (dataInicial != null && dataFinal != null) {
+                periodoTexto += dateFormat.format(dataInicial) + " até " + dateFormat.format(dataFinal);
+            } else if (dataInicial != null) {
+                periodoTexto += "A partir de " + dateFormat.format(dataInicial);
+            } else if (dataFinal != null) {
+                periodoTexto += "Até " + dateFormat.format(dataFinal);
             } else {
-                document.add(new Paragraph(" ", FONT_SUBTITLE));
-                document.add(new Paragraph(" ", FONT_SUBTITLE));
+                periodoTexto += "Todos os registros";
             }
+            Paragraph periodo = new Paragraph(periodoTexto, SUBTITLE_FONT);
+            periodo.setAlignment(Element.ALIGN_LEFT);
+            periodo.setSpacingAfter(3);
+            document.add(periodo);
 
-            // Total de registros
-            Paragraph total = new Paragraph("Total de dias: " + agendamentos.size(), FONT_CELL_BOLD);
-            total.setSpacingAfter(15);
-            document.add(total);
+            // Data de geração
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Paragraph dataGeracao = new Paragraph("Data de Geração: " + sdf.format(new java.util.Date()), SUBTITLE_FONT);
+            dataGeracao.setAlignment(Element.ALIGN_LEFT);
+            dataGeracao.setSpacingAfter(20);
+            document.add(dataGeracao);
 
             // Criação da tabela
             PdfPTable table = new PdfPTable(5);
@@ -104,7 +98,6 @@ public class RelatorioAgendamentosPDF {
 
             // Preenchendo a tabela com os dados
             SimpleDateFormat dataTabela = new SimpleDateFormat("dd/MM/yyyy");
-            int index = 0;
             int codigo = 1;
             
             int totalGeral = 0;
@@ -112,7 +105,7 @@ public class RelatorioAgendamentosPDF {
             int canceladosGeral = 0;
             
             for (AgendamentoSintetico agendamento : agendamentos) {
-                Color bgColor = (index % 2 == 0) ? Color.WHITE : COLOR_ROW_EVEN;
+                Color bgColor = COR_BRANCO;
                 
                 // Código (usa índice sequencial)
                 adicionarCelulaDados(table, String.valueOf(codigo++), Element.ALIGN_CENTER, bgColor);
@@ -125,62 +118,49 @@ public class RelatorioAgendamentosPDF {
                 
                 // Total de Agendamentos
                 String totalAgend = String.valueOf(agendamento.getTotalAgendamentos());
-                PdfPCell cellTotal = new PdfPCell(new Phrase(totalAgend, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_INFO)));
-                cellTotal.setHorizontalAlignment(Element.ALIGN_CENTER);
-                cellTotal.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellTotal.setPadding(8);
-                cellTotal.setBackgroundColor(bgColor);
-                cellTotal.setBorder(Rectangle.NO_BORDER);
-                table.addCell(cellTotal);
+                adicionarCelulaDados(table, totalAgend, Element.ALIGN_CENTER, bgColor);
                 
-                // Finalizados
+                // Finalizados (verde claro)
                 String finalizados = String.valueOf(agendamento.getFinalizados());
-                PdfPCell cellFinalizado = new PdfPCell(new Phrase(finalizados, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_SUCCESS)));
+                PdfPCell cellFinalizado = new PdfPCell(new Phrase(finalizados, CELL_BOLD_FONT));
                 cellFinalizado.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cellFinalizado.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellFinalizado.setPadding(8);
-                cellFinalizado.setBackgroundColor(bgColor);
-                cellFinalizado.setBorder(Rectangle.NO_BORDER);
+                cellFinalizado.setPadding(7);
+                cellFinalizado.setBackgroundColor(COR_VERDE_CLARO);
+                cellFinalizado.setBorderWidth(1);
+                cellFinalizado.setBorderColor(COR_BORDA_EXCEL);
                 table.addCell(cellFinalizado);
                 
-                // Cancelados
+                // Cancelados (vermelho claro)
                 String cancelados = String.valueOf(agendamento.getCancelados());
-                PdfPCell cellCancelado = new PdfPCell(new Phrase(cancelados, new Font(Font.HELVETICA, 9, Font.BOLD, COLOR_BADGE_DANGER)));
+                PdfPCell cellCancelado = new PdfPCell(new Phrase(cancelados, CELL_BOLD_FONT));
                 cellCancelado.setHorizontalAlignment(Element.ALIGN_CENTER);
                 cellCancelado.setVerticalAlignment(Element.ALIGN_MIDDLE);
-                cellCancelado.setPadding(8);
-                cellCancelado.setBackgroundColor(bgColor);
-                cellCancelado.setBorder(Rectangle.NO_BORDER);
+                cellCancelado.setPadding(7);
+                cellCancelado.setBackgroundColor(COR_VERMELHO_CLARO);
+                cellCancelado.setBorderWidth(1);
+                cellCancelado.setBorderColor(COR_BORDA_EXCEL);
                 table.addCell(cellCancelado);
                 
                 // Acumular totais
                 totalGeral += agendamento.getTotalAgendamentos();
                 finalizadosGeral += agendamento.getFinalizados();
                 canceladosGeral += agendamento.getCancelados();
-                
-                index++;
             }
 
             document.add(table);
 
             // Totalizadores
-            document.add(new Paragraph(" "));
+            document.add(new Paragraph("\n\n"));
             Paragraph totalizadores = new Paragraph(
                 "TOTAIS: Agendamentos: " + totalGeral + 
                 " | Finalizados: " + finalizadosGeral + 
                 " | Cancelados: " + canceladosGeral, 
-                FONT_CELL_BOLD
+                CELL_BOLD_FONT
             );
             totalizadores.setAlignment(Element.ALIGN_RIGHT);
             totalizadores.setSpacingBefore(10);
             document.add(totalizadores);
-
-            // Rodapé
-            document.add(new Paragraph(" "));
-            Paragraph rodape = new Paragraph("BarberSys - Sistema de Gerenciamento de Barbearia", FONT_SUBTITLE);
-            rodape.setAlignment(Element.ALIGN_CENTER);
-            rodape.setSpacingBefore(20);
-            document.add(rodape);
 
             document.close();
             facesContext.responseComplete();
@@ -192,22 +172,24 @@ public class RelatorioAgendamentosPDF {
     }
 
     private static void adicionarCelulaCabecalho(PdfPTable table, String texto) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_HEADER));
-        cell.setBackgroundColor(COLOR_HEADER);
+        PdfPCell cell = new PdfPCell(new Phrase(texto, HEADER_FONT));
+        cell.setBackgroundColor(COR_CINZA_HEADER);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(10);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPadding(8);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
 
     private static void adicionarCelulaDados(PdfPTable table, String texto, int alinhamento, Color bgColor) {
-        PdfPCell cell = new PdfPCell(new Phrase(texto, FONT_CELL));
+        PdfPCell cell = new PdfPCell(new Phrase(texto, CELL_FONT));
         cell.setHorizontalAlignment(alinhamento);
         cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
-        cell.setPadding(8);
+        cell.setPadding(7);
         cell.setBackgroundColor(bgColor);
-        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setBorderWidth(1);
+        cell.setBorderColor(COR_BORDA_EXCEL);
         table.addCell(cell);
     }
 }

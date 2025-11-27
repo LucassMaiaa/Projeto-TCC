@@ -46,7 +46,13 @@
 							<h:outputText class="title-name-perfil" value="#{usuarioController.nomeUsuarioLogado}" />
 						</div>
 					</div>
-					<div class="flex">
+					<div class="flex align-center" style="gap: 10px;">
+						<!-- Botão Ajuda -->
+						<p:commandButton class="btn-ajuda-header" value="Ajuda"
+							icon="fa-solid fa-circle-info" 
+							onclick="abrirAjudaPDF(); return false;" />
+						
+						<!-- Botão Notificações -->
 						<div style="position: relative; display: inline-block;">
 							<p:commandButton id="botaoNotificacao" class="btn-circle" icon="fa-solid fa-bell" />
 							<h:panelGroup id="notificationBadge">
@@ -56,6 +62,7 @@
 							</h:panelGroup>
 						</div>
 
+						<!-- Botão Sair -->
 						<p:commandButton class="btn-sair-header" value="Sair"
 							icon="fa-solid fa-right-from-bracket" 
 							action="#{usuarioController.logout}" />
@@ -63,74 +70,97 @@
 				</div>
 
 				<!-- PAINEL DE NOTIFICAÇÕES -->
-				<p:overlayPanel id="painelNotificacoes" for="botaoNotificacao" style="width:350px" dismissable="true">
-					<p:ajax event="show" listener="#{notificacaoController.marcarTodasComoLidas()}" 
-					        update="@form:notificationBadge" />
-					<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 10px; margin-bottom: 10px;">
-						<span style="font-weight: bold; font-size: 1.2em;">Notificações</span>
+				<p:overlayPanel id="painelNotificacoes" for="botaoNotificacao" styleClass="notif-panel" style="width:380px" dismissable="true">
+					<p:ajax event="show" listener="#{notificacaoController.marcarTodasComoLidas()}" update="@form:notificationBadge" />
+
+					<!-- Cabeçalho do Painel -->
+					<div class="notif-header">
+						<span class="notif-title">Notificações</span>
 						<p:commandButton value="Limpar todas" 
-						                 icon="fa fa-trash-alt"
-						                 styleClass="ui-button-secondary ui-button-sm"
-						                 style="font-size: 11px; padding: 5px 10px;"
-						                 onclick="PF('dlgConfirmLimparTodas').show();"
-						                 process="@this"
-						                 rendered="#{notificacaoController.notificacoes.size() > 0}" />
+										 styleClass="notif-clear-all"
+										 onclick="PF('dlgConfirmLimparTodas').show();"
+										 process="@this"
+										 rendered="#{not empty notificacaoController.notificacoes}" />
 					</div>
-					<p:dataList value="#{notificacaoController.notificacoes}" var="notificacao" type="definition"
-					            emptyMessage="Nenhuma notificação no momento 🔔"
-					            style="max-height: 400px; overflow-y: auto;">
-						<f:facet name="description">
-							<div style="padding: 10px; border-radius: 5px; margin-bottom: 8px; 
-							            #{notificacao.lida eq 'N' ? 'background: #fff3cd; border-left: 3px solid #ffc107; font-weight: 500;' : 'background: #f9f9f9;'}">
-								<div>#{notificacao.mensagem}</div>
-								<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-									<span style="font-size: 0.8em; color: #888;">
-										<h:outputText value="#{notificacao.dataEnvio}">
-											<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-										</h:outputText>
-									</span>
-									<div>
-										<!-- Botão de Avaliar (só aparece para notificações de finalizado) -->
-										<p:commandButton rendered="#{notificacao.mensagem.contains('Avalie o serviço prestado')}"
-										                 icon="fa fa-star" 
-										                 actionListener="#{avaliacaoController.abrirModalAvaliacao(notificacao)}"
-										                 oncomplete="PF('dlgAvaliacao').show();"
-										                 update="@form:formAvaliacao"
-										                 title="Avaliar atendimento"
-										                 styleClass="ui-button-warning ui-button-flat"
-										                 style="margin-right: 5px;" />
-										
-										<!-- Botão de Remover (só aparece para notificações normais) -->
-										<p:commandButton rendered="#{!notificacao.mensagem.contains('Avalie o serviço prestado')}"
-										                 icon="fa fa-trash" 
-										                 actionListener="#{notificacaoController.selecionarNotificacao(notificacao)}"
-										                 oncomplete="PF('dlgConfirmNotificacao').show();"
-										                 update="@form:dlgConfirmNotificacaoForm"
-										                 title="Remover notificação"
-										                 styleClass="ui-button-danger ui-button-flat" />
+
+					<!-- Lista de Itens -->
+					<h:panelGroup rendered="#{not empty notificacaoController.notificacoes}" layout="block">
+						<ul class="notif-list">
+							<ui:repeat value="#{notificacaoController.notificacoes}" var="notificacao">
+								<li class="notif-item #{notificacao.lida eq 'N' ? 'unread' : ''}">
+									
+									<!-- Indicador de não lido -->
+									<h:panelGroup rendered="#{notificacao.lida eq 'N'}" layout="block" styleClass="notif-unread-dot" />
+									
+									<!-- Conteúdo Principal -->
+									<div class="notif-content">
+										<p class="notif-message">#{notificacao.mensagem}</p>
+										<p class="notif-meta">
+											<h:outputText value="#{notificacao.dataEnvio}">
+												<f:convertDateTime pattern="dd/MM/yyyy 'às' HH:mm" />
+											</h:outputText>
+										</p>
 									</div>
-								</div>
-							</div>
-						</f:facet>
-					</p:dataList>
+									
+									<!-- Ações que aparecem no Hover -->
+									<div class="notif-actions">
+										<p:commandButton rendered="#{notificacao.mensagem.contains('Avalie o serviço prestado')}"
+														 icon="fa fa-star" 
+														 actionListener="#{avaliacaoController.abrirModalAvaliacao(notificacao)}"
+														 oncomplete="PF('dlgAvaliacao').show();"
+														 update="@form:formAvaliacao"
+														 title="Avaliar atendimento"
+														 styleClass="ui-button-warning ui-button-flat ui-button-icon-only" />
+										
+										<p:commandButton icon="fa fa-trash" 
+														 actionListener="#{notificacaoController.selecionarNotificacao(notificacao)}"
+														 oncomplete="PF('dlgConfirmNotificacao').show();"
+														 update="@form:dlgConfirmNotificacaoForm"
+														 title="Remover notificação"
+														 styleClass="ui-button-danger ui-button-flat ui-button-icon-only" />
+									</div>
+								</li>
+							</ui:repeat>
+						</ul>
+					</h:panelGroup>
+
+					<!-- Estado de Lista Vazia -->
+					<h:panelGroup rendered="#{empty notificacaoController.notificacoes}" layout="block" styleClass="notif-empty">
+						<div class="notif-empty-icon">
+							<i class="fa-regular fa-bell-slash"></i>
+						</div>
+						<p class="notif-empty-text">Nenhuma notificação no momento</p>
+					</h:panelGroup>
 				</p:overlayPanel>
 
 				<!-- MODAL DE AVALIAÇÃO -->
-				<p:dialog id="dlgAvaliacao" widgetVar="dlgAvaliacao" header="Avaliar Atendimento" 
-				          modal="true" resizable="false" width="500" responsive="true">
+				<p:dialog id="dlgAvaliacao" widgetVar="dlgAvaliacao" modal="true" resizable="false" 
+				          width="600" responsive="true" closable="false">
 				    
 				    <h:panelGroup id="formAvaliacao">
 				        
-				        <div style="text-align: center; margin-bottom: 20px;">
-				            <h3 style="margin: 10px 0; color: #333;">#{avaliacaoController.nomeFuncionario}</h3>
-				            <p style="color: #666; font-size: 14px;">Como foi seu atendimento?</p>
+				        <!-- Header do Modal -->
+				        <div class="header-modal">
+				            <span>Avaliar Atendimento</span>
+				            <p:commandButton icon="fa fa-times" 
+				                           styleClass="btn-x"
+				                           onclick="PF('dlgAvaliacao').hide(); return false;"
+				                           process="@this" />
+				        </div>
+				        
+				        <!-- Informações do Funcionário -->
+				        <div style="text-align: center; margin: 20px 0 30px;">
+				            <h3 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 600; color: #0C0C17;">
+				                #{avaliacaoController.nomeFuncionario}
+				            </h3>
+				            <p style="margin: 0; color: #6B7280; font-size: 14px;">Como foi seu atendimento?</p>
 				        </div>
 
 				        <!-- SISTEMA DE ESTRELAS -->
-				        <div style="text-align: center; margin: 30px 0;">
-				            <span onclick="document.getElementById('form:estrela1').click();" style="cursor: pointer;">
+				        <div style="text-align: center; margin: 40px 0; padding: 20px; background: #F9FAFB; border-radius: 8px;">
+				            <span onclick="document.getElementById('form:estrela1').click();" style="cursor: pointer; display: inline-block; transition: transform 0.2s;">
 				                <i class="#{avaliacaoController.getEstrelaClass(1)}" 
-				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                   style="font-size: 48px; margin: 0 8px; color: #FFD700; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
 				                </i>
 				            </span>
 				            <p:commandButton id="estrela1" style="display:none;">
@@ -138,9 +168,9 @@
 				                        update="formAvaliacao" />
 				            </p:commandButton>
 				            
-				            <span onclick="document.getElementById('form:estrela2').click();" style="cursor: pointer;">
+				            <span onclick="document.getElementById('form:estrela2').click();" style="cursor: pointer; display: inline-block; transition: transform 0.2s;">
 				                <i class="#{avaliacaoController.getEstrelaClass(2)}" 
-				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                   style="font-size: 48px; margin: 0 8px; color: #FFD700; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
 				                </i>
 				            </span>
 				            <p:commandButton id="estrela2" style="display:none;">
@@ -148,9 +178,9 @@
 				                        update="formAvaliacao" />
 				            </p:commandButton>
 				            
-				            <span onclick="document.getElementById('form:estrela3').click();" style="cursor: pointer;">
+				            <span onclick="document.getElementById('form:estrela3').click();" style="cursor: pointer; display: inline-block; transition: transform 0.2s;">
 				                <i class="#{avaliacaoController.getEstrelaClass(3)}" 
-				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                   style="font-size: 48px; margin: 0 8px; color: #FFD700; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
 				                </i>
 				            </span>
 				            <p:commandButton id="estrela3" style="display:none;">
@@ -158,9 +188,9 @@
 				                        update="formAvaliacao" />
 				            </p:commandButton>
 				            
-				            <span onclick="document.getElementById('form:estrela4').click();" style="cursor: pointer;">
+				            <span onclick="document.getElementById('form:estrela4').click();" style="cursor: pointer; display: inline-block; transition: transform 0.2s;">
 				                <i class="#{avaliacaoController.getEstrelaClass(4)}" 
-				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                   style="font-size: 48px; margin: 0 8px; color: #FFD700; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
 				                </i>
 				            </span>
 				            <p:commandButton id="estrela4" style="display:none;">
@@ -168,9 +198,9 @@
 				                        update="formAvaliacao" />
 				            </p:commandButton>
 				            
-				            <span onclick="document.getElementById('form:estrela5').click();" style="cursor: pointer;">
+				            <span onclick="document.getElementById('form:estrela5').click();" style="cursor: pointer; display: inline-block; transition: transform 0.2s;">
 				                <i class="#{avaliacaoController.getEstrelaClass(5)}" 
-				                   style="font-size: 40px; margin: 0 5px; color: #FFD700;">
+				                   style="font-size: 48px; margin: 0 8px; color: #FFD700; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
 				                </i>
 				            </span>
 				            <p:commandButton id="estrela5" style="display:none;">
@@ -179,24 +209,20 @@
 				            </p:commandButton>
 				        </div>
 
-				        <div style="margin-bottom: 20px;">
-				            <h:outputLabel value="Deixe seu comentário (opcional):" style="font-weight: bold; display: block; margin-bottom: 8px;" />
+				        <!-- Campo de Comentário -->
+				        <div class="input-combined mt15">
+				            <span class="title-input">COMENTÁRIO (OPCIONAL)</span>
 				            <p:inputTextarea id="comentario" value="#{avaliacaoController.comentario}" 
-				                           rows="4" cols="50" maxlength="500"
-				                           placeholder="Compartilhe sua experiência..."
-				                           style="width: 100%;" />
+				                           rows="4" maxlength="500"
+				                           placeholder="Compartilhe sua experiência..." />
 				        </div>
 
-				        <div style="text-align: center; margin-top: 20px;">
-				            <p:commandButton value="Avaliar" 
+				        <!-- Botões de Ação -->
+				        <div class="flex justify-center mt30">
+				            <p:commandButton value="Enviar Avaliação" 
 				                           actionListener="#{avaliacaoController.salvarAvaliacao()}"
-				                           styleClass="ui-button-success"
-				                           style="margin-right: 10px;" 
+				                           styleClass="btn btn-green medium"
 				                           update="@form:painelNotificacoes" />
-				            
-				            <p:commandButton value="Cancelar" 
-				                           onclick="PF('dlgAvaliacao').hide(); return false;"
-				                           styleClass="ui-button-secondary" />
 				        </div>
 
 				    </h:panelGroup>
@@ -248,6 +274,46 @@
 
 					</h:panelGroup>
 				</p:dialog>
+
+				<script>
+					function abrirAjudaPDF() {
+						// Pega o nome da página atual
+						var paginaAtual = window.location.pathname.split('/').pop().replace('.xhtml', '');
+						
+						// ========================================================================
+						// MAPA DE PÁGINAS: Configure aqui qual página do PDF deve abrir para cada tela
+						// ========================================================================
+						// COMO USAR:
+						// 1. À esquerda: coloque o nome da sua página .xhtml (sem extensão)
+						// 2. À direita: coloque o número da página do PDF
+						// 
+						// EXEMPLO: Se sua tela é "minha_tela.xhtml" e deve abrir na página 5 do PDF:
+						//          'minha_tela': 5
+						//
+						// IMPORTANTE: O PDF vai fazer SCROLL automático até a página especificada
+						// usando o parâmetro #page=N na URL do PDF
+						// ========================================================================
+						var mapaPaginas = {
+							'dashboard': 1,              // Dashboard abre na página 1 do PDF
+							'agendamento_cliente': 2,    // Agendamento abre na página 2 do PDF
+							'cadastro_clientes': 3,      // Cadastro de Clientes abre na página 3
+							'cadastro_funcionarios': 4,  // Cadastro de Funcionários abre na página 4
+							'cadastro_servicos': 5,      // Cadastro de Serviços abre na página 5
+							'controle_caixa': 6,         // Controle de Caixa abre na página 6
+							'configuracoes': 7,          // Configurações abre na página 7
+							'relatorio': 8               // Relatórios abre na página 8
+							// Adicione mais páginas conforme necessário seguindo o padrão acima
+						};
+						
+						// Pega o número da página correspondente (se não encontrar, usa página 1)
+						var numeroPagina = mapaPaginas[paginaAtual] || 1;
+						
+						// Abre o PDF na página correspondente em nova aba
+						// O parâmetro #page=N faz o PDF dar scroll automático até a página N
+						var urlPDF = '#{request.contextPath}/resources/pdf/manual-ajuda.pdf#page=' + numeroPagina;
+						window.open(urlPDF, '_blank');
+					}
+				</script>
 
 				<style>
 				    .estrela-link {

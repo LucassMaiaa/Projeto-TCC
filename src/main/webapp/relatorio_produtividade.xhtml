@@ -174,6 +174,7 @@ body .ui-datatable .ui-datatable-even>td {
 	border: 1px solid #ced4da !important;
 }
 
+/* BOTÃO DO CALENDÁRIO - AZUL PADRÃO DO SISTEMA */
 .input-combined-no-text .p-datepicker-trigger,
 .input-combined-no-text .p-datepicker button,
 .input-combined-no-text .p-calendar button,
@@ -182,15 +183,14 @@ body .ui-datatable .ui-datatable-even>td {
 	height: 24px !important;
 	min-width: 24px !important;
 	position: absolute !important;
-	right: 8px !important;
-	top: 50% !important;
-	transform: translateY(-50%) !important;
+	right: 6px !important;
+	bottom: 10px !important;
 	border-radius: 8px !important;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
-	background: #DEDEDE !important;
-	border: none !important;
+	background: #457BF9 !important;
+	border: transparent !important;
 	z-index: 10 !important;
 	padding: 0 !important;
 }
@@ -205,13 +205,68 @@ body .ui-datatable .ui-datatable-even>td {
 	font-size: 12px !important;
 	width: 12px !important;
 	height: 12px !important;
-	color: black !important;
+	color: white !important;
+	position: relative !important;
+	top: 1px !important;
+	left: 4.3px !important;
 }
 
 .input-combined-no-text .p-datepicker-trigger:hover,
 .input-combined-no-text .p-datepicker button:hover,
 .input-combined-no-text .p-calendar button:hover {
-	background: #CACACA !important;
+	background: #3667E3 !important;
+}
+
+/* Estilo para selectOneMenu nos filtros */
+.input-combined-no-text .ui-selectonemenu {
+	height: 46px !important;
+	width: 100% !important;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger {
+	width: 28px !important;
+	height: 46px !important;
+	background: transparent !important;
+	border: none !important;
+	position: absolute !important;
+	right: 0px !important;
+	top: 0px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-trigger .ui-icon {
+	background: #DEDEDE !important;
+	width: 24px !important;
+	height: 24px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	border-radius: 8px !important;
+	font-size: 12px !important;
+	color: black !important;
+	margin: 0 !important;
+	position: relative !important;
+	top: 0px !important;
+	left: -6px !important;
+	transform: none !important;
+}
+
+.input-combined-no-text .ui-selectonemenu .ui-selectonemenu-label {
+	height: 46px !important;
+	line-height: 46px !important;
+	padding: 0 40px 0 12px !important;
+	font-size: 14px !important;
+	color: #656464 !important;
+	font-weight: 600 !important;
+	font-family: "Barlow" !important;
+}
+
+.input-combined-no-text .ui-selectonemenu.ui-state-focus,
+.input-combined-no-text .ui-selectonemenu.ui-state-hover {
+	border-color: #ced4da !important;
+	box-shadow: none !important;
 }
 
 /* Estilo para input de texto dos filtros */

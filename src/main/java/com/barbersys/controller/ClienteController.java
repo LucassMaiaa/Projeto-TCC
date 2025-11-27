@@ -19,6 +19,7 @@ import com.barbersys.dao.UsuarioDAO;
 import com.barbersys.model.Cliente;
 import com.barbersys.model.Perfil;
 import com.barbersys.model.Usuario;
+import com.barbersys.util.EmailService;
 
 import javax.faces.context.FacesContext;
 
@@ -32,9 +33,15 @@ import lombok.Setter;
 public class ClienteController {
 
 	private String nomeCliente;
+	private String statusSelecionado = "";
 	private Cliente clienteModel = new Cliente();
 	private LazyDataModel<Cliente> lstCliente;
 	private String editarModel;
+	
+	private String loginOriginal;
+	private String codigoValidacao;
+	private String codigoGerado;
+	private boolean aguardandoValidacao = false;
 
 	@PostConstruct
 	public void init() {
@@ -44,12 +51,12 @@ public class ClienteController {
 			@Override
 			public List<Cliente> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 					Map<String, FilterMeta> filterBy) {
-				return ClienteDAO.buscarCliente(nomeCliente, first, pageSize);
+				return ClienteDAO.buscarCliente(nomeCliente, statusSelecionado, first, pageSize);
 			}
 
 			@Override
 			public int count(Map<String, FilterMeta> filterBy) {
-				return ClienteDAO.clienteCount(nomeCliente);
+				return ClienteDAO.clienteCount(nomeCliente, statusSelecionado);
 			}
 
 		};
@@ -57,7 +64,7 @@ public class ClienteController {
     
     private void exibirAlerta(String icon, String title) {
 		String script = String.format(
-				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 2000, width: '350px' });",
+				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 4000, width: '350px' });",
 				icon, title);
 		PrimeFaces.current().executeScript(script);
 	}
@@ -68,13 +75,81 @@ public class ClienteController {
             clienteModel.setUsuario(new Usuario());
         }
 		editarModel = "A";
+		loginOriginal = clienteModel.getUsuario().getLogin();
+		aguardandoValidacao = false;
 	}
 
 	public void novoCliente() {
 		editarModel = "I";
 		clienteModel = new Cliente();
         clienteModel.setUsuario(new Usuario());
-
+		loginOriginal = null;
+		aguardandoValidacao = false;
+	}
+	
+	public void prepararSalvarCliente() {
+		String loginAtual = clienteModel.getUsuario().getLogin();
+		
+		// Verifica se é novo cliente OU se o login foi alterado
+		boolean loginAlterado = loginOriginal == null || !loginAtual.equals(loginOriginal);
+		
+		if (editarModel.equals("I") || (editarModel.equals("A") && loginAlterado)) {
+			// Precisa validar email
+			enviarCodigoValidacaoCliente();
+		} else {
+			// Não precisa validar, salva direto
+			atualizarCliente();
+		}
+	}
+	
+	private void enviarCodigoValidacaoCliente() {
+		try {
+			String email = clienteModel.getUsuario().getLogin();
+			codigoGerado = String.format("%06d", (int)(Math.random() * 1000000));
+			
+			EmailService emailService = new EmailService();
+			String nomeCliente = clienteModel.getNome() != null && !clienteModel.getNome().isEmpty() 
+				? clienteModel.getNome() : "Usuário";
+			
+			boolean emailEnviado = emailService.enviarEmailValidacao(email, nomeCliente, codigoGerado);
+			
+			if (emailEnviado) {
+				aguardandoValidacao = true;
+				codigoValidacao = "";
+				exibirAlerta("info", "Código enviado para " + email);
+				PrimeFaces.current().executeScript("PF('dlgValidarEmailCliente').show();");
+			} else {
+				exibirAlerta("error", "Erro ao enviar código de validação");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			exibirAlerta("error", "Erro ao enviar código: " + e.getMessage());
+		}
+	}
+	
+	public void validarCodigoCliente() {
+		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
+			exibirAlerta("error", "Código é obrigatório");
+			return;
+		}
+		
+		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
+			aguardandoValidacao = false;
+			PrimeFaces.current().executeScript("PF('dlgValidarEmailCliente').hide();");
+			
+			if (editarModel.equals("I")) {
+				adicionarNovoCliente();
+			} else {
+				atualizarCliente();
+			}
+		} else {
+			exibirAlerta("error", "Código incorreto");
+		}
+	}
+	
+	public void reenviarCodigoCliente() {
+		enviarCodigoValidacaoCliente();
 	}
 
 	public void adicionarNovoCliente() {
@@ -174,19 +249,17 @@ public class ClienteController {
 		try {
             ClienteDAO.deletar(clienteModel);
 
-            exibirAlerta("success", "Cliente deletado com sucesso!");
+            exibirAlerta("success", "Cliente inativado com sucesso!");
 
             PrimeFaces.current().executeScript("PF('dlgClic').hide();");
             PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
             PrimeFaces.current().ajax().update("form");
         } catch (SQLException e) {
             e.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Erro ao deletar cliente: " + e.getMessage(), "Erro!"));
+            exibirAlerta("error", "Erro ao inativar cliente!");
         } catch (Exception e) {
             e.printStackTrace();
-            FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Erro inesperado ao deletar cliente: " + e.getMessage(), "Erro!"));
+            exibirAlerta("error", "Erro inesperado ao deletar cliente: " + e.getMessage());
         }
 	}
 	

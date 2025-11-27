@@ -26,6 +26,7 @@ import com.barbersys.model.Funcionario;
 import com.barbersys.model.Horario;
 import com.barbersys.model.Perfil;
 import com.barbersys.model.Usuario;
+import com.barbersys.util.EmailService;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,11 @@ public class FuncionarioController {
 	private List<Horario> lstHorarioAux = new ArrayList<Horario>();
 	private String editarModel;
 	private int indexListAux;
+	
+	private String loginOriginal;
+	private String codigoValidacao;
+	private String codigoGerado;
+	private boolean aguardandoValidacao = false;
 
 	@PostConstruct
 	public void init() {
@@ -68,7 +74,7 @@ public class FuncionarioController {
     
     private void exibirAlerta(String icon, String title) {
 		String script = String.format(
-				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 2000, width: '350px' });",
+				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 4000, width: '350px' });",
 				icon, title);
 		PrimeFaces.current().executeScript(script);
 	}
@@ -122,6 +128,8 @@ public class FuncionarioController {
 		editarModel = "A";
 		dataInicial = null;
 		dataFinal = null;
+		loginOriginal = funcionarioModel.getUsuario().getLogin();
+		aguardandoValidacao = false;
 
 		carregarHorariosFuncionario();
 	}
@@ -131,7 +139,73 @@ public class FuncionarioController {
 		funcionarioModel = new Funcionario();
 		horarioModel = new Horario();
         funcionarioModel.setUsuario(new Usuario());
-
+		loginOriginal = null;
+		aguardandoValidacao = false;
+	}
+	
+	public void prepararSalvarFuncionario() {
+		String loginAtual = funcionarioModel.getUsuario().getLogin();
+		
+		// Verifica se é novo funcionário OU se o login foi alterado
+		boolean loginAlterado = loginOriginal == null || !loginAtual.equals(loginOriginal);
+		
+		if (editarModel.equals("I") || (editarModel.equals("A") && loginAlterado)) {
+			// Precisa validar email
+			enviarCodigoValidacaoFuncionario();
+		} else {
+			// Não precisa validar, salva direto
+			atualizarFuncionario();
+		}
+	}
+	
+	private void enviarCodigoValidacaoFuncionario() {
+		try {
+			String email = funcionarioModel.getUsuario().getLogin();
+			codigoGerado = String.format("%06d", (int)(Math.random() * 1000000));
+			
+			EmailService emailService = new EmailService();
+			String nomeFuncionario = funcionarioModel.getNome() != null && !funcionarioModel.getNome().isEmpty() 
+				? funcionarioModel.getNome() : "Usuário";
+			
+			boolean emailEnviado = emailService.enviarEmailValidacao(email, nomeFuncionario, codigoGerado);
+			
+			if (emailEnviado) {
+				aguardandoValidacao = true;
+				codigoValidacao = "";
+				exibirAlerta("info", "Código enviado para " + email);
+				PrimeFaces.current().executeScript("PF('dlgValidarEmailFuncionario').show();");
+			} else {
+				exibirAlerta("error", "Erro ao enviar código de validação");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			exibirAlerta("error", "Erro ao enviar código: " + e.getMessage());
+		}
+	}
+	
+	public void validarCodigoFuncionario() {
+		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
+			exibirAlerta("error", "Código é obrigatório");
+			return;
+		}
+		
+		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
+			aguardandoValidacao = false;
+			PrimeFaces.current().executeScript("PF('dlgValidarEmailFuncionario').hide();");
+			
+			if (editarModel.equals("I")) {
+				adicionarNovoFuncionario();
+			} else {
+				atualizarFuncionario();
+			}
+		} else {
+			exibirAlerta("error", "Código incorreto");
+		}
+	}
+	
+	public void reenviarCodigoFuncionario() {
+		enviarCodigoValidacaoFuncionario();
 	}
 
 	public void adicionarNovoFuncionario() {
@@ -156,6 +230,7 @@ public class FuncionarioController {
                 Perfil perfil = new Perfil();
                 perfil.setId(2L); // 2 para funcionário
                 funcionarioModel.getUsuario().setPerfil(perfil);
+                funcionarioModel.getUsuario().setUser(funcionarioModel.getNome()); // Define usu_user com o nome do funcionário
                 Usuario usuarioSalvo = usuarioDAO.salvar(funcionarioModel.getUsuario());
                 funcionarioModel.setUsuario(usuarioSalvo);
 
