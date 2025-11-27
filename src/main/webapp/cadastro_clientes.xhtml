@@ -524,8 +524,9 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					<p:commandButton value="Validar" 
 						styleClass="btn medium btn-green"
 						actionListener="#{clienteController.validarCodigoCliente()}"
-						update="dlgValidarEmailClienteForm"
-						process="@form"/>
+						update="dlgValidarEmailClienteForm @form"
+						process="dlgValidarEmailClienteForm"
+						oncomplete="if (args &amp;&amp; args.validationFailed) { PF('dlgValidarEmailCliente').show(); }"/>
 						
 					<p:commandButton value="Reenviar Código" 
 						styleClass="btn medium btn-cancel"

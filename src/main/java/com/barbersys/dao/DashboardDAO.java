@@ -282,19 +282,24 @@ public class DashboardDAO {
     }
     
     /**
-     * Busca total de agendamentos de hoje
+     * Busca total de agendamentos de hoje (excluindo cancelados)
      */
     public static int buscarAgendamentosHoje() {
-        String sql = "SELECT COUNT(*) as total FROM agendamento WHERE age_data = CURDATE()";
+        String sql = "SELECT COUNT(*) as total FROM agendamento " +
+                     "WHERE DATE(age_data) = CURDATE() " +
+                     "AND age_status != 'I'";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             if (rs.next()) {
-                return rs.getInt("total");
+                int total = rs.getInt("total");
+                System.out.println("✅ Agendamentos de hoje: " + total);
+                return total;
             }
         } catch (SQLException e) {
+            System.err.println("❌ Erro ao buscar agendamentos de hoje: " + e.getMessage());
             e.printStackTrace();
         }
         return 0;
@@ -326,16 +331,25 @@ public class DashboardDAO {
     }
     
     /**
-     * Busca o próximo agendamento de hoje
+     * Busca o próximo agendamento (mais próximo com base na data e hora)
+     * Sempre mostra DATA + HORA + CLIENTE
      */
     public static String buscarProximoAgendamento() {
-        String sql = "SELECT CONCAT(a.age_hora, ' - ', COALESCE(c.cli_nome, a.age_nome_cliente)) as info " +
+        // Busca o próximo agendamento (hoje ou futuro)
+        String sql = "SELECT " +
+                     "CONCAT(" +
+                     "  DATE_FORMAT(a.age_data, '%d/%m'), " +
+                     "  ' às ', " +
+                     "  TIME_FORMAT(a.age_hora, '%H:%i'), " +
+                     "  ' - ', " +
+                     "  COALESCE(c.cli_nome, a.age_nome_cliente)" +
+                     ") as info " +
                      "FROM agendamento a " +
                      "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
-                     "WHERE a.age_data = CURDATE() " +
-                     "AND a.age_hora >= CURTIME() " +
+                     "WHERE (a.age_data > CURDATE() OR " +
+                     "       (a.age_data = CURDATE() AND TIME(a.age_hora) >= TIME(NOW()))) " +
                      "AND a.age_status != 'I' " +
-                     "ORDER BY a.age_hora ASC " +
+                     "ORDER BY a.age_data ASC, a.age_hora ASC " +
                      "LIMIT 1";
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -346,8 +360,10 @@ public class DashboardDAO {
                 return rs.getString("info");
             }
         } catch (SQLException e) {
+            System.err.println("❌ Erro ao buscar próximo agendamento: " + e.getMessage());
             e.printStackTrace();
         }
+        
         return null;
     }
     
@@ -401,7 +417,6 @@ public class DashboardDAO {
     
     /**
      * Busca o total de visitas (agendamentos) por dia da semana atual
-     * Retorna Map com dia da semana (1=Domingo, 7=Sábado) e total de agendamentos
      */
     public static Map<Integer, Integer> buscarVisitasPorDiaSemana() {
         Map<Integer, Integer> visitasPorDia = new LinkedHashMap<>();
@@ -414,6 +429,7 @@ public class DashboardDAO {
         String sql = "SELECT DAYOFWEEK(age_data) as dia_semana, COUNT(*) as total " +
                      "FROM agendamento " +
                      "WHERE YEARWEEK(age_data, 1) = YEARWEEK(CURDATE(), 1) " +
+                     "AND age_status != 'I' " +
                      "GROUP BY DAYOFWEEK(age_data) " +
                      "ORDER BY dia_semana";
         
@@ -425,9 +441,11 @@ public class DashboardDAO {
                 int diaSemana = rs.getInt("dia_semana");
                 int total = rs.getInt("total");
                 visitasPorDia.put(diaSemana, total);
+                System.out.println("✅ Dia " + diaSemana + ": " + total + " agendamento(s)");
             }
             
         } catch (SQLException e) {
+            System.err.println("❌ Erro ao buscar visitas por dia: " + e.getMessage());
             e.printStackTrace();
         }
         

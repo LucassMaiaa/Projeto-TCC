@@ -630,7 +630,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 		
 					<div class="col-md-4 flex justify-center align-center">
-						<p:commandButton update="dttLstHorarios dttLstHorariosAux dlgFuncForm"
+						<p:commandButton update="dttLstHorarios dttLstHorariosAux"
 							process="@form"
 							style="    width: 100%;
     height: 40px;"
@@ -726,7 +726,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 								<span class="dia-badge #{horario.sexta ? 'ativo' : 'inativo'}">S</span>
 								<span class="dia-badge #{horario.sabado ? 'ativo' : 'inativo'}">S</span>
 							</div>
-							<p:commandButton update="dttLstHorariosAux dlgFuncForm" process="@this"
+							<p:commandButton update="dttLstHorariosAux" process="@this"
 								styleClass="btn-trash"
 								actionListener="#{funcionarioController.recebeValorDeleteHorarioAux(index)}"
 								icon="fa-solid fa-trash"
@@ -817,7 +817,8 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					value="Confirmar"
 					actionListener="#{funcionarioController.deletaHorario()}" 
 					process="@this"
-					update="form:dlgFuncForm"/>
+					update="dlgFunc"
+					oncomplete="PF('dlgHora').hide()"/>
 				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
 					onclick="PF('dlgHora').hide()" />
 			</div>
@@ -836,7 +837,10 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 			<div class="flex align-center justify-center">
 				<p:commandButton styleClass="btn medium btn-confirm"
 					value="Confirmar"
-					actionListener="#{funcionarioController.deletaHorarioAux()}" />
+					actionListener="#{funcionarioController.deletaHorarioAux()}"
+					process="@this"
+					update="dlgFunc"
+					oncomplete="PF('dlgHoraAux').hide()"/>
 				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
 					onclick="PF('dlgHoraAux').hide()" />
 			</div>
@@ -873,8 +877,9 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 							<p:commandButton value="Validar" 
 								styleClass="btn btn-green"
 								actionListener="#{funcionarioController.validarCodigoFuncionario()}"
-								update="dlgValidarEmailFuncionarioForm"
-								process="@form"/>
+								update="dlgValidarEmailFuncionarioForm @form"
+								process="dlgValidarEmailFuncionarioForm"
+								oncomplete="if (args &amp;&amp; args.validationFailed) { PF('dlgValidarEmailFuncionario').show(); }"/>
 								
 							<p:commandButton value="Reenviar Código" 
 								styleClass="btn btn-secondary"

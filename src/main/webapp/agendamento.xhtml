@@ -827,7 +827,7 @@ margin-bottom: 0px
 									rendered="#{agendamentoController.tipoCadastro eq 'A'}">
 									<div class="input-combined">
 										<p:outputLabel styleClass="title-input"
-											value="Nome do Cliente" />
+											value="Nome do Cliente *" />
 										<p:selectOneMenu value="#{agendamentoController.clienteId}"
 											filter="true" filterMatchMode="startsWith" style="width: 100%;"
 											disabled="#{agendamentoController.editarModel eq 'A'}">
@@ -849,7 +849,7 @@ margin-bottom: 0px
 									rendered="#{agendamentoController.tipoCadastro eq 'I'}">
 									<div class="input-combined">
 										<p:outputLabel styleClass="title-input"
-											value="Nome do Cliente" />
+											value="Nome do Cliente *" />
 										<p:inputText value="#{agendamentoController.nomeCliente}"
 											styleClass="senha-login" style="width: 100%;"
 											disabled="#{agendamentoController.editarModel eq 'A'}">
@@ -863,7 +863,7 @@ margin-bottom: 0px
 						<div class="step-grid">
 							<div class="input-combined step-grid-full">
 								<p:outputLabel styleClass="title-input"
-									value="Nome do Funcionário" />
+									value="Nome do Funcionário *" />
 								<p:selectOneMenu value="#{agendamentoController.nomeFuncionario}"
 									filter="true" filterMatchMode="startsWith" style="width: 100%;"
 									disabled="#{agendamentoController.agendamentoPassado}">
@@ -902,7 +902,7 @@ margin-bottom: 0px
 						<div class="col-md-12">
 							<div class="input-combined">
 								<p:outputLabel styleClass="title-input"
-									value="Selecione uma data" />
+									value="Selecione uma data *" />
 								<p:datePicker id="inputData" widgetVar="dlgDatePicker"
 									value="#{agendamentoController.dataSelecionada}"
 									showIcon="true" pattern="dd/MM/yyyy" autocomplete="off"
@@ -957,7 +957,7 @@ margin-bottom: 0px
 									</div>
 								</p:outputPanel>
 								
-								<h3 style="font-size: 16px; font-weight: 700; color: #374151; margin: 24px 0 16px 0;">Serviços disponíveis</h3>
+								<h3 style="font-size: 16px; font-weight: 700; color: #374151; margin: 24px 0 16px 0;">Serviços disponíveis *</h3>
 								
 								<!-- Campo de pesquisa -->
 								<div class="input-combined-no-text" style="margin-bottom: 16px;">
@@ -1044,7 +1044,7 @@ margin-bottom: 0px
 						<div class="step-grid">
 							<div class="input-combined step-grid-full">
 								<p:outputLabel styleClass="title-input"
-									value="Selecione o Horário" />
+									value="Selecione o Horário *" />
 								<p:selectOneMenu id="inputHorario"
 									value="#{agendamentoController.horaSelecionada}" 
 									disabled="#{agendamentoController.agendamentoPassado or empty agendamentoController.horariosDisponiveis}">

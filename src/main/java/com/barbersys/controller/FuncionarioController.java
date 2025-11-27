@@ -144,15 +144,22 @@ public class FuncionarioController {
 	}
 	
 	public void prepararSalvarFuncionario() {
+		System.out.println("🔍 Preparando para salvar funcionário...");
+		System.out.println("📝 Login: " + funcionarioModel.getUsuario().getLogin());
+		System.out.println("📝 Senha: " + (funcionarioModel.getUsuario().getSenha() != null ? "***" : "NULL"));
+		System.out.println("📝 EditarModel: " + editarModel);
+		
 		String loginAtual = funcionarioModel.getUsuario().getLogin();
 		
 		// Verifica se é novo funcionário OU se o login foi alterado
 		boolean loginAlterado = loginOriginal == null || !loginAtual.equals(loginOriginal);
 		
 		if (editarModel.equals("I") || (editarModel.equals("A") && loginAlterado)) {
+			System.out.println("✅ Precisa validar email");
 			// Precisa validar email
 			enviarCodigoValidacaoFuncionario();
 		} else {
+			System.out.println("✅ Não precisa validar, salvando direto");
 			// Não precisa validar, salva direto
 			atualizarFuncionario();
 		}
@@ -185,22 +192,36 @@ public class FuncionarioController {
 	}
 	
 	public void validarCodigoFuncionario() {
+		System.out.println("🔍 Validando código...");
+		System.out.println("📝 Código digitado: " + codigoValidacao);
+		System.out.println("✅ Código esperado: " + codigoGerado);
+		
 		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
 			exibirAlerta("error", "Código é obrigatório");
+			System.out.println("❌ Código vazio!");
 			return;
 		}
 		
 		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
+			System.out.println("✅ Código correto! Salvando funcionário...");
 			aguardandoValidacao = false;
+			
+			// Limpa o código após validação bem-sucedida
+			codigoValidacao = null;
+			codigoGerado = null;
+			
+			// Fecha o dialog de validação
 			PrimeFaces.current().executeScript("PF('dlgValidarEmailFuncionario').hide();");
 			
+			// Salva o funcionário
 			if (editarModel.equals("I")) {
 				adicionarNovoFuncionario();
 			} else {
 				atualizarFuncionario();
 			}
 		} else {
-			exibirAlerta("error", "Código incorreto");
+			System.out.println("❌ Código incorreto!");
+			exibirAlerta("error", "Código incorreto! Tente novamente.");
 		}
 	}
 	
@@ -209,22 +230,27 @@ public class FuncionarioController {
 	}
 
 	public void adicionarNovoFuncionario() {
+		System.out.println("💾 Iniciando salvamento do funcionário...");
 		try {
 			if (funcionarioModel.getNome().isEmpty()) {
+				System.out.println("❌ Nome vazio!");
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 						"Campo nome do funcionário obrigatório", "Erro!"));
 			} else {
                 if (funcionarioModel.getUsuario().getLogin() == null || funcionarioModel.getUsuario().getLogin().isEmpty()) {
+					System.out.println("❌ Login vazio!");
                     FacesContext.getCurrentInstance().addMessage(null,
                             new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Login do usuário obrigatório", "Erro!"));
                     return;
                 }
                 if (funcionarioModel.getUsuario().getSenha() == null || funcionarioModel.getUsuario().getSenha().isEmpty()) {
+					System.out.println("❌ Senha vazia!");
                     FacesContext.getCurrentInstance().addMessage(null,
                             new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Senha do usuário obrigatório", "Erro!"));
                     return;
                 }
 
+				System.out.println("📝 Salvando usuário...");
                 // Salvar o usuário primeiro
                 UsuarioDAO usuarioDAO = new UsuarioDAO();
                 Perfil perfil = new Perfil();
@@ -233,14 +259,19 @@ public class FuncionarioController {
                 funcionarioModel.getUsuario().setUser(funcionarioModel.getNome()); // Define usu_user com o nome do funcionário
                 Usuario usuarioSalvo = usuarioDAO.salvar(funcionarioModel.getUsuario());
                 funcionarioModel.setUsuario(usuarioSalvo);
+				System.out.println("✅ Usuário salvo com ID: " + usuarioSalvo.getId());
 
+				System.out.println("📝 Salvando funcionário...");
 				FuncionarioDAO.salvar(funcionarioModel);
+				System.out.println("✅ Funcionário salvo com ID: " + funcionarioModel.getId());
 
 				if (funcionarioModel.getId() != null) {
+					System.out.println("📝 Salvando " + lstHorarioAux.size() + " horários...");
 					for (Horario item : lstHorarioAux) {
 						item.setFuncionario(funcionarioModel);
 						HorarioDAO.salvar(item);
 					}
+					System.out.println("✅ Horários salvos!");
 
 					funcionarioModel = new Funcionario();
 					lstHorarioAux.clear();

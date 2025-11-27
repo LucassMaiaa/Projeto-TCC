@@ -129,22 +129,36 @@ public class ClienteController {
 	}
 	
 	public void validarCodigoCliente() {
+		System.out.println("🔍 Validando código do CLIENTE...");
+		System.out.println("📝 Código digitado: " + codigoValidacao);
+		System.out.println("✅ Código esperado: " + codigoGerado);
+		
 		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
 			exibirAlerta("error", "Código é obrigatório");
+			System.out.println("❌ Código vazio!");
 			return;
 		}
 		
 		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
+			System.out.println("✅ Código correto! Salvando cliente...");
 			aguardandoValidacao = false;
+			
+			// Limpa o código após validação bem-sucedida
+			codigoValidacao = null;
+			codigoGerado = null;
+			
+			// Fecha o dialog de validação
 			PrimeFaces.current().executeScript("PF('dlgValidarEmailCliente').hide();");
 			
+			// Salva o cliente
 			if (editarModel.equals("I")) {
 				adicionarNovoCliente();
 			} else {
 				atualizarCliente();
 			}
 		} else {
-			exibirAlerta("error", "Código incorreto");
+			System.out.println("❌ Código incorreto!");
+			exibirAlerta("error", "Código incorreto! Tente novamente.");
 		}
 	}
 	
@@ -153,33 +167,40 @@ public class ClienteController {
 	}
 
 	public void adicionarNovoCliente() {
+		System.out.println("💾 Iniciando salvamento do cliente...");
 		try {
 			if (clienteModel.getNome().isEmpty()) {
+				System.out.println("❌ Nome vazio!");
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo nome do cliente obrigatório", "Erro!"));
 				return;
 			}
 			if (clienteModel.getTelefone().isEmpty()) {
+				System.out.println("❌ Telefone vazio!");
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo telefone obrigatório", "Erro!"));
 				return;
 			}
 			if (clienteModel.getCpf().isEmpty()) {
+				System.out.println("❌ CPF vazio!");
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo CPF obrigatório", "Erro!"));
 				return;
 			}
             if (clienteModel.getUsuario().getLogin() == null || clienteModel.getUsuario().getLogin().isEmpty()) {
+				System.out.println("❌ Login vazio!");
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Login do usuário obrigatório", "Erro!"));
                 return;
             }
             if (clienteModel.getUsuario().getSenha() == null || clienteModel.getUsuario().getSenha().isEmpty()) {
+				System.out.println("❌ Senha vazia!");
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Senha do usuário obrigatório", "Erro!"));
                 return;
             }
 
+			System.out.println("📝 Salvando usuário...");
             // Salvar o usuário primeiro
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             Perfil perfil = new Perfil();

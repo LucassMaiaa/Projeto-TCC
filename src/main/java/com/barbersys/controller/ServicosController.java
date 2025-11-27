@@ -54,11 +54,16 @@ public class ServicosController {
 	public void servicoSelecionado(Servicos event) {
 		servicosModel = event;
 		editarModel = "A";
+		// Garantir que sempre tenha um valor válido
+		if (servicosModel.getMinutos() == null || servicosModel.getMinutos() < 30) {
+			servicosModel.setMinutos(30);
+		}
 	}
 
 	public void novoServico() {
 		editarModel = "I";
 		servicosModel = new Servicos();
+		servicosModel.setMinutos(30); // Inicializa com 30 minutos
 	}
 
 	public void adicionarNovoServico() {
@@ -132,6 +137,40 @@ public class ServicosController {
 		PrimeFaces.current().executeScript("PF('dlgService').hide();");
 		PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
 		PrimeFaces.current().ajax().update("form");
+	}
+
+	public void aumentarTempo() {
+		try {
+			if (servicosModel == null) {
+				servicosModel = new Servicos();
+				servicosModel.setMinutos(30);
+			} else if (servicosModel.getMinutos() == null) {
+				servicosModel.setMinutos(30);
+			} else if (servicosModel.getMinutos() < 300) {
+				servicosModel.setMinutos(servicosModel.getMinutos() + 30);
+			}
+			System.out.println("✅ Tempo aumentado para: " + servicosModel.getMinutos() + " minutos");
+		} catch (Exception e) {
+			System.err.println("❌ Erro ao aumentar tempo: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	public void diminuirTempo() {
+		try {
+			if (servicosModel == null) {
+				servicosModel = new Servicos();
+				servicosModel.setMinutos(30);
+			} else if (servicosModel.getMinutos() == null || servicosModel.getMinutos() <= 30) {
+				servicosModel.setMinutos(30);
+			} else {
+				servicosModel.setMinutos(servicosModel.getMinutos() - 30);
+			}
+			System.out.println("✅ Tempo diminuído para: " + servicosModel.getMinutos() + " minutos");
+		} catch (Exception e) {
+			System.err.println("❌ Erro ao diminuir tempo: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 }

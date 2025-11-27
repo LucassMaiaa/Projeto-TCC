@@ -18,6 +18,101 @@
 	margin-top: 9px;
 }
 
+/* Stepper de minutos - Estilo moderno */
+.input-stepper-container {
+	    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #FFFFFF;
+    border: 1px solid #DDE3DF;
+    border-radius: 8px;
+    overflow: hidden;
+    padding-top: 21px;
+    height: 60px;
+}
+
+.input-stepper-container .btn-stepper {
+	height: 60px !important;
+    width: 50px !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: #F8F9FA !important;
+    color: #495057 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s 
+ease !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative;
+    top: -10px;
+}
+
+.input-stepper-container .btn-stepper:hover {
+	background: #4EB458 !important;
+	color: white !important;
+}
+
+.input-stepper-container .btn-stepper:active {
+	background: #45a04e !important;
+}
+
+.input-stepper-container .btn-stepper .ui-button-text {
+	padding: 0 !important;
+}
+
+.input-stepper-container .btn-stepper .fa {
+	margin: 0 !important;
+	font-size: 14px !important;
+}
+
+.input-stepper-container .btn-stepper .fa-plus:before {
+    content: "\2b";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+}
+
+.input-stepper-container .btn-stepper .fa-minus:before {
+    content: "\f068";
+    position: absolute;
+    top: -4px;
+    left: -6px;
+}
+
+.input-stepper-container .input-stepper-number {
+	flex: 1 !important;
+	border: none !important;
+	border-radius: 0 !important;
+	height: 46px !important;
+	text-align: center !important;
+	font-size: 16px !important;
+	font-weight: 600 !important;
+	color: #2C3E50 !important;
+	background: #FFFFFF !important;
+	box-shadow: none !important;
+	padding: 0 10px !important;
+}
+
+body .input-stepper-container .input-stepper-number.ui-state-disabled,
+body .input-stepper-container .input-stepper-number[readonly] {
+	opacity: 1 !important;
+	background: #FFFFFF !important;
+	color: #2C3E50 !important;
+	cursor: default !important;
+}
+
+body .input-stepper-container .input-stepper-number input[readonly] {
+	background: #FFFFFF !important;
+	color: #2C3E50 !important;
+	cursor: default !important;
+}
+
+body .input-stepper-container .ui-inputnumber-buttons-stacked .ui-spinner-button {
+	display: none !important;
+}
+
 .perfil-top-funcionario {
 	height: 28px;
 	width: 28px;
@@ -238,9 +333,29 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 					<div class="col-md-6">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input"
-								value="Tempo estimado do serviço" />
-							<p:inputNumber
-								value="#{servicosController.servicosModel.minutos}" />
+								value="Tempo estimado do serviço (minutos)" />
+							<div class="input-stepper-container">
+								<p:commandButton 
+									icon="fa fa-minus" 
+									styleClass="btn-stepper btn-stepper-minus">
+									<p:ajax listener="#{servicosController.diminuirTempo}" 
+											update="inputMinutos" 
+											process="@this"/>
+								</p:commandButton>
+								<p:inputText 
+									id="inputMinutos"
+									value="#{servicosController.servicosModel.minutos}"
+									styleClass="input-stepper-number"
+									readonly="true"
+									style="text-align: center; font-weight: 600; font-size: 16px;"/>
+								<p:commandButton 
+									icon="fa fa-plus" 
+									styleClass="btn-stepper btn-stepper-plus">
+									<p:ajax listener="#{servicosController.aumentarTempo}" 
+											update="inputMinutos" 
+											process="@this"/>
+								</p:commandButton>
+							</div>
 						</div>
 					</div>
 					<div class="col-md-6">

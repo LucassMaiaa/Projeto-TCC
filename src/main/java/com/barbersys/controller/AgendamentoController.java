@@ -441,18 +441,36 @@ public class AgendamentoController implements Serializable {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Selecione pelo menos 1 serviço", "Erro!"));
 			return false;
 		}
+		// Validação do sexo APENAS para agendamentos sem cadastro
+		if ("I".equals(tipoCadastro) && (sexoSelecionado == null || sexoSelecionado.trim().isEmpty())) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo sexo é obrigatório", "Erro!"));
+			return false;
+		}
 		return true;
 	}
 
 	public void adicionarNovoAgendamento() {
 		if (!validarCamposAgendamento()) return;
 		
+		System.out.println("🔍 Tipo de cadastro: " + tipoCadastro);
+		System.out.println("📝 Sexo selecionado (variável): " + sexoSelecionado);
+		System.out.println("📝 Sexo no model (ANTES): " + agendamentoModel.getSexo());
+		
+		// Atribui o sexo selecionado ao model ANTES da validação
+		if ("I".equals(tipoCadastro) && sexoSelecionado != null && !sexoSelecionado.trim().isEmpty()) {
+			agendamentoModel.setSexo(sexoSelecionado);
+			System.out.println("✅ Sexo atribuído ao model: " + agendamentoModel.getSexo());
+		}
+		
 		// Validação do campo sexo para agendamentos sem cadastro
 		if ("I".equals(tipoCadastro) && (agendamentoModel.getSexo() == null || agendamentoModel.getSexo().trim().isEmpty())) {
+			System.out.println("❌ Validação falhou - sexo vazio!");
 			FacesContext.getCurrentInstance().addMessage(null, 
 				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo sexo é obrigatório para agendamentos sem cadastro", "Erro!"));
 			return;
 		}
+		
+		System.out.println("✅ Validação de sexo OK!");
 		
 		Funcionario funcionarioSelecionado = lstFuncionario.stream().filter(f -> f.getNome().equalsIgnoreCase(nomeFuncionario.trim())).findFirst().orElse(null);
 		Cliente clienteSelecionado = null;
@@ -549,6 +567,11 @@ public class AgendamentoController implements Serializable {
 
 	public void atualizarAgendamento() {
 		if (!validarCamposAgendamento()) return;
+		
+		// Atribui o sexo selecionado ao model ANTES da validação
+		if ("I".equals(tipoCadastro) && sexoSelecionado != null && !sexoSelecionado.trim().isEmpty()) {
+			agendamentoModel.setSexo(sexoSelecionado);
+		}
 		
 		// Validação do campo sexo para agendamentos sem cadastro
 		if ("I".equals(tipoCadastro) && (agendamentoModel.getSexo() == null || agendamentoModel.getSexo().trim().isEmpty())) {
@@ -738,10 +761,16 @@ public class AgendamentoController implements Serializable {
 		}
 		
 		if (funcionarioSelecionado == null || dataSelecionada == null) {
+			System.out.println("⚠️ Funcionário ou data não selecionado");
 			return;
 		}
 		
+		System.out.println("\n========== GERANDO HORÁRIOS DISPONÍVEIS ==========");
+		System.out.println("👤 Funcionário: " + funcionarioSelecionado.getNome());
+		System.out.println("📅 Data: " + dataSelecionada);
+		
 		if (com.barbersys.dao.RestricaoDataDAO.isDataBloqueada(dataSelecionada, funcionarioSelecionado.getId())) {
+			System.out.println("🚫 Data bloqueada para este funcionário");
 			return; // Data bloqueada, não mostra horários
 		}
 
@@ -751,6 +780,7 @@ public class AgendamentoController implements Serializable {
 				Servicos servico = ServicosDAO.buscarPorId(servicoId);
 				if (servico != null) {
 					totalMinutos += servico.getMinutos();
+					System.out.println("✂️ Serviço: " + servico.getNome() + " (" + servico.getMinutos() + " min)");
 				}
 			}
 		}
@@ -761,6 +791,8 @@ public class AgendamentoController implements Serializable {
 		if (numeroDeSlotsNecessarios == 0) {
 			numeroDeSlotsNecessarios = 1;
 		}
+		
+		System.out.println("⏱️ Duração total: " + totalMinutos + " minutos (" + numeroDeSlotsNecessarios + " slots de 30min)");
 
 		List<Horario> horariosFuncionario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionarioSelecionado);
 		if (horariosFuncionario == null || horariosFuncionario.isEmpty()) {
@@ -807,16 +839,32 @@ public class AgendamentoController implements Serializable {
 		}
 		
 		if (horariosValidosParaDia.isEmpty()) {
+			System.out.println("⚠️ Funcionário não trabalha neste dia da semana");
 			return; // Funcionário não trabalha neste dia da semana
+		}
+		
+		System.out.println("🕐 Períodos de trabalho neste dia:");
+		for (Horario h : horariosValidosParaDia) {
+			System.out.println("  ⏰ " + h.getHoraInicial() + " às " + h.getHoraFinal());
 		}
 
 		Long idParaExcluir = null;
 		if ("A".equals(editarModel) && agendamentoModel != null && agendamentoModel.getFuncionario() != null
 				&& agendamentoModel.getFuncionario().getId().equals(funcionarioSelecionado.getId())) {
 			idParaExcluir = agendamentoModel.getId();
+			System.out.println("✏️ Editando agendamento ID: " + idParaExcluir + " (será excluído da verificação)");
 		}
 		List<LocalTime> horariosOcupados = AgendamentoDAO.getHorariosOcupados(funcionarioSelecionado.getId(),
 				dataSelecionada, idParaExcluir);
+		
+		System.out.println("\n📍 Horários OCUPADOS (slots de 30min):");
+		if (horariosOcupados.isEmpty()) {
+			System.out.println("  ✅ Nenhum horário ocupado");
+		} else {
+			for (LocalTime h : horariosOcupados) {
+				System.out.println("  ❌ " + h);
+			}
+		}
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 		LocalDateTime agora = LocalDateTime.now();
@@ -824,10 +872,18 @@ public class AgendamentoController implements Serializable {
 		LocalTime horaAtualSistema = agora.toLocalTime();
 		
 		boolean isHojeDia = dataSelecionadaLocalDate.isEqual(LocalDate.now());
+		
+		System.out.println("\n⏰ VERIFICAÇÃO DE DATA/HORA:");
+		System.out.println("  📅 Data selecionada: " + dataSelecionadaLocalDate);
+		System.out.println("  📅 Data de hoje: " + LocalDate.now());
+		System.out.println("  ⏰ Hora atual do sistema: " + horaAtualSistema);
+		System.out.println("  🔍 É hoje? " + (isHojeDia ? "SIM" : "NÃO"));
 
 		if ("A".equals(editarModel) && horaSelecionada != null && !horaSelecionada.isEmpty()) {
 			horariosDisponiveis.add(horaSelecionada);
 		}
+		
+		System.out.println("\n🔎 TESTANDO HORÁRIOS:");
 
 		// Usa apenas os horários válidos para o dia da semana
 		for (Horario periodo : horariosValidosParaDia) {
@@ -848,10 +904,23 @@ public class AgendamentoController implements Serializable {
 				iteracao++;
 				
 				boolean isHoje = dataSelecionadaLocalDate.isEqual(LocalDate.now());
-				// CORREÇÃO: Para hoje, aceita horários que dão tempo de chegar (30min de antecedência)
-				// Exemplo: Se são 22:30, aceita horários onde: horário + 30min > hora atual
-				// Horário 23:00: (23:00 + 30min = 23:30) > 22:30 = true ✅
-				boolean isHorarioFuturo = !isHoje || horaAtual.plusMinutes(30).isAfter(horaAtualSistema);
+				// CORREÇÃO: Para hoje, só aceita horários que ainda não passaram
+				// Margem de segurança: precisa ter pelo menos 15 minutos de antecedência
+				// Exemplo: Se são 20:00, só aceita 20:15 em diante
+				boolean isHorarioFuturo = !isHoje || horaAtual.isAfter(horaAtualSistema.plusMinutes(15));
+				
+				// Log detalhado para DEBUG
+				if (isHoje && iteracao <= 5) {
+					String status = isHorarioFuturo ? "✅ ACEITO" : "❌ BLOQUEADO";
+					System.out.println("  " + status + " " + horaAtual.format(formatter) + 
+						" (hora atual: " + horaAtualSistema.format(formatter) + 
+						", limite: " + horaAtualSistema.plusMinutes(15).format(formatter) + ")");
+				}
+				
+				if (!isHorarioFuturo) {
+					horaAtual = horaAtual.plusMinutes(30);
+					continue; // Pula este horário
+				}
 
 				if (isHorarioFuturo) {
 					// Calcula quando o serviço terminaria se começasse neste horário
@@ -864,6 +933,8 @@ public class AgendamentoController implements Serializable {
 							&& horarioTermino.compareTo(horaAtual) >= 0) {
 						// Verifica se todos os slots necessários estão livres
 						boolean todosSlotsLivres = true;
+						String motivoRejeicao = "";
+						
 						for (int i = 0; i < numeroDeSlotsNecessarios; i++) {
 							LocalTime slotParaVerificar = horaAtual.plusMinutes((long) i * 30);
 							
@@ -871,17 +942,20 @@ public class AgendamentoController implements Serializable {
 							if (slotParaVerificar.compareTo(horaAtual) < 0) {
 								// Slot deu volta (passou de 23:59 para 00:00)
 								todosSlotsLivres = false;
+								motivoRejeicao = "overflow (passou da meia-noite)";
 								break;
 							}
 							
 							// Verifica se o slot ultrapassa o horário final
 							if (slotParaVerificar.isAfter(horaFinalPeriodo)) {
 								todosSlotsLivres = false;
+								motivoRejeicao = "ultrapassa horário final (" + horaFinalPeriodo + ")";
 								break;
 							}
 							
 							if (horariosOcupados.contains(slotParaVerificar)) {
 								todosSlotsLivres = false;
+								motivoRejeicao = "slot " + slotParaVerificar + " ocupado";
 								break;
 							}
 						}
@@ -890,8 +964,13 @@ public class AgendamentoController implements Serializable {
 							String horaFormatadaLoop = horaAtual.format(formatter);
 							if (!horariosDisponiveis.contains(horaFormatadaLoop)) {
 								horariosDisponiveis.add(horaFormatadaLoop);
+								System.out.println("  ✅ " + horaFormatadaLoop + " → DISPONÍVEL");
 							}
+						} else {
+							System.out.println("  ❌ " + horaAtual.format(formatter) + " → REJEITADO (" + motivoRejeicao + ")");
 						}
+					} else {
+						System.out.println("  ⚠️ " + horaAtual.format(formatter) + " → Termina fora do período (termina às " + horarioTermino + ")");
 					}
 				}
 				
@@ -907,6 +986,13 @@ public class AgendamentoController implements Serializable {
 			}
 		}
 		java.util.Collections.sort(horariosDisponiveis);
+		
+		System.out.println("\n✨ RESULTADO FINAL:");
+		System.out.println("📊 Total de horários disponíveis: " + horariosDisponiveis.size());
+		if (!horariosDisponiveis.isEmpty()) {
+			System.out.println("🕐 Horários: " + String.join(", ", horariosDisponiveis));
+		}
+		System.out.println("==================================================\n");
 	}
 
 	public void funcionarioAlterado() {
@@ -917,6 +1003,33 @@ public class AgendamentoController implements Serializable {
 	public void addPassosAgendamento() {
 		try {
 			if (this.passos < 2) {
+				// VALIDAÇÃO PASSO 0 → 1: Cliente e Funcionário
+				if (this.passos == 0) {
+					// Valida Nome do Cliente
+					if (tipoCadastro.equals("A")) {
+						// Com cadastro: valida se cliente foi selecionado
+						if (clienteId == null) {
+							FacesContext.getCurrentInstance().addMessage(null,
+									new FacesMessage(FacesMessage.SEVERITY_ERROR, "Selecione um cliente", "Erro!"));
+							return;
+						}
+					} else {
+						// Sem cadastro: valida se nome foi preenchido
+						if (nomeCliente == null || nomeCliente.trim().isEmpty()) {
+							FacesContext.getCurrentInstance().addMessage(null,
+									new FacesMessage(FacesMessage.SEVERITY_ERROR, "Informe o nome do cliente", "Erro!"));
+							return;
+						}
+					}
+					
+					// Valida Nome do Funcionário
+					if (nomeFuncionario == null || nomeFuncionario.trim().isEmpty()) {
+						FacesContext.getCurrentInstance().addMessage(null,
+								new FacesMessage(FacesMessage.SEVERITY_ERROR, "Selecione um funcionário", "Erro!"));
+						return;
+					}
+				}
+				
 				// VALIDAÇÃO PASSO 1 → 2: Verifica se há horários disponíveis para os serviços selecionados
 				if (this.passos == 1) {
 					// Valida se data foi selecionada

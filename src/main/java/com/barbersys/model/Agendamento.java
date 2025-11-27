@@ -50,6 +50,9 @@ public class Agendamento {
 
 	@Column(name = "age_sexo")
 	private String sexo;
+	
+	@Column(name = "age_duracao_minutos")
+	private Integer duracaoMinutos = 30;
 
 	@ManyToMany
 	@JoinTable(name = "agendamento_servico", joinColumns = @JoinColumn(name = "age_codigo"), inverseJoinColumns = @JoinColumn(name = "ser_codigo"))

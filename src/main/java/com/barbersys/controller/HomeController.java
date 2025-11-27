@@ -367,28 +367,15 @@ public class HomeController implements Serializable {
     }
     
     /**
-     * Retorna o próximo agendamento com horário formatado
+     * Retorna o próximo agendamento formatado
+     * Formato: "27/11 às 22:00 - Nome do Cliente"
      */
     public String getProximoAgendamentoFormatado() {
         if (proximoAgendamento == null || proximoAgendamento.trim().isEmpty()) {
             return null;
         }
         
-        // O formato vindo do banco é algo como "14:30:00 - Nome do Cliente"
-        // Vamos formatar para "14:30 - Nome do Cliente"
-        if (proximoAgendamento.contains(" - ")) {
-            String[] partes = proximoAgendamento.split(" - ", 2);
-            String horario = partes[0].trim();
-            String nomeCliente = partes.length > 1 ? partes[1].trim() : "";
-            
-            // Remove os segundos do horário (14:30:00 -> 14:30)
-            if (horario.length() >= 8) {
-                horario = horario.substring(0, 5);
-            }
-            
-            return horario + " - " + nomeCliente;
-        }
-        
+        // O DAO já retorna formatado corretamente com data e hora
         return proximoAgendamento;
     }
     
