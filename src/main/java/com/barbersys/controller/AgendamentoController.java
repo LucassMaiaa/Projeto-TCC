@@ -683,7 +683,6 @@ public class AgendamentoController implements Serializable {
 
 		exibirAlerta("success", "Agendamento atualizado com sucesso!");
 		PrimeFaces.current().executeScript("PF('dlgAgendar').hide();");
-		PrimeFaces.current().executeScript("setTimeout(function() { PrimeFaces.ab({s:'form', u:'form'}); }, 50);");
 	}
 
 	public void salvarOuAtualizarAgendamento() {
@@ -2209,6 +2208,8 @@ public class AgendamentoController implements Serializable {
 	 */
 	public void aoSelecionarServicoModal() {
 		try {
+			System.out.println("\n🔔 aoSelecionarServicoModal() CHAMADO!");
+			
 			// Atualiza a lista servicosSelecionadosIds com base no Map
 			if (servicosSelecionadosIds == null) {
 				servicosSelecionadosIds = new ArrayList<>();
@@ -2224,10 +2225,23 @@ public class AgendamentoController implements Serializable {
 				}
 			}
 			
+			System.out.println("📦 Serviços selecionados: " + servicosSelecionadosIds.size());
+			System.out.println("📅 Data selecionada: " + (dataSelecionada != null ? dataSelecionada : "NENHUMA"));
+			
 			// Recalcula o valor total
 			calculaValorServicos();
 			
+			// Se já tem data selecionada, recalcula os horários disponíveis
+			// Isso garante que o botão "Próximo" seja habilitado corretamente
+			if (dataSelecionada != null && !servicosSelecionadosIds.isEmpty()) {
+				System.out.println("✅ Recalculando horários disponíveis...");
+				gerarHorariosDisponiveis();
+			} else {
+				System.out.println("⚠️ NÃO recalcula horários (falta data ou serviços)");
+			}
+			
 		} catch (Exception e) {
+			System.err.println("❌ ERRO em aoSelecionarServicoModal: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<!-- Usando o template SEM sidebar (full width) -->
+<ui:composition template="/WEB-INF/template.xhtml">
+
+	<!-- Título da página -->
+	<ui:define name="title">Configurações - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página (REDUZIDO - PADRÃO DO SISTEMA) -->
+	<ui:define name="extra-css">
+		<style>
+			/* Mantendo apenas estilos de layout essenciais e animações */
+			.config-container {
+				background: #FFFFFF;
+				border-radius: 12px;
+				padding: 40px;
+				box-shadow: 0 3px 6px #00000029;
+				max-width: 1200px;
+				margin: 0 auto;
+				animation: fadeInUp 0.5s ease-out;
+			}
+
+			.avatar-section {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				margin-bottom: 35px;
+				padding-bottom: 30px;
+				border-bottom: 1px solid #EBEBEB;
+			}
+
+			.avatar-circle-large {
+				width: 120px;
+				height: 120px;
+				border-radius: 50%;
+				background: var(--avatar-color, #23A4D5);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.avatar-circle-large i {
+				font-size: 50px;
+				color: white;
+			}
+
+			.avatar-info {
+				text-align: center;
+			}
+
+			.avatar-name {
+				font-size: 24px;
+				font-weight: 700;
+				color: #1F2937;
+				margin-bottom: 5px;
+				text-transform: uppercase;
+			}
+
+			.avatar-email {
+				font-size: 14px;
+				color: #6B7280;
+				font-weight: 500;
+			}
+
+			/* Animação de entrada */
+			@keyframes fadeInUp {
+				from {
+					opacity: 0;
+					transform: translateY(30px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			/* Animação slideDown para senha */
+			@keyframes slideDown {
+				from {
+					opacity: 0;
+					max-height: 0;
+					transform: translateY(-15px);
+				}
+				to {
+					opacity: 1;
+					max-height: 600px;
+					transform: translateY(0);
+				}
+			}
+
+			/* Senha container animation */
+			.senha-fields-container {
+				overflow: hidden;
+				transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			}
+
+			.senha-fields-container[style*="display: grid"] {
+				display: grid !important;
+				opacity: 1 !important;
+				visibility: visible !important;
+				animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+			}
+
+			.senha-fields-container[style*="display: none"] {
+				display: none !important;
+			}
+		</style>
+		
+		<script>
+			function definirCorAvatar() {
+	padding: 14px 18px !important;
+	border: 2px solid #E5E7EB !important;
+	border-radius: 50px !important;
+	font-size: 14px !important;
+	color: #1F2937 !important;
+	background: #FFFFFF !important;
+	transition: all 0.3s ease !important;
+	font-weight: 500 !important;
+	outline: none !important;
+}
+
+body .ui-inputfield:hover,
+body .ui-password:hover,
+body .ui-inputtextarea:hover {
+	border-color: #D1D5DB !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+body .ui-inputfield:focus,
+body .ui-password:focus,
+body .ui-inputtextarea:focus {
+	border-color: #DC2626 !important;
+	box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1) !important;
+}
+
+body .ui-inputfield:disabled,
+body .ui-password:disabled {
+	background: #F9FAFB !important;
+	color: #9CA3AF !important;
+	cursor: not-allowed !important;
+	opacity: 0.6 !important;
+}
+
+body .ui-inputfield::placeholder,
+body .ui-password::placeholder,
+body .ui-inputtextarea::placeholder {
+	color: #9CA3AF !important;
+	font-weight: 400 !important;
+}
+
+body .ui-inputtextarea {
+	border-radius: 20px !important;
+	min-height: 100px !important;
+	resize: vertical !important;
+	line-height: 1.6 !important;
+	padding: 16px 20px !important;
+}
+
+/* SelectOneMenu customizado */
+body .ui-selectonemenu {
+	width: 100% !important;
+	border: 2px solid #E5E7EB !important;
+	border-radius: 50px !important;
+	background: #FFFFFF !important;
+	transition: all 0.3s ease !important;
+	height: 48px !important;
+}
+
+body .ui-selectonemenu:hover {
+	border-color: #D1D5DB !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+body .ui-selectonemenu.ui-state-focus {
+	border-color: #DC2626 !important;
+	box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1) !important;
+}
+
+body .ui-selectonemenu .ui-selectonemenu-label {
+	padding: 12px 18px !important;
+	color: #1F2937 !important;
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	line-height: 1.5 !important;
+}
+
+body .ui-selectonemenu .ui-selectonemenu-trigger {
+	background: transparent !important;
+	border: none !important;
+	width: 40px !important;
+	color: #DC2626 !important;
+}
+
+body .ui-selectonemenu .ui-selectonemenu-trigger .ui-icon {
+	color: #DC2626 !important;
+	font-size: 13px !important;
+}
+
+/* Mensagens */
+body .ui-messages {
+	margin-bottom: 25px;
+	border-radius: 10px !important;
+	border: none !important;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+body .ui-messages .ui-messages-error {
+	background: #FEE2E2 !important;
+	border-left: 4px solid #DC2626 !important;
+	color: #991B1B !important;
+}
+
+body .ui-messages .ui-messages-info {
+	background: #DBEAFE !important;
+	border-left: 4px solid #3B82F6 !important;
+	color: #1E40AF !important;
+}
+
+body .ui-messages .ui-messages-success {
+	background: #D1FAE5 !important;
+	border-left: 4px solid #10B981 !important;
+	color: #065F46 !important;
+}
+
+body .ui-messages .ui-messages-warn {
+	background: #FEF3C7 !important;
+	border-left: 4px solid #F59E0B !important;
+	color: #92400E !important;
+}
+
+/* Scroll customizado */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: #F3F4F6;
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+	border-radius: 10px;
+	transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(135deg, #B91C1C 0%, #991B1B 100%);
+}
+
+/* Animação de entrada */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		max-height: 0;
+		transform: translateY(-15px);
+	}
+	to {
+		opacity: 1;
+		max-height: 600px;
+		transform: translateY(0);
+	}
+}
+
+.config-container {
+	animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animação para os campos de senha */
+.senha-fields-container {
+	overflow: hidden;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.senha-fields-container[style*="display: grid"] {
+	display: grid !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.senha-fields-container[style*="display: none"] {
+	display: none !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+	.form-grid {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+	
+	.config-container {
+		padding: 25px;
+	}
+	
+	.avatar-circle-large {
+		width: 110px;
+		height: 110px;
+	}
+	
+	.avatar-circle-large i {
+		font-size: 55px;
+	}
+	
+	.avatar-name {
+		font-size: 22px;
+	}
+	
+	.action-buttons {
+		flex-direction: column;
+		gap: 12px;
+	}
+	
+	.btn-salvar.ui-button,
+	.btn-cancelar.ui-button {
+		width: 100%;
+		padding: 16px 30px !important;
+	}
+}
+
+/* BlockUI customizado */
+.block-ui-custom {
+	background: rgba(255, 255, 255, 0.98) !important;
+	border-radius: 16px !important;
+	padding: 35px !important;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Loading spinner */
+.ui-blockui-content {
+	display: flex !important;
+	flex-direction: column !important;
+	align-items: center !important;
+	gap: 15px !important;
+}
+
+.ui-blockui-content .fa-spinner {
+	color: #DC2626 !important;
+	font-size: 32px !important;
+}
+		</style>
+		
+		<script>
+			function definirCorAvatar() {
+				var sexo = '#{configuracaoController.clienteModel.sexo}';
+				var cor = '#6366F1';
+				var corDark = '#4F46E5';
+				
+				if (sexo === 'M') {
+					cor = '#3B82F6';
+					corDark = '#2563EB';
+				} else if (sexo === 'F') {
+					cor = '#EC4899';
+					corDark = '#DB2777';
+				} else if (sexo === 'O') {
+					cor = '#8B5CF6';
+					corDark = '#7C3AED';
+				}
+				
+				document.documentElement.style.setProperty('--avatar-color', cor);
+				document.documentElement.style.setProperty('--avatar-color-dark', corDark);
+			}
+			
+			window.addEventListener('load', definirCorAvatar);
+		</script>
+	</ui:define>
+
+	<!-- Conteúdo da página -->
+	<ui:define name="content">
+		<h:form id="formConfig">
+			<p:messages id="messages" showDetail="true" closable="true" />
+			
+			<div class="config-container">
+				<!-- Avatar e informações do usuário -->
+				<div class="avatar-section">
+					<div class="avatar-circle-large">
+						<i class="fa-solid #{configuracaoController.iconeAvatar}"></i>
+					</div>
+					<div class="avatar-info">
+						<div class="avatar-name">#{configuracaoController.clienteModel.nome}</div>
+						<div class="avatar-email">#{configuracaoController.clienteModel.email}</div>
+					</div>
+				</div>
+				
+				<!-- Formulário de dados -->
+				<div class="form-grid">
+					<!-- Seção: Dados Pessoais -->
+					<div class="section-divider">
+						<i class="fa-solid fa-user"></i>
+						<h3>Dados Pessoais</h3>
+					</div>
+					
+					<!-- Nome de Usuário -->
+					<div>
+						<p:inputText id="nomeUsuario" value="#{configuracaoController.nomeUsuario}" 
+									 required="true" requiredMessage="Nome de usuário é obrigatório" 
+									 maxlength="100" style="width: 100%;" 
+									 placeholder="Nome de Usuário *" />
+					</div>
+					
+					<!-- Nome Completo -->
+					<div>
+						<p:inputText id="nome" value="#{configuracaoController.clienteModel.nome}" 
+									 required="true" requiredMessage="Nome é obrigatório" 
+									 maxlength="100" style="width: 100%;" 
+									 placeholder="Nome Completo *" />
+					</div>
+					
+					<!-- CPF (Bloqueado) -->
+					<div>
+						<p:inputMask id="cpf" value="#{configuracaoController.clienteModel.cpf}" 
+									 mask="999.999.999-99" disabled="true" style="width: 100%;" 
+									 placeholder="CPF" />
+					</div>
+					
+					<!-- Data de Nascimento (Bloqueado) -->
+					<div>
+						<p:inputText id="dataNascimento" 
+									 value="#{configuracaoController.clienteModel.dataNascimento}" 
+									 disabled="true" style="width: 100%;"
+									 placeholder="Data de Nascimento">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</p:inputText>
+					</div>
+					
+					<!-- Email -->
+					<div>
+						<p:inputText id="email" value="#{configuracaoController.clienteModel.email}" 
+									 required="true" requiredMessage="E-mail é obrigatório" 
+									 type="email" maxlength="100" style="width: 100%;" 
+									 placeholder="E-mail *" />
+					</div>
+					
+					<!-- Telefone -->
+					<div>
+						<p:inputMask id="telefone" value="#{configuracaoController.clienteModel.telefone}" 
+									 mask="(99) 99999-9999" required="true" 
+									 requiredMessage="Telefone é obrigatório" style="width: 100%;" 
+									 placeholder="Telefone *" />
+					</div>
+					
+					<!-- Sexo -->
+					<div>
+						<p:selectOneMenu id="sexo" value="#{configuracaoController.clienteModel.sexo}" 
+										 required="true" requiredMessage="Sexo é obrigatório"
+										 style="width: 100%;">
+							<f:selectItem itemLabel="Sexo *" itemValue="" />
+							<f:selectItem itemLabel="Masculino" itemValue="M" />
+							<f:selectItem itemLabel="Feminino" itemValue="F" />
+							<f:selectItem itemLabel="Outro" itemValue="O" />
+						</p:selectOneMenu>
+					</div>
+					
+					<!-- Seção: Endereço -->
+					<div class="section-divider">
+						<i class="fa-solid fa-location-dot"></i>
+						<h3>Endereço</h3>
+					</div>
+					
+					<!-- CEP -->
+					<div>
+						<p:inputMask id="cep" value="#{configuracaoController.clienteModel.cep}" 
+									 mask="99999-999" style="width: 100%;" 
+									 placeholder="CEP" />
+					</div>
+					
+					<!-- Cidade -->
+					<div>
+						<p:inputText id="cidade" value="#{configuracaoController.clienteModel.cidade}" 
+									 maxlength="100" style="width: 100%;" 
+									 placeholder="Cidade" />
+					</div>
+					
+					<!-- Rua -->
+					<div>
+						<p:inputText id="rua" value="#{configuracaoController.clienteModel.rua}" 
+									 maxlength="200" style="width: 100%;" 
+									 placeholder="Rua" />
+					</div>
+					
+					<!-- Estado -->
+					<div>
+						<p:selectOneMenu id="estado" value="#{configuracaoController.clienteModel.estado}" 
+										 style="width: 100%;">
+							<f:selectItem itemLabel="Estado" itemValue="" />
+							<f:selectItem itemLabel="AC" itemValue="AC" />
+							<f:selectItem itemLabel="AL" itemValue="AL" />
+							<f:selectItem itemLabel="AP" itemValue="AP" />
+							<f:selectItem itemLabel="AM" itemValue="AM" />
+							<f:selectItem itemLabel="BA" itemValue="BA" />
+							<f:selectItem itemLabel="CE" itemValue="CE" />
+							<f:selectItem itemLabel="DF" itemValue="DF" />
+							<f:selectItem itemLabel="ES" itemValue="ES" />
+							<f:selectItem itemLabel="GO" itemValue="GO" />
+							<f:selectItem itemLabel="MA" itemValue="MA" />
+							<f:selectItem itemLabel="MT" itemValue="MT" />
+							<f:selectItem itemLabel="MS" itemValue="MS" />
+							<f:selectItem itemLabel="MG" itemValue="MG" />
+							<f:selectItem itemLabel="PA" itemValue="PA" />
+							<f:selectItem itemLabel="PB" itemValue="PB" />
+							<f:selectItem itemLabel="PR" itemValue="PR" />
+							<f:selectItem itemLabel="PE" itemValue="PE" />
+							<f:selectItem itemLabel="PI" itemValue="PI" />
+							<f:selectItem itemLabel="RJ" itemValue="RJ" />
+							<f:selectItem itemLabel="RN" itemValue="RN" />
+							<f:selectItem itemLabel="RS" itemValue="RS" />
+							<f:selectItem itemLabel="RO" itemValue="RO" />
+							<f:selectItem itemLabel="RR" itemValue="RR" />
+							<f:selectItem itemLabel="SC" itemValue="SC" />
+							<f:selectItem itemLabel="SP" itemValue="SP" />
+							<f:selectItem itemLabel="SE" itemValue="SE" />
+							<f:selectItem itemLabel="TO" itemValue="TO" />
+						</p:selectOneMenu>
+					</div>
+					
+					<!-- Número -->
+					<div>
+						<p:inputText id="numero" value="#{configuracaoController.clienteModel.numero}" 
+									 maxlength="10" style="width: 100%;" 
+									 placeholder="Número" />
+					</div>
+					
+					<!-- Bairro -->
+					<div>
+						<p:inputText id="bairro" value="#{configuracaoController.clienteModel.bairro}" 
+									 maxlength="100" style="width: 100%;" 
+									 placeholder="Bairro" />
+					</div>
+					
+					<!-- Complemento -->
+					<div class="form-grid-full">
+						<p:inputText id="complemento" value="#{configuracaoController.clienteModel.complemento}" 
+									 maxlength="200" style="width: 100%;" 
+									 placeholder="Complemento" />
+					</div>
+					
+					<!-- Seção: Observações -->
+					<div class="section-divider">
+						<i class="fa-solid fa-clipboard"></i>
+						<h3>Observações Padrão</h3>
+					</div>
+					
+					<!-- Observações -->
+					<div class="form-grid-full">
+						<p:inputTextarea id="observacoes" value="#{configuracaoController.clienteModel.observacoes}" 
+										 rows="4" maxlength="500" style="width: 100%; resize: none;" 
+										 placeholder="Ex: Alergia a produtos com amônia, preferência por horários pela manhã, etc." />
+					</div>
+					
+					<!-- Seção: Alterar Senha -->
+					<div class="section-divider">
+						<i class="fa-solid fa-lock"></i>
+						<h3>Segurança</h3>
+					</div>
+					
+					<!-- Checkbox para habilitar alteração de senha -->
+					<div class="form-grid-full checkbox-container">
+						<p:selectBooleanCheckbox id="alterarSenha" 
+												 value="#{configuracaoController.alterarSenha}"
+												 onchange="toggleSenhaFields(this.checked);" />
+						<p:outputLabel for="alterarSenha" value="Desejo alterar minha senha" style="cursor: pointer;" onclick="toggleCheckboxManual();" />
+					</div>
+					
+					<!-- Campos de senha (aparecem quando checkbox marcado) -->
+					<p:outputPanel id="senhaFields" styleClass="form-grid-full">
+						<div id="senhaFieldsContainer" class="form-grid senha-fields-container" 
+							 style="display: none; grid-column: 1 / -1; background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%); padding: 25px; border-radius: 12px; border: 2px solid #FCA5A5; margin-top: 15px; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.1);">
+							<div style="grid-column: 1 / -1; margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; border-left: 4px solid #DC2626;">
+								<i class="fa-solid fa-shield-halved" style="color: #DC2626; margin-right: 10px; font-size: 18px;"></i>
+								<span style="color: #991B1B; font-weight: 600; font-size: 15px;">Por segurança, você precisa informar sua senha atual para alterá-la</span>
+							</div>
+							
+							<!-- Senha Atual -->
+							<div>
+								<p:password id="senhaAtual" value="#{configuracaoController.senhaAtual}" 
+										   feedback="false" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Senha atual é obrigatória" style="width: 100%;" 
+										   placeholder="Senha Atual *" />
+							</div>
+							
+							<!-- Nova Senha -->
+							<div>
+								<p:password id="novaSenha" value="#{configuracaoController.novaSenha}" 
+										   feedback="true" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Nova senha é obrigatória" 
+										   weakLabel="Fraca" goodLabel="Média" strongLabel="Forte"
+										   style="width: 100%;" 
+										   placeholder="Nova Senha *" />
+							</div>
+							
+							<!-- Confirmar Nova Senha -->
+							<div>
+								<p:password id="confirmaNovaSenha" value="#{configuracaoController.confirmaNovaSenha}" 
+										   feedback="false" required="#{configuracaoController.alterarSenha}"
+										   requiredMessage="Confirmação de senha é obrigatória" style="width: 100%;" 
+										   placeholder="Confirmar Nova Senha *" />
+							</div>
+						</div>
+					</p:outputPanel>
+					
+					<script>
+						function toggleSenhaFields(checked) {
+							var container = document.getElementById('senhaFieldsContainer');
+							if (container) {
+								if (checked) {
+									container.style.display = 'grid';
+									// Forçar o display para garantir que permanece visível
+									setTimeout(function() {
+										container.style.display = 'grid';
+									}, 10);
+								} else {
+									container.style.display = 'none';
+								}
+							}
+						}
+						
+						function toggleCheckboxManual() {
+							var checkboxInput = document.querySelector('input[id*="alterarSenha"]');
+							if (checkboxInput) {
+								checkboxInput.click();
+							}
+						}
+						
+						// Inicializar o estado correto ao carregar a página
+						window.addEventListener('load', function() {
+							var checkboxInput = document.querySelector('input[id*="alterarSenha"]');
+							if (checkboxInput) {
+								toggleSenhaFields(checkboxInput.checked);
+							}
+						});
+					</script>
+				</div>
+				
+				<!-- Botões de ação -->
+				<div class="action-buttons">
+					<p:commandButton value="Salvar Alterações" 
+									 styleClass="btn-salvar"
+									 action="#{configuracaoController.salvarConfiguracoes}"
+									 icon="fa fa-save"
+									 ajax="false" />
+				</div>
+				
+				<script>
+					// Log para debug
+					console.log('Botão Salvar carregado');
+				</script>
+			</div>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
+</html>

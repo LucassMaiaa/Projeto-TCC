@@ -991,7 +991,7 @@ margin-bottom: 0px
 													disabled="#{agendamentoController.agendamentoPassado}">
 													<p:ajax event="change"
 														listener="#{agendamentoController.aoSelecionarServicoModal}"
-														update="@(.total-update)" 
+														update="@form:dlgAgendar:totaisPanel @form:dlgAgendar:proximoButtonStep2" 
 														process="@this" />
 												</p:selectBooleanCheckbox>
 												
@@ -1107,7 +1107,7 @@ margin-bottom: 0px
 								styleClass="btn-step btn-step-finish"
 								actionListener="#{agendamentoController.atualizarAgendamento()}"
 								disabled="#{empty agendamentoController.horaSelecionada or agendamentoController.agendamentoPassado}"
-								update="dttDataSelect msgs"
+								update="dttDataSelect msgs sidebarContent dttlstservicos datatableCaixas"
 								process="dttDataSelect @this"
 								rendered="#{agendamentoController.editarModel eq 'A'}" />
 							
@@ -1118,7 +1118,7 @@ margin-bottom: 0px
 								styleClass="btn-step btn-step-finish"
 								actionListener="#{agendamentoController.adicionarNovoAgendamento()}"
 								disabled="#{empty agendamentoController.horaSelecionada}"
-								update="dttDataSelect msgs"
+								update="dttDataSelect msgs datatableCaixas"
 								process="dttDataSelect @this"
 								rendered="#{agendamentoController.editarModel eq 'I'}" />
 						</div>
@@ -1192,7 +1192,7 @@ margin-bottom: 0px
 			</div>
 		</ui:fragment>
 	
-		<ui:fragment
+		<ui:fragment id="sidebarContent"
 			rendered="#{agendamentoController.agendamentoModel != null and agendamentoController.agendamentoModel.id != null}">
 			<div class="content-logo-system">
 				<div class="flex space-between align-center">

@@ -81,7 +81,7 @@ public class AvaliacaoDAO {
             sql.append("AND a.ava_data_criacao >= ? ");
         }
         if (dataFinal != null) {
-            sql.append("AND a.ava_data_criacao <= ? ");
+            sql.append("AND DATE(a.ava_data_criacao) <= ? ");
         }
         
         sql.append("ORDER BY a.ava_data_criacao DESC ");
@@ -148,7 +148,7 @@ public class AvaliacaoDAO {
             sql.append("AND a.ava_data_criacao >= ? ");
         }
         if (dataFinal != null) {
-            sql.append("AND a.ava_data_criacao <= ? ");
+            sql.append("AND DATE(a.ava_data_criacao) <= ? ");
         }
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -210,7 +210,7 @@ public class AvaliacaoDAO {
             sql.append("AND a.ava_data_criacao >= ? ");
         }
         if (dataFinal != null) {
-            sql.append("AND a.ava_data_criacao <= ? ");
+            sql.append("AND DATE(a.ava_data_criacao) <= ? ");
         }
         
         sql.append("ORDER BY a.ava_data_criacao DESC");
