@@ -18,6 +18,7 @@ import com.barbersys.util.DatabaseConnection;
 public class ControleCaixaDAO {
 
 	public static List<Map<String, Object>> buscarCaixasContagem(Date dataSelecionada) {
+		System.out.println("🔍 ===== BUSCAR CAIXAS CONTAGEM DIA =====");
 		Double totalEntradas = 0.0;
 		Double totalSaidas = 0.0;
 
@@ -29,6 +30,7 @@ public class ControleCaixaDAO {
 
 			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
 			String dataFiltro = dataFormatada.format(dataSelecionada);
+			System.out.println("📅 Data filtro: " + dataFiltro);
 
 			ps.setString(1, dataFiltro);
 
@@ -40,15 +42,23 @@ public class ControleCaixaDAO {
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
 
-				if (caixa.getMovimentacao().equals("Entrada")) {
-					totalEntradas += caixa.getValor();
+				System.out.println("📝 Movimentação: " + caixa.getMovimentacao() + " | Valor: R$ " + String.format("%.2f", caixa.getValor()));
 
-				} else if (caixa.getMovimentacao().equals("Saida")) {
-					totalSaidas += caixa.getValor();
+				if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Entrada automática")) {
+					totalEntradas += caixa.getValor();
+					System.out.println("  ✅ Contabilizado em ENTRADAS");
+
+				} else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
+					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
+					System.out.println("  ✅ Contabilizado em SAÍDAS");
 
 				}
 
 			}
+			
+			System.out.println("💰 TOTAL ENTRADAS DIA: R$ " + String.format("%.2f", totalEntradas));
+			System.out.println("💸 TOTAL SAÍDAS DIA: R$ " + String.format("%.2f", totalSaidas));
+			System.out.println("🔍 ===== FIM BUSCAR CAIXAS CONTAGEM DIA =====\n");
 
 			lista.put("entrada", totalEntradas);
 			lista.put("saida", totalSaidas);
@@ -62,6 +72,7 @@ public class ControleCaixaDAO {
 	}
 
 	public static List<Map<String, Object>> buscarCaixasContagemPorMes(Date dataSelecionada) {
+		System.out.println("🔍 ===== BUSCAR CAIXAS CONTAGEM MÊS =====");
 		Double totalEntradas = 0.0;
 		Double totalSaidas = 0.0;
 
@@ -77,6 +88,8 @@ public class ControleCaixaDAO {
 			calendar.setTime(dataSelecionada);
 			int mes = calendar.get(java.util.Calendar.MONTH) + 1;
 			int ano = calendar.get(java.util.Calendar.YEAR);
+			
+			System.out.println("📅 Mês/Ano filtro: " + mes + "/" + ano);
 
 			ps.setInt(1, mes);
 			ps.setInt(2, ano);
@@ -88,14 +101,23 @@ public class ControleCaixaDAO {
 				caixa.setValor(rs.getDouble("con_valor"));
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
+				
+				System.out.println("📝 Movimentação: " + caixa.getMovimentacao() + " | Valor: R$ " + String.format("%.2f", caixa.getValor()));
 
 				if (caixa.getMovimentacao().equals("Entrada")
+						|| caixa.getMovimentacao().equals("Entrada automática")
 						|| caixa.getMovimentacao().equals("Fechamento de Caixa")) {
 					totalEntradas += caixa.getValor();
-				} else if (caixa.getMovimentacao().equals("Saida")) {
-					totalSaidas += caixa.getValor();
+					System.out.println("  ✅ Contabilizado em ENTRADAS");
+				} else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
+					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
+					System.out.println("  ✅ Contabilizado em SAÍDAS");
 				}
 			}
+			
+			System.out.println("💰 TOTAL ENTRADAS MÊS: R$ " + String.format("%.2f", totalEntradas));
+			System.out.println("💸 TOTAL SAÍDAS MÊS: R$ " + String.format("%.2f", totalSaidas));
+			System.out.println("🔍 ===== FIM BUSCAR CAIXAS CONTAGEM MÊS =====\n");
 
 			lista.put("entrada", totalEntradas);
 			lista.put("saida", totalSaidas);

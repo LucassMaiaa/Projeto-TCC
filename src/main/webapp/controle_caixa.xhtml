@@ -14,6 +14,7 @@
 	<!-- CSS específico desta página -->
 	<ui:define name="extra-css">
 		<h:outputScript library="primefaces" name="locales/locale-pt.js" />
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<style>
 .content-agendamentos {
 	border-radius: 0px;
@@ -46,8 +47,105 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 	padding: 20px;
 	width: 400px;
 	min-width: 400px !important;
+	max-height: 80vh !important;
+	overflow-y: auto !important;
+}
+
+/* Ajuste local de z-index apenas para o overlay deste dialog do Controle de Caixa */
+body .ui-widget-overlay.ui-dialog-mask[id$="dlgSaldo_modal"] {
+	z-index: 1000 !important;
+}
+
+body .ui-dialog[id$="dlgSaldo"] {
+	z-index: 1001 !important;
+	position: fixed !important;
+	top: 50% !important;
+	left: 50% !important;
+	transform: translate(-50%, -50%) !important;
+	margin: 0 !important;
+}
+
+/* Scrollbar customizada para o modal */
+body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar {
+	width: 6px;
+}
+
+body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar-track {
+	background: #F0F4F8;
+	border-radius: 3px;
+}
+
+body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar-thumb {
+	background: #CCC;
+	border-radius: 3px;
+}
+
+body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar-thumb:hover {
+	background: #999;
 }
 		</style>
+		
+		<script type="text/javascript">
+			function debugModal() {
+				console.log('=== DEBUG MODAL ===');
+				var input = document.querySelector('input[id*="valorInicialInput"]');
+				if (input) {
+					console.log('Input encontrado:', input);
+					console.log('Valor do input:', input.value);
+				} else {
+					console.log('Input NÃO encontrado!');
+				}
+			}
+			
+			function handleCaixaResponse(args) {
+				console.log('🔔 handleCaixaResponse chamado:', args);
+				
+				if (args &amp;&amp; args.validado === true) {
+					// Sucesso
+					PF('dlgSaldo').hide();
+					Swal.fire({
+						icon: 'success',
+						title: 'Sucesso!',
+						text: args.mensagem || 'Operação realizada com sucesso!',
+						showConfirmButton: false,
+						timer: 2000
+					});
+				} else if (args &amp;&amp; args.validado === false) {
+					// Erro
+					Swal.fire({
+						icon: 'error',
+						title: args.titulo || 'Erro!',
+						text: args.mensagem || 'Ocorreu um erro ao processar a operação.',
+						showConfirmButton: false,
+						timer: 3000
+					});
+				}
+			}
+			
+			function handleEntradaSaidaResponse(args) {
+				console.log('💰 handleEntradaSaidaResponse chamado:', args);
+				
+				if (args &amp;&amp; args.validado === true) {
+					// Sucesso
+					Swal.fire({
+						icon: 'success',
+						title: 'Sucesso!',
+						text: args.mensagem || 'Movimentação registrada com sucesso!',
+						showConfirmButton: false,
+						timer: 2000
+					});
+				} else if (args &amp;&amp; args.validado === false) {
+					// Erro
+					Swal.fire({
+						icon: 'error',
+						title: args.titulo || 'Erro!',
+						text: args.mensagem || 'Ocorreu um erro ao processar a operação.',
+						showConfirmButton: false,
+						timer: 3000
+					});
+				}
+			}
+		</script>
 	</ui:define>
 
 	<!-- Conteúdo CENTRAL da página -->
@@ -111,6 +209,141 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 			</p:dataTable>
 		</div>
 		
+					<!-- Modal de Saldo -->
+			<p:dialog id="dlgSaldo" widgetVar="dlgSaldo" modal="true"
+				showEffect="fade" hideEffect="fade" closable="false"
+				draggable="false" resizable="false" fitViewport="true" responsive="true">
+			<h:panelGroup id="dlgSaldoForm">
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<i class="fa-solid fa-money-bill-transfer"></i>
+						</div>
+						<label>
+							#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}
+						</label>
+					</div>
+				</div>
+				<p:messages id="modalMessages" showDetail="true" closable="true" />
+
+				<!-- Campo para ABERTURA de caixa -->
+				<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel class="title-input" value="Valor Inicial *" />
+								
+								<p:inputNumber id="valorInicialInput" 
+									symbol="R$ " 
+									decimalPlaces="2"
+									value="#{controleCaixaController.valorInicialTemp}"
+									widgetVar="widgetValorInicial"
+									required="false" />
+							</div>
+						</div>
+					</div>
+				</ui:fragment>
+
+				<!-- Campos para FECHAMENTO de caixa -->
+				<ui:fragment rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
+					<!-- Mensagem informativa com cálculo automático -->
+					<div style="background: #E8F5E9; border-left: 4px solid #66BB6A; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px;">
+						<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+							<i class="fa-solid fa-calculator" style="color: #66BB6A; font-size: 16px;"></i>
+							<span style="font-weight: 700; font-size: 13px; color: #2C4A2C;">Cálculo Automático do Caixa</span>
+						</div>
+						<p style="margin: 0; font-size: 13px; color: #5A7A5A; line-height: 1.5;">
+							Com base nas movimentações de hoje, o valor esperado para fechamento é: 
+							<strong style="color: #2C4A2C;">#{controleCaixaController.formatarValor(controleCaixaController.valorSugerido)}</strong>
+						</p>
+					</div>
+					
+					<div class="row">
+						<div class="col-md-12">
+							<div class="input-combined">
+								<p:outputLabel class="title-input" value="Valor Final *" />
+								<p:inputNumber id="valorFinalInput" 
+									symbol="R$ " 
+									decimalPlaces="2"
+									value="#{controleCaixaController.valorFinalTemp}"
+									widgetVar="widgetValorFinal"
+									required="false">
+									<p:ajax event="change" update="@form:areaMotivo" process="@this" />
+								</p:inputNumber>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Área do motivo (atualiza dinamicamente) -->
+					<h:panelGroup id="areaMotivo">
+						<ui:fragment rendered="#{controleCaixaController.valorFinalTemp != null and controleCaixaController.valorFinalTemp lt controleCaixaController.valorSugerido}">
+							<div style="background: #FFF3E0; border-left: 4px solid #FF9800; padding: 12px 16px; border-radius: 4px; margin: 16px 0;">
+								<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+									<i class="fa-solid fa-triangle-exclamation" style="color: #FF9800; font-size: 16px;"></i>
+									<span style="font-weight: 700; font-size: 13px; color: #E65100;">Atenção: Valor Menor que o Esperado</span>
+								</div>
+								<p style="margin: 0; font-size: 12px; color: #8D6E63; line-height: 1.5;">
+									O valor informado é <strong>#{controleCaixaController.formatarValor(controleCaixaController.valorSugerido - controleCaixaController.valorFinalTemp)}</strong> menor que o calculado. 
+									Por favor, informe o motivo da diferença.
+								</p>
+							</div>
+							
+							<div class="row">
+								<div class="col-md-12">
+									<div class="input-combined">
+										<p:outputLabel class="title-input" value="Motivo da Diferença *" style="color: #E65100; font-weight: 700;" />
+										<p:inputTextarea maxlength="200"
+											value="#{controleCaixaController.mensagemMotivoFinal}"
+											placeholder="Informe o motivo do valor divergente..."
+											style="border-color: #FF9800;" />
+									</div>
+								</div>
+							</div>
+						</ui:fragment>
+						
+						<ui:fragment rendered="#{controleCaixaController.valorFinalTemp == null or controleCaixaController.valorFinalTemp ge controleCaixaController.valorSugerido}">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="input-combined">
+										<p:outputLabel class="title-input" value="Observações (Opcional)" />
+										<p:inputTextarea maxlength="200"
+											value="#{controleCaixaController.mensagemMotivoFinal}"
+											placeholder="Adicione observações sobre o fechamento..." />
+									</div>
+								</div>
+							</div>
+						</ui:fragment>
+					</h:panelGroup>
+				</ui:fragment>
+
+			<div class="flex justify-center mt15">
+				<ui:fragment
+					rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
+					<p:commandButton 
+						id="btnRegistrarAbertura"
+						styleClass="btn btn-blue medium" 
+						value="Registrar"
+						update="dlgSaldoForm @form:attCaixa @form:vlrCaixa @form:datatableCaixas @form:attBtnCaixa @form:camposEntradaSaida @form:btnRegistrarEntradaSaida"
+						process="@form"
+						actionListener="#{controleCaixaController.salvarRegistroInicial()}"
+						oncomplete="handleCaixaResponse(args);" />
+				</ui:fragment>
+				<ui:fragment
+					rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
+					<p:commandButton 
+						id="btnRegistrarFechamento"
+						styleClass="btn btn-blue medium" 
+						value="Registrar"
+						update="dlgSaldoForm @form:attCaixa @form:vlrCaixa @form:datatableCaixas @form:attBtnCaixa @form:camposEntradaSaida @form:btnRegistrarEntradaSaida"
+						process="@form"
+						actionListener="#{controleCaixaController.salvarRegistroFinal()}"
+						oncomplete="handleCaixaResponse(args);" />
+				</ui:fragment>
+			</div>
+			</h:panelGroup>
+		</p:dialog>
+		
+
 	</ui:define>
 
 	<!-- Conteúdo da SIDEBAR DIREITA -->
@@ -132,9 +365,11 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 						unselectable="false">
 						<f:selectItem itemLabel="Aberto" itemValue="A" />
 						<f:selectItem itemLabel="Fechado" itemValue="I" />
-						<p:ajax update="@form" process="@this"
-							listener="#{controleCaixaController.verificaTravaCampo()}"
-							oncomplete="if (args.aberto) PF('dlgSaldo').show();" />
+						<p:ajax event="change" 
+							listener="#{controleCaixaController.prepararModal()}"
+							update="dlgSaldo attBtnCaixa"
+							process="@this"
+							oncomplete="console.log('args.aberto:', args.aberto); if (args.aberto) { console.log('Abrindo modal...'); PF('dlgSaldo').show(); }" />
 					</p:selectOneButton>
 
 					<p:outputPanel id="attCaixa">
@@ -213,6 +448,7 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 
 				</div>
 			<div class="content-agendamentos flex column space-between">
+				<h:panelGroup id="camposEntradaSaida">
 				<div>
 					<div class="select-segundario no-filter">
 						<p:selectOneButton value="#{controleCaixaController.tipodeValor}"
@@ -229,23 +465,19 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 							<ui:fragment
 								rendered="#{controleCaixaController.tipodeValor eq 'e'}">
 								<div class="input-combined">
-									<p:outputLabel class="title-input" value="Valor de entrada" />
+									<p:outputLabel class="title-input" value="Valor de entrada *" />
 									<p:inputNumber symbol="R$ "
 										value="#{controleCaixaController.controleCaixaModel.valor}"
-										disabled="#{controleCaixaController.dadosLiberados}"
-										required="true"
-										requiredMessage="Preencha o campo de valor de entrada" />
+										disabled="#{controleCaixaController.dadosLiberados}" />
 								</div>
 							</ui:fragment>
 							<ui:fragment
 								rendered="#{controleCaixaController.tipodeValor eq 's'}">
 								<div class="input-combined">
-									<p:outputLabel class="title-input" value="Valor de saída" />
+									<p:outputLabel class="title-input" value="Valor de saída *" />
 									<p:inputNumber symbol="R$ "
 										value="#{controleCaixaController.controleCaixaModel.valor}"
-										disabled="#{controleCaixaController.dadosLiberados}"
-										required="true"
-										requiredMessage="Preencha o campo de valor vazamento" />
+										disabled="#{controleCaixaController.dadosLiberados}" />
 								</div>
 							</ui:fragment>
 						</div>
@@ -265,7 +497,7 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 					<div class="row">
 						<div class="col-md-12">
 							<div class="input-combined">
-								<p:outputLabel class="title-input" value="Motivo" />
+								<p:outputLabel class="title-input" value="Motivo (opcional)" />
 								<p:inputTextarea maxlength="100"
 									value="#{controleCaixaController.controleCaixaModel.motivo}"
 									disabled="#{controleCaixaController.dadosLiberados}" />
@@ -273,99 +505,20 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content {
 						</div>
 					</div>
 				</div>
+				</h:panelGroup>
 
 				<div class="flex justify-center">
 					<p:commandButton
+						id="btnRegistrarEntradaSaida"
 						disabled="#{controleCaixaController.dadosLiberados}"
-						class="btn btn-blue medium" value="Registrar" update="@form"
+						class="btn btn-blue medium" value="Registrar" 
+						update="@form btnRegistrarEntradaSaida"
 						process="@form"
-						actionListener="#{controleCaixaController.salvarValores()}" />
+						actionListener="#{controleCaixaController.salvarValores()}"
+						oncomplete="handleEntradaSaidaResponse(args);" />
 				</div>
 			</div>
 			
-			<!-- Modal de Saldo -->
-			<p:dialog id="dlgSaldo" widgetVar="dlgSaldo" modal="true"
-				showEffect="fade" hideEffect="fade" closable="false"
-				draggable="false" resizable="false" appendTo="@(body)">
-				<div class="header-modal">
-					<div class="flex align-center">
-						<div class="icon-circle">
-							<i class="fa-solid fa-money-bill-transfer"></i>
-						</div>
-						<label>
-							#{controleCaixaController.statusSelecionado eq 'A' ? 'Valor Inicial do Caixa' : 'Valor Final do Caixa'}
-						</label>
-					</div>
-				</div>
-				<p:messages id="messages" showDetail="true" autoUpdate="true"
-					closable="true" />
-
-				<h:panelGroup id="dialogVlr">
-					<div class="row">
-						<div class="col-md-12">
-							<ui:fragment
-								rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
-								<div class="input-combined">
-									<p:outputLabel class="title-input" value="Valor Inicial" />
-									<p:inputNumber symbol="R$ "
-										value="#{controleCaixaController.valorInicial}" required="true"
-										requiredMessage="Preencha o campo de valor" />
-								</div>
-							</ui:fragment>
-
-							<ui:fragment
-								rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
-								<div class="flex justify-end">
-									<span class="desc-topo">Cálculo Automático: <span
-										class="desc-topo-segundary">R$
-											#{controleCaixaController.valorSugerido}</span></span>
-								</div>
-
-								<div class="input-combined">
-									<p:outputLabel class="title-input" value="Valor Final" />
-									<p:inputNumber symbol="R$ "
-										value="#{controleCaixaController.valorFinal}" required="true"
-										requiredMessage="Preencha o campo de valor" />
-								</div>
-							</ui:fragment>
-						</div>
-					</div>
-
-					<ui:fragment
-						rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="input-combined">
-									<p:outputLabel class="title-input"
-										value="#{controleCaixaController.motivoFinal eq 'A' ? 'Valor final menor que o inicial informe o motivo' : 'Motivo'}" />
-									<p:inputTextarea maxlength="100"
-										value="#{controleCaixaController.mensagemMotivoFinal}" />
-								</div>
-							</div>
-						</div>
-					</ui:fragment>
-
-				</h:panelGroup>
-
-				<div class="flex justify-center mt15">
-					<ui:fragment
-						rendered="#{controleCaixaController.statusSelecionado eq 'A'}">
-						<p:commandButton class="btn btn-blue medium" value="Registrar"
-							update="@form" process="dlgSaldo"
-							actionListener="#{controleCaixaController.salvarRegistroInicial()}" />
-					</ui:fragment>
-					<ui:fragment
-						rendered="#{controleCaixaController.statusSelecionado eq 'I'}">
-						<p:commandButton class="btn btn-blue medium" value="Registrar"
-							update="datatableCaixas vlrCaixa dialogVlr messages"
-							process="dlgSaldo"
-							actionListener="#{controleCaixaController.salvarRegistroFinal()}"
-							oncomplete="if (args.validado) PF('dlgSaldo').hide();" />
-					</ui:fragment>
-				</div>
-
-			</p:dialog>
-		
 	</ui:define>
 
 </ui:composition>
