@@ -350,9 +350,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					<div class="flex align-center">
 						<ui:fragment
 							rendered="#{funcionarioController.editarModel eq 'A'}">
-							<p:commandButton update="dttLstHorariosAux" process="@this"
-								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
-								icon="fa-solid fa-trash" />
+							<!-- Botão de deletar REMOVIDO - use o botão INATIVO para desativar funcionários -->
 							<p:commandButton update="dlgFuncForm" process="@form"
 								actionListener="#{funcionarioController.prepararSalvarFuncionario()}"
 								styleClass="btn btn-green" value="Salvar" />
@@ -365,8 +363,11 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 						</ui:fragment>
 
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-							onclick="PF('dlgFunc').hide()"
-							actionListener="#{funcionarioController.limpaListaHorario()}" />
+							type="button"
+							onclick="PF('dlgFunc').hide(); return false;"
+							actionListener="#{funcionarioController.cancelarFuncionario()}"
+							process="@this"
+							ajax="false" />
 					</div>
 
 				</div>
@@ -398,7 +399,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
                 <div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Login" />
+							<p:outputLabel styleClass="title-input" value="Login *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.login}" 
 								placeholder="Digite o login" />
@@ -409,18 +410,20 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 				<div class="row">
                     <div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Senha" />
+							<p:outputLabel styleClass="title-input" value="Senha *" />
 							<p:password id="senhaFunc1" styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.senha}"
-								match="senhaFunc2" feedback="true"
+								feedback="true"
+								weakLabel="Fraca" goodLabel="Média" strongLabel="Forte"
+								promptLabel="Digite uma senha"
 								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : 'Digite a senha'}" />
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Confirmar Senha" />
+							<p:outputLabel styleClass="title-input" value="Confirmar Senha *" />
 							<p:password id="senhaFunc2" styleClass="senha-login" autocomplete="off"
-								value="#{funcionarioController.funcionarioModel.usuario.senha}"
+								value="#{funcionarioController.confirmarSenha}"
 								placeholder="#{funcionarioController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : 'Confirme a senha'}" />
 						</div>
 					</div>
@@ -434,7 +437,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Nome Completo" />
+							<p:outputLabel styleClass="title-input" value="Nome Completo *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.nome}" 
 								placeholder="Digite o nome completo" />
@@ -445,7 +448,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 				<div class="row">
 					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="CPF" />
+							<p:outputLabel styleClass="title-input" value="CPF *" />
 							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.cpf}" 
 								placeholder="000.000.000-00" />
@@ -453,7 +456,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
+							<p:outputLabel styleClass="title-input" value="Data de Nascimento *" />
 							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
 								value="#{funcionarioController.funcionarioModel.dataNascimento}" 
 								showIcon="true" locale="pt" yearNavigator="true" 
@@ -462,7 +465,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Sexo" />
+							<p:outputLabel styleClass="title-input" value="Sexo *" />
 							<p:selectOneMenu styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.sexo}">
 								<f:selectItem itemLabel="Selecione" itemValue="" />
@@ -477,7 +480,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 				<div class="row">
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Telefone" />
+							<p:outputLabel styleClass="title-input" value="Telefone *" />
 							<p:inputMask mask="(99) 99999-9999" styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.telefone}" 
 								placeholder="(00) 00000-0000" />
@@ -485,11 +488,12 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Data de Admissão" />
+							<p:outputLabel styleClass="title-input" value="Data de Admissão *" />
 							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
 								value="#{funcionarioController.funcionarioModel.dataAdmissao}" 
 								showIcon="true" locale="pt" yearNavigator="true" 
-								yearRange="2000:2030" maxdate="#{funcionarioController.hoje}" />
+								yearRange="2000:2030" maxdate="#{funcionarioController.hoje}"
+								required="true" requiredMessage="Data de Admissão é obrigatória" />
 						</div>
 					</div>
 				</div>
@@ -502,21 +506,21 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 				<div class="row">
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="CEP" />
+							<p:outputLabel styleClass="title-input" value="CEP *" />
 							<p:inputMask mask="99999-999" styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.cep}" />
 						</div>
 					</div>
 					<div class="col-md-7">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Rua" />
+							<p:outputLabel styleClass="title-input" value="Rua *" />
 							<p:inputText styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.rua}" />
 						</div>
 					</div>
 					<div class="col-md-2">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Número" />
+							<p:outputLabel styleClass="title-input" value="Número *" />
 							<p:inputText styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.numero}" />
 						</div>
@@ -533,21 +537,21 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Bairro" />
+							<p:outputLabel styleClass="title-input" value="Bairro *" />
 							<p:inputText styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.bairro}" />
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Cidade" />
+							<p:outputLabel styleClass="title-input" value="Cidade *" />
 							<p:inputText styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.cidade}" />
 						</div>
 					</div>
 					<div class="col-md-1">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="UF" />
+							<p:outputLabel styleClass="title-input" value="UF *" />
 							<p:selectOneMenu styleClass="senha-login"
 								value="#{funcionarioController.funcionarioModel.estado}">
 								<f:selectItem itemLabel="UF" itemValue="" />
@@ -736,10 +740,10 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</p:dataList>
 				</ui:fragment>
 				<ui:fragment rendered="#{funcionarioController.editarModel eq 'A'}">
-					<p:dataList id="dttLstHorarios" rowIndexVar="row"
+					<p:dataList id="dttLstHorarios" rowIndexVar="index"
 						class="dataList-dialog-custom data-list-time"
-						value="#{funcionarioController.lstHorarios}" var="horario"
-						paginator="true" paginatorPosition="bottom" rows="4" lazy="true"
+						value="#{funcionarioController.lstHorarioAux}" var="horario"
+						paginator="true" paginatorPosition="bottom" rows="4"
 						emptyMessage="Nenhum horário cadastrado para esse funcionário">
 
 						<div class="list-time-extended">
@@ -768,8 +772,9 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 							</div>
 							<p:commandButton update="dttLstHorarios" process="@this"
 								styleClass="btn-trash"
-								actionListener="#{funcionarioController.recebeValorDeleteHorario(horario)}"
-								icon="fa-solid fa-trash" />
+								actionListener="#{funcionarioController.recebeValorDeleteHorarioAux(index)}"
+								icon="fa-solid fa-trash"
+								onclick="PF('dlgHoraAux').show()" />
 						</div>
 
 					</p:dataList>
@@ -801,6 +806,40 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 
 			</h:panelGroup>
 
+		</p:dialog>
+		
+		<!-- Modal de Confirmação de Exclusão de Funcionário com Agendamentos -->
+		<p:dialog id="dlgConfirmarExclusaoFuncionario" widgetVar="dlgConfirmarExclusaoFuncionario" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<div class="header-modal-confirm">
+				<div style="text-align: center;">
+					<label style="font-size: 16px; font-weight: 600; color: #333; display: block; margin-bottom: 12px;">
+						⚠️ Atenção: Exclusão de Funcionário
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block; margin-bottom: 10px;">
+						Este funcionário possui 
+						<strong style="color: #E74A46;">#{funcionarioController.qtdAgendamentosAfetar}</strong> 
+						agendamento(s) pendente(s).
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block;">
+						Ao excluir, todos os agendamentos serão <strong style="color: #E74A46;">cancelados automaticamente</strong>.
+					</label>
+					<label style="font-size: 13px; color: #999; margin-top: 15px; display: block;">
+						Deseja continuar?
+					</label>
+				</div>
+			</div>
+
+			<div class="flex align-center justify-center">
+				<p:commandButton styleClass="btn medium btn-confirm" 
+					value="Sim, excluir"
+					action="#{funcionarioController.confirmarExclusaoComCancelamento}"
+					update="@form" />
+				<p:commandButton styleClass="btn medium btn-cancel" 
+					value="Não"
+					onclick="PF('dlgConfirmarExclusaoFuncionario').hide(); return false;" />
+			</div>
 		</p:dialog>
 
 		<p:dialog id="dlgHora" widgetVar="dlgHora" modal="true"
@@ -839,58 +878,146 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					value="Confirmar"
 					actionListener="#{funcionarioController.deletaHorarioAux()}"
 					process="@this"
-					update="dlgFunc"
+					update="dttLstHorarios dttLstHorariosAux"
 					oncomplete="PF('dlgHoraAux').hide()"/>
 				<p:commandButton styleClass="btn medium btn-cancel" value="Cancelar"
 					onclick="PF('dlgHoraAux').hide()" />
 			</div>
 		</p:dialog>
 		
+		<!-- Modal de Confirmação ao Salvar (quando horários deletados têm agendamentos) -->
+		<p:dialog id="dlgConfirmarExclusaoHorarioSalvar" widgetVar="dlgConfirmarExclusaoHorarioSalvar" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<div class="header-modal-confirm">
+				<div style="text-align: center;">
+					<label style="font-size: 16px; font-weight: 600; color: #333; display: block; margin-bottom: 12px;">
+						⚠️ Atenção: Alteração em Horários
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block; margin-bottom: 10px;">
+						Os horários removidos possuem 
+						<strong style="color: #E74A46;">#{funcionarioController.qtdAgendamentosAfetar}</strong> 
+						agendamento(s) pendente(s).
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block;">
+						Todos esses agendamentos serão <strong style="color: #E74A46;">cancelados automaticamente</strong>.
+					</label>
+					<label style="font-size: 13px; color: #999; margin-top: 15px; display: block;">
+						Deseja continuar?
+					</label>
+				</div>
+			</div>
+
+			<div class="flex align-center justify-center">
+				<p:commandButton styleClass="btn medium btn-confirm" 
+					value="Sim, salvar"
+					action="#{funcionarioController.executarAtualizacaoFuncionario}"
+					update="@form"
+					process="@form" />
+				<p:commandButton styleClass="btn medium btn-cancel" 
+					value="Não"
+					onclick="PF('dlgConfirmarExclusaoHorarioSalvar').hide(); return false;" />
+			</div>
+		</p:dialog>
+		
+		<!-- Modal de Confirmação ao Inativar Funcionário com Agendamentos -->
+		<p:dialog id="dlgConfirmarInativarFuncionario" widgetVar="dlgConfirmarInativarFuncionario" modal="true"
+			showEffect="fade" hideEffect="fade" closable="false"
+			draggable="false" resizable="false">
+			<div class="header-modal-confirm">
+				<div style="text-align: center;">
+					<label style="font-size: 16px; font-weight: 600; color: #333; display: block; margin-bottom: 12px;">
+						⚠️ Atenção: Inativar Funcionário
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block; margin-bottom: 10px;">
+						Este funcionário possui 
+						<strong style="color: #E74A46;">#{funcionarioController.qtdAgendamentosAfetar}</strong> 
+						agendamento(s) pendente(s).
+					</label>
+					<label style="font-size: 14px; color: #666; line-height: 1.6; display: block;">
+						Ao inativar, todos os agendamentos serão <strong style="color: #E74A46;">cancelados automaticamente</strong>.
+					</label>
+					<label style="font-size: 13px; color: #999; margin-top: 15px; display: block;">
+						Deseja continuar?
+					</label>
+				</div>
+			</div>
+
+			<div class="flex align-center justify-center">
+				<p:commandButton styleClass="btn medium btn-confirm" 
+					value="Sim, inativar"
+					action="#{funcionarioController.confirmarInativarFuncionario}"
+					update="@form"
+					process="@form" />
+				<p:commandButton styleClass="btn medium btn-cancel" 
+					value="Não"
+					onclick="PF('dlgConfirmarInativarFuncionario').hide(); return false;" />
+			</div>
+		</p:dialog>
+		
 		<!-- Modal de Validação de Email -->
 		<p:dialog id="dlgValidarEmailFuncionario" widgetVar="dlgValidarEmailFuncionario" modal="true" 
-			closable="false" draggable="false" resizable="false" showHeader="false">
+			showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false"
+			styleClass="dialog-validar-email">
 			<h:panelGroup id="dlgValidarEmailFuncionarioForm">
-				<div class="dialog-header">
-					<div style="display: flex; gap: 10px; align-items: center;">
-						<i class="fa-solid fa-envelope-circle-check" style="font-size: 22px; color: #4CAF50;"></i>
+				
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<i class="fa-solid fa-envelope-circle-check"></i>
+						</div>
 						<label>Validar Email</label>
+					</div>
+					<div class="flex align-center">
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgValidarEmailFuncionario').hide()"/>
 					</div>
 				</div>
 
-				<div class="dialog-scroll">
-					<div style="padding: 20px; text-align: center;">
-						<p style="margin-bottom: 20px; color: #666; font-size: 14px;">
-							Digite o código de 6 dígitos enviado para<br/>
-							<strong>#{funcionarioController.funcionarioModel.usuario.login}</strong>
-						</p>
+				<div style="padding: 20px 20px 0 20px; text-align: center;">
+					<p style="margin-bottom: 25px; color: #666; font-size: 14px;">
+						Digite o código de 6 dígitos enviado para<br/>
+						<strong>#{funcionarioController.funcionarioModel.usuario.login}</strong>
+					</p>
 
-						<div style="margin-bottom: 20px;">
-							<p:inputText id="codigoValidacaoFuncionario" 
-								value="#{funcionarioController.codigoValidacao}"
-								placeholder="000000"
-								maxlength="6"
-								style="text-align: center; font-size: 24px; letter-spacing: 8px; width: 100%;"
-								styleClass="input-padrao"/>
-						</div>
-
-						<div style="display: flex; gap: 10px; justify-content: center;">
-							<p:commandButton value="Validar" 
-								styleClass="btn btn-green"
-								actionListener="#{funcionarioController.validarCodigoFuncionario()}"
-								update="dlgValidarEmailFuncionarioForm @form"
-								process="dlgValidarEmailFuncionarioForm"
-								oncomplete="if (args &amp;&amp; args.validationFailed) { PF('dlgValidarEmailFuncionario').show(); }"/>
-								
-							<p:commandButton value="Reenviar Código" 
-								styleClass="btn btn-secondary"
-								actionListener="#{funcionarioController.reenviarCodigoFuncionario()}"
-								update="dlgValidarEmailFuncionarioForm"
-								process="@this"/>
-						</div>
+					<div class="input-combined" style="margin: 0 auto 25px auto; max-width: 280px;">
+						<p:outputLabel styleClass="title-input" value="Código de Verificação *" />
+						<p:inputText id="codigoValidacaoFuncionario" 
+							value="#{funcionarioController.codigoValidacao}"
+							maxlength="6"/>
 					</div>
+				</div>
+
+				<div class="flex align-center justify-center" style="padding: 0 20px 20px 20px;">
+					<p:commandButton value="Validar" 
+						styleClass="btn medium btn-green"
+						actionListener="#{funcionarioController.validarCodigoFuncionario()}"
+						update="dlgValidarEmailFuncionarioForm"
+						process="dlgValidarEmailFuncionarioForm"
+						ajax="true"/>
+						
+					<p:commandButton value="Reenviar Código" 
+						styleClass="btn medium btn-cancel"
+						actionListener="#{funcionarioController.reenviarCodigoFuncionario()}"
+						update="dlgValidarEmailFuncionarioForm"
+						process="@this"/>
 				</div>
 			</h:panelGroup>
 		</p:dialog>
+		
+		<script type="text/javascript">
+			function confirmarExclusaoComCancelamento() {
+				PF('statusDialog').show();
+				
+				// Chama o método do controller via remoteCommand
+				excluirFuncionarioComCancelamento();
+			}
+		</script>
+		
+		<p:remoteCommand name="excluirFuncionarioComCancelamento" 
+			actionListener="#{funcionarioController.confirmarExclusaoComCancelamento()}"
+			update="form"
+			oncomplete="PF('statusDialog').hide();" />
 		
 	</ui:define>
 

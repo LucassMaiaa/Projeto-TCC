@@ -985,4 +985,230 @@ public class AgendamentoDAO {
 		return resultado;
 	}
 
+	/**
+	 * Conta agendamentos pendentes de um funcionário
+	 */
+	public static int contarAgendamentosPendentesPorFuncionario(Long funcionarioId) {
+		String sql = "SELECT COUNT(*) as total FROM agendamento " +
+		             "WHERE fun_codigo = ? AND age_status IN ('A', 'P')";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, funcionarioId);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				int total = rs.getInt("total");
+				System.out.println("🔍 Funcionário " + funcionarioId + " tem " + total + " agendamento(s) pendente(s)");
+				return total;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	/**
+	 * Conta agendamentos pendentes em um horário específico de um funcionário
+	 */
+	public static int contarAgendamentosPendentesPorHorario(Long horarioId) {
+		// Busca o horário para pegar funcionário e período
+		String sqlHorario = "SELECT fun_codigo, hor_hora_inicio, hor_hora_fim FROM horario WHERE hor_codigo = ?";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+		     PreparedStatement stmtHorario = conn.prepareStatement(sqlHorario)) {
+			
+			stmtHorario.setLong(1, horarioId);
+			ResultSet rsHorario = stmtHorario.executeQuery();
+			
+			if (!rsHorario.next()) {
+				System.err.println("⚠️ Horário ID " + horarioId + " não encontrado no banco!");
+				return 0; // Horário não encontrado
+			}
+			
+			Long funCodigo = rsHorario.getLong("fun_codigo");
+			java.sql.Time horInicio = rsHorario.getTime("hor_hora_inicio");
+			java.sql.Time horFim = rsHorario.getTime("hor_hora_fim");
+			rsHorario.close();
+			
+			System.out.println("🔍 Verificando agendamentos para:");
+			System.out.println("   - Horário ID: " + horarioId);
+			System.out.println("   - Funcionário: " + funCodigo);
+			System.out.println("   - Período: " + horInicio + " até " + horFim);
+			
+			// PRIMEIRO: Vamos ver TODOS os agendamentos desse funcionário para debug
+			String sqlDebug = "SELECT age_codigo, age_data, age_hora, age_status FROM agendamento WHERE fun_codigo = ?";
+			try (PreparedStatement stmtDebug = conn.prepareStatement(sqlDebug)) {
+				stmtDebug.setLong(1, funCodigo);
+				ResultSet rsDebug = stmtDebug.executeQuery();
+				System.out.println("   📋 TODOS os agendamentos do funcionário " + funCodigo + ":");
+				while (rsDebug.next()) {
+					System.out.println("      - ID: " + rsDebug.getLong("age_codigo") + 
+					                 " | Data: " + rsDebug.getDate("age_data") + 
+					                 " | Hora: " + rsDebug.getTime("age_hora") + 
+					                 " | Status: " + rsDebug.getString("age_status"));
+				}
+			}
+			
+			// Conta agendamentos pendentes desse funcionário no período do horário
+			// MUDANÇA: Usar <= para incluir agendamentos no horário final
+			String sqlCount = "SELECT COUNT(*) as total FROM agendamento " +
+			                 "WHERE fun_codigo = ? " +
+			                 "AND age_data >= CURDATE() " +
+			                 "AND age_hora >= ? " +
+			                 "AND age_hora <= ? " + // MUDEI < para <=
+			                 "AND age_status = 'A'";
+			
+			try (PreparedStatement stmtCount = conn.prepareStatement(sqlCount)) {
+				stmtCount.setLong(1, funCodigo);
+				stmtCount.setTime(2, horInicio);
+				stmtCount.setTime(3, horFim);
+				
+				System.out.println("   📝 Executando query: " + sqlCount);
+				System.out.println("   📝 Parâmetros: funCodigo=" + funCodigo + ", horInicio=" + horInicio + ", horFim=" + horFim);
+				
+				ResultSet rsCount = stmtCount.executeQuery();
+				if (rsCount.next()) {
+					int total = rsCount.getInt("total");
+					System.out.println("   ✅ Total de agendamentos pendentes encontrados: " + total);
+					return total;
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("❌ Erro ao contar agendamentos por horário: " + e.getMessage());
+		}
+		return 0;
+	}
+
+	/**
+	 * Cancela todos os agendamentos pendentes de um funcionário
+	 */
+	public static int cancelarAgendamentosPendentesPorFuncionario(Long funcionarioId) {
+		String sql = "UPDATE agendamento SET age_status = 'I' " +
+		             "WHERE fun_codigo = ? AND age_status IN ('A', 'P')";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+		     PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, funcionarioId);
+			int qtd = stmt.executeUpdate();
+			System.out.println("🔴 Cancelados " + qtd + " agendamentos do funcionário ID: " + funcionarioId);
+			return qtd;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("Erro ao cancelar agendamentos: " + e.getMessage());
+		}
+		return 0;
+	}
+
+	/**
+	 * Cancela agendamentos pendentes em um horário específico
+	 */
+	public static int cancelarAgendamentosPendentesPorHorario(Long horarioId) {
+		// Busca o horário para pegar funcionário e período
+		String sqlHorario = "SELECT fun_codigo, hor_hora_inicio, hor_hora_fim FROM horario WHERE hor_codigo = ?";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+		     PreparedStatement stmtHorario = conn.prepareStatement(sqlHorario)) {
+			
+			stmtHorario.setLong(1, horarioId);
+			ResultSet rsHorario = stmtHorario.executeQuery();
+			
+			if (!rsHorario.next()) {
+				return 0; // Horário não encontrado
+			}
+			
+			Long funCodigo = rsHorario.getLong("fun_codigo");
+			java.sql.Time horInicio = rsHorario.getTime("hor_hora_inicio");
+			java.sql.Time horFim = rsHorario.getTime("hor_hora_fim");
+			rsHorario.close();
+			
+			// Cancela agendamentos pendentes desse funcionário no período do horário
+			String sqlUpdate = "UPDATE agendamento SET age_status = 'I' " +
+			                  "WHERE fun_codigo = ? " +
+			                  "AND age_hora >= ? " +
+			                  "AND age_hora < ? " +
+			                  "AND age_status IN ('A', 'P')";
+			
+			try (PreparedStatement stmtUpdate = conn.prepareStatement(sqlUpdate)) {
+				stmtUpdate.setLong(1, funCodigo);
+				stmtUpdate.setTime(2, horInicio);
+				stmtUpdate.setTime(3, horFim);
+				
+				int count = stmtUpdate.executeUpdate();
+				System.out.println("🔴 Cancelados " + count + " agendamentos do horário ID: " + horarioId);
+				return count;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("Erro ao cancelar agendamentos: " + e.getMessage());
+		}
+		return 0;
+	}
+	
+	/**
+	 * DELETA todos os agendamentos de um funcionário (TODOS os status)
+	 * Usado ao deletar o funcionário para evitar erro de foreign key
+	 */
+	public static int deletarTodosPorFuncionario(Long funcionarioId) {
+		try (Connection conn = DatabaseConnection.getConnection()) {
+			
+			// PASSO 1: Buscar todos os agendamentos do funcionário
+			String sqlBuscar = "SELECT age_codigo FROM agendamento WHERE fun_codigo = ?";
+			List<Long> agendamentosIds = new ArrayList<>();
+			
+			try (PreparedStatement stmtBuscar = conn.prepareStatement(sqlBuscar)) {
+				stmtBuscar.setLong(1, funcionarioId);
+				ResultSet rs = stmtBuscar.executeQuery();
+				while (rs.next()) {
+					agendamentosIds.add(rs.getLong("age_codigo"));
+				}
+			}
+			
+			System.out.println("📋 Encontrados " + agendamentosIds.size() + " agendamentos do funcionário ID: " + funcionarioId);
+			
+			if (!agendamentosIds.isEmpty()) {
+				// PASSO 2: Deletar NOTIFICAÇÕES de cada agendamento
+				String sqlDeleteNotificacoes = "DELETE FROM notificacao WHERE age_codigo = ?";
+				int totalNotificacoes = 0;
+				
+				try (PreparedStatement stmtDeleteNotificacoes = conn.prepareStatement(sqlDeleteNotificacoes)) {
+					for (Long ageId : agendamentosIds) {
+						stmtDeleteNotificacoes.setLong(1, ageId);
+						totalNotificacoes += stmtDeleteNotificacoes.executeUpdate();
+					}
+				}
+				System.out.println("🗑️ Deletados " + totalNotificacoes + " registros de notificacao");
+				
+				// PASSO 3: Deletar AGENDAMENTO_SERVICO de cada agendamento
+				String sqlDeleteServicos = "DELETE FROM agendamento_servico WHERE age_codigo = ?";
+				int totalServicos = 0;
+				
+				try (PreparedStatement stmtDeleteServicos = conn.prepareStatement(sqlDeleteServicos)) {
+					for (Long ageId : agendamentosIds) {
+						stmtDeleteServicos.setLong(1, ageId);
+						totalServicos += stmtDeleteServicos.executeUpdate();
+					}
+				}
+				System.out.println("🗑️ Deletados " + totalServicos + " registros de agendamento_servico");
+			}
+			
+			// PASSO 4: Deletar todos os agendamentos do funcionário
+			String sqlDeleteAgendamentos = "DELETE FROM agendamento WHERE fun_codigo = ?";
+			int qtdAgendamentos = 0;
+			
+			try (PreparedStatement stmtDeleteAgendamentos = conn.prepareStatement(sqlDeleteAgendamentos)) {
+				stmtDeleteAgendamentos.setLong(1, funcionarioId);
+				qtdAgendamentos = stmtDeleteAgendamentos.executeUpdate();
+			}
+			
+			System.out.println("🗑️ Deletados " + qtdAgendamentos + " agendamentos do funcionário ID: " + funcionarioId);
+			return qtdAgendamentos;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.err.println("Erro ao deletar agendamentos: " + e.getMessage());
+		}
+		return 0;
+	}
+
 }

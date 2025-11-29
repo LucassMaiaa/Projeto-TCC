@@ -52,21 +52,26 @@ public class PagamentoController {
 	}
 
 	public void pagamentoSelecionado(Pagamento event) {
-		pagamentoModel = event;
+		pagamentoModel = new Pagamento();
+		pagamentoModel.setId(event.getId());
+		pagamentoModel.setNome(event.getNome());
+		pagamentoModel.setStatus(event.getStatus());
 		editarModel = "A";
+		System.out.println("🔍 Pagamento selecionado: " + pagamentoModel.getNome());
 	}
 
 	public void novoPagamento() {
-		editarModel = "I";
 		pagamentoModel = new Pagamento();
-
+		editarModel = "I";
+		System.out.println("➕ Novo pagamento - Model limpo");
 	}
 
 	public void adicionarNovoPagamento() {
 		try {
-			if (pagamentoModel.getNome().isEmpty()) {
+			// Validação do campo nome
+			if (pagamentoModel.getNome() == null || pagamentoModel.getNome().trim().isEmpty()) {
 				FacesContext.getCurrentInstance().addMessage(null,
-						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo nome do pagamento obrigatório", "Erro!"));
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Nome do tipo de pagamento é obrigatório", "Erro!"));
 				return;
 			}
 
@@ -74,7 +79,7 @@ public class PagamentoController {
 
 			PrimeFaces.current()
 					.executeScript("Swal.fire({" + "  icon: 'success',"
-							+ "  title: '<span style=\"font-size: 14px\">Pagamento cadastrado com sucesso!</span>',"
+							+ "  title: '<span style=\"font-size: 14px\">Tipo de pagamento cadastrado com sucesso!</span>',"
 							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 
 			PrimeFaces.current().executeScript("PF('dlgPag').hide();");
@@ -82,25 +87,31 @@ public class PagamentoController {
 
 		} catch (Exception e) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Erro inesperado ao salvar pagamento: " + e.getMessage(), "Erro!"));
+					"Erro inesperado ao salvar tipo de pagamento: " + e.getMessage(), "Erro!"));
 		}
 	}
 
 	public void atualizarPagamento() {
-		if (pagamentoModel.getNome().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null,
-					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo nome do cliente obrigatório", "Erro!"));
-			return;
+		try {
+			// Validação do campo nome
+			if (pagamentoModel.getNome() == null || pagamentoModel.getNome().trim().isEmpty()) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Nome do tipo de pagamento é obrigatório", "Erro!"));
+				return;
+			}
+
+			PagamentoDAO.atualizar(pagamentoModel);
+			PrimeFaces.current()
+					.executeScript("Swal.fire({" + "  icon: 'success',"
+							+ "  title: '<span style=\"font-size: 14px\">Tipo de pagamento editado com sucesso!</span>',"
+							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
+			PrimeFaces.current().executeScript("PF('dlgPag').hide();");
+			PrimeFaces.current().ajax().update("form");
+
+		} catch (Exception e) {
+			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+					"Erro inesperado ao atualizar tipo de pagamento: " + e.getMessage(), "Erro!"));
 		}
-
-		PagamentoDAO.atualizar(pagamentoModel);
-		PrimeFaces.current()
-				.executeScript("Swal.fire({" + "  icon: 'success',"
-						+ "  title: '<span style=\"font-size: 14px\">Pagamento editado com sucesso!</span>',"
-						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-		PrimeFaces.current().executeScript("PF('dlgPag').hide();");
-		PrimeFaces.current().ajax().update("form");
-
 	}
 
 	public void deletaPagamento() {

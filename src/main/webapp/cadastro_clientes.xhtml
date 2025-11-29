@@ -254,7 +254,10 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 						</ui:fragment>
 
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-							onclick="PF('dlgCli').hide()"/>
+							actionListener="#{clienteController.cancelarCliente()}"
+							process="@this"
+							update="dlgCliForm"
+							oncomplete="PF('dlgCli').hide()"/>
 					</div>
 
 				</div>
@@ -286,7 +289,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
                 <div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Login" />
+							<p:outputLabel styleClass="title-input" value="Login *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								placeholder="Digite o login"
 								value="#{clienteController.clienteModel.usuario.login}" />
@@ -297,18 +300,20 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 				<div class="row">
                     <div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Senha" />
+							<p:outputLabel styleClass="title-input" value="Senha *" />
 							<p:password id="senha1" styleClass="senha-login" autocomplete="off"
 								value="#{clienteController.clienteModel.usuario.senha}"
-								match="senha2" feedback="true"
+								feedback="true"
+								weakLabel="Fraca" goodLabel="Média" strongLabel="Forte"
+								promptLabel="Digite uma senha"
 								placeholder="#{clienteController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : ''}" />
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Confirmar Senha" />
+							<p:outputLabel styleClass="title-input" value="Confirmar Senha *" />
 							<p:password id="senha2" styleClass="senha-login" autocomplete="off"
-								value="#{clienteController.clienteModel.usuario.senha}"
+								value="#{clienteController.confirmarSenha}"
 								placeholder="#{clienteController.editarModel eq 'A' ? 'Deixe em branco para manter a atual' : ''}" />
 						</div>
 					</div>
@@ -322,7 +327,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 				<div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Nome Completo" />
+							<p:outputLabel styleClass="title-input" value="Nome Completo *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								placeholder="Digite o nome completo"
 								value="#{clienteController.clienteModel.nome}" />
@@ -333,7 +338,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 				<div class="row">
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="CPF" />
+							<p:outputLabel styleClass="title-input" value="CPF *" />
 							<p:inputMask mask="999.999.999-99" styleClass="senha-login"
 								placeholder="000.000.000-00"
 								value="#{clienteController.clienteModel.cpf}" />
@@ -341,7 +346,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Data de Nascimento" />
+							<p:outputLabel styleClass="title-input" value="Data de Nascimento *" />
 							<p:datePicker styleClass="senha-login" pattern="dd/MM/yyyy"
 								placeholder="dd/mm/aaaa"
 								value="#{clienteController.clienteModel.dataNascimento}" 
@@ -355,7 +360,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 				<div class="row">
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Telefone" />
+							<p:outputLabel styleClass="title-input" value="Telefone *" />
 							<p:inputMask mask="(99) 99999-9999" styleClass="senha-login"
 								placeholder="(00) 00000-0000"
 								value="#{clienteController.clienteModel.telefone}" />
@@ -363,7 +368,7 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					</div>
 										<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Sexo" />
+							<p:outputLabel styleClass="title-input" value="Sexo *" />
 							<p:selectOneMenu styleClass="senha-login"
 								value="#{clienteController.clienteModel.sexo}">
 								<f:selectItem itemLabel="Selecione" itemValue="" />
@@ -383,21 +388,21 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 				<div class="row">
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="CEP" />
+							<p:outputLabel styleClass="title-input" value="CEP *" />
 							<p:inputMask mask="99999-999" styleClass="senha-login"
 								value="#{clienteController.clienteModel.cep}" />
 						</div>
 					</div>
 					<div class="col-md-7">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Rua" />
+							<p:outputLabel styleClass="title-input" value="Rua *" />
 							<p:inputText styleClass="senha-login"
 								value="#{clienteController.clienteModel.rua}" />
 						</div>
 					</div>
 					<div class="col-md-2">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Número" />
+							<p:outputLabel styleClass="title-input" value="Número *" />
 							<p:inputText styleClass="senha-login"
 								value="#{clienteController.clienteModel.numero}" />
 						</div>
@@ -414,21 +419,21 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					</div>
 					<div class="col-md-4">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Bairro" />
+							<p:outputLabel styleClass="title-input" value="Bairro *" />
 							<p:inputText styleClass="senha-login"
 								value="#{clienteController.clienteModel.bairro}" />
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Cidade" />
+							<p:outputLabel styleClass="title-input" value="Cidade *" />
 							<p:inputText styleClass="senha-login"
 								value="#{clienteController.clienteModel.cidade}" />
 						</div>
 					</div>
 					<div class="col-md-1">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="UF" />
+							<p:outputLabel styleClass="title-input" value="UF *" />
 							<p:selectOneMenu styleClass="senha-login"
 								value="#{clienteController.clienteModel.estado}">
 								<f:selectItem itemLabel="UF" itemValue="" />
@@ -524,9 +529,9 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					<p:commandButton value="Validar" 
 						styleClass="btn medium btn-green"
 						actionListener="#{clienteController.validarCodigoCliente()}"
-						update="dlgValidarEmailClienteForm @form"
+						update="dlgValidarEmailClienteForm"
 						process="dlgValidarEmailClienteForm"
-						oncomplete="if (args &amp;&amp; args.validationFailed) { PF('dlgValidarEmailCliente').show(); }"/>
+						ajax="true"/>
 						
 					<p:commandButton value="Reenviar Código" 
 						styleClass="btn medium btn-cancel"

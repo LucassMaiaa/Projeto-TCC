@@ -394,7 +394,7 @@ body .ui-dialog#dlgRestricao {
 					</div>
 					<div class="flex align-center">
 						<ui:fragment rendered="#{restricaoDataController.editarModel eq 'A'}">
-							<p:commandButton update="@form" process="@this"
+							<p:commandButton type="button"
 								styleClass="btn-trash" onclick="PF('dlgConfirm').show()"
 								icon="fa-solid fa-trash" />
 							<p:commandButton update="dlgRestricaoForm" process="@form"
@@ -429,9 +429,7 @@ body .ui-dialog#dlgRestricao {
 									pattern="dd/MM/yyyy"
 									value="#{restricaoDataController.restricaoModel.data}" 
 									showIcon="true" 
-									locale="pt"
-									required="true"
-									requiredMessage="A data é obrigatória." />
+									locale="pt" />
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -501,9 +499,9 @@ body .ui-dialog#dlgRestricao {
 
 				<div class="flex align-center justify-center">
 					<p:commandButton styleClass="btn medium btn-confirm"
-						value="Confirmar"
+						value="Confirmar" update="@form" process="@this"
 						actionListener="#{restricaoDataController.deletarRestricao()}" />
-					<p:commandButton styleClass="btn medium btn-cancel"
+					<p:commandButton type="button" styleClass="btn medium btn-cancel"
 						value="Cancelar" onclick="PF('dlgConfirm').hide()" />
 				</div>
 			</h:panelGroup>

@@ -40,7 +40,9 @@ public class AuthorizationFilter implements Filter {
         
         // Se não está logado, redireciona para login
         if (usuarioLogado == null) {
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login.xhtml");
+            if (!httpResponse.isCommitted()) {
+                httpResponse.sendRedirect(httpRequest.getContextPath() + "/login.xhtml");
+            }
             return;
         }
         
@@ -54,7 +56,9 @@ public class AuthorizationFilter implements Filter {
                 // Cliente só pode acessar agendamentoCliente.xhtml e configuracoes.xhtml
                 if (!requestPath.contains("agendamentoCliente.xhtml") && 
                     !requestPath.contains("configuracoes.xhtml")) {
-                    httpResponse.sendRedirect(httpRequest.getContextPath() + "/agendamentoCliente.xhtml");
+                    if (!httpResponse.isCommitted()) {
+                        httpResponse.sendRedirect(httpRequest.getContextPath() + "/agendamentoCliente.xhtml");
+                    }
                     return;
                 }
             }
@@ -66,7 +70,9 @@ public class AuthorizationFilter implements Filter {
                     !requestPath.contains("controle_caixa.xhtml") && 
                     !requestPath.contains("configuracoes_geral.xhtml") &&
                     !requestPath.contains("modal_avaliacao.xhtml")) { // Modal de avaliação usado no agendamento
-                    httpResponse.sendRedirect(httpRequest.getContextPath() + "/agendamento.xhtml");
+                    if (!httpResponse.isCommitted()) {
+                        httpResponse.sendRedirect(httpRequest.getContextPath() + "/agendamento.xhtml");
+                    }
                     return;
                 }
             }

@@ -150,6 +150,28 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
+	
+	public static Funcionario buscarPorId(Long id) {
+		Funcionario funcionario = null;
+		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection();
+				PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setLong(1, id);
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				funcionario = mapResultSetToFuncionario(rs);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return funcionario;
+	}
+
 	public static Funcionario buscarFuncionarioPorUsuarioId(Long usuarioId) {
 		Funcionario funcionario = null;
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.usu_codigo = ?";

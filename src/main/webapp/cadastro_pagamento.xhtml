@@ -137,7 +137,7 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 		<div class="flex align-center mt15 mb15">
 			<p:commandButton
 				actionListener="#{pagamentoController.novoPagamento()}"
-				update="form:dlgPag" process="@form" class="btn-circle-green"
+				update="form:dlgPag" process="@this" class="btn-circle-green"
 				icon="fa fa-plus" oncomplete="PF('dlgPag').show()" />
 			<label class="title-button ml8">Novo Tipo de Pagamento</label>
 		</div>
@@ -195,7 +195,10 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 						</ui:fragment>
 
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-							onclick="PF('dlgPag').hide()" />
+							type="button"
+							onclick="PF('dlgPag').hide(); return false;"
+							process="@this"
+							ajax="false" />
 					</div>
 
 				</div>
@@ -221,7 +224,7 @@ dl, ol, .dataList-custom ul[class="ui-datalist-data"] {
 					<div class="col-md-12">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input"
-								value="Nome do tipo de pagamento" />
+								value="Nome do tipo de pagamento *" />
 							<p:inputText styleClass="senha-login"
 								value="#{pagamentoController.pagamentoModel.nome}" />
 						</div>

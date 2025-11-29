@@ -71,6 +71,36 @@ public class HorarioDAO {
 
 		return total;
 	}
+	
+	public static List<Horario> listarPorFuncionario(Long funcionarioId) {
+		List<Horario> horarios = new ArrayList<>();
+		String sql = "SELECT * FROM horario WHERE fun_codigo = ?";
+
+		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+			ps.setLong(1, funcionarioId);
+			ResultSet rs = ps.executeQuery();
+
+			while (rs.next()) {
+				Horario horario = new Horario();
+				horario.setId(rs.getLong("hor_codigo"));
+				horario.setHoraInicial(rs.getTime("hor_hora_inicio").toLocalTime());
+				horario.setHoraFinal(rs.getTime("hor_hora_fim").toLocalTime());
+				horario.setDomingo(rs.getBoolean("hor_domingo"));
+				horario.setSegunda(rs.getBoolean("hor_segunda"));
+				horario.setTerca(rs.getBoolean("hor_terca"));
+				horario.setQuarta(rs.getBoolean("hor_quarta"));
+				horario.setQuinta(rs.getBoolean("hor_quinta"));
+				horario.setSexta(rs.getBoolean("hor_sexta"));
+				horario.setSabado(rs.getBoolean("hor_sabado"));
+				horarios.add(horario);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return horarios;
+	}
 
 	public static void deletar(Long horario) {
 		String sql = "DELETE FROM horario WHERE hor_codigo = ?";
