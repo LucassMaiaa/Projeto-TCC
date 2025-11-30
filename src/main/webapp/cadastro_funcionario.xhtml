@@ -399,7 +399,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
                 <div class="row">
 					<div class="col-md-12">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Login *" />
+							<p:outputLabel styleClass="title-input" value="Email *" />
 							<p:inputText styleClass="senha-login" autocomplete="off"
 								value="#{funcionarioController.funcionarioModel.usuario.login}" 
 								placeholder="Digite o login" />
@@ -634,10 +634,9 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
 					</div>
 		
 					<div class="col-md-4 flex justify-center align-center">
-						<p:commandButton update="dttLstHorarios dttLstHorariosAux"
-							process="@form"
-							style="    width: 100%;
-    height: 40px;"
+						<p:commandButton update="msgs dttLstHorarios dttLstHorariosAux inputHoraInicio inputHoraFim chkDom chkSeg chkTer chkQua chkQui chkSex chkSab"
+							process="@this inputHoraInicio inputHoraFim chkDom chkSeg chkTer chkQua chkQui chkSex chkSab"
+							style="width: 100%; height: 40px;"
 							actionListener="#{funcionarioController.novoHorario()}"
 							class="btn btn-green" value="Adicionar Horário" 
 							icon="fa fa-plus" />

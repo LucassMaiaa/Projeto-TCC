@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+<!-- Usando o template SEM sidebar (full width) -->
+<ui:composition template="/WEB-INF/template.xhtml">
+
+	<!-- Título da página -->
+	<ui:define name="title">Configurações Admin - BarberSys</ui:define>
+	
+	<!-- CSS específico desta página -->
+	<ui:define name="extra-css">
+		<style>
+			:root { --avatar-color: #23A4D5; }
+
+			.config-container {
+				background: #FFFFFF;
+				border-radius: 12px;
+				padding: 40px;
+				box-shadow: 0 3px 6px #00000029;
+				max-width: 900px;
+				margin: 0 auto;
+				animation: fadeInUp 0.5s ease-out;
+			}
+
+			.avatar-section {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 15px;
+				margin-bottom: 35px;
+				padding-bottom: 30px;
+				border-bottom: 1px solid #EBEBEB;
+			}
+
+			.avatar-circle-large {
+				width: 120px;
+				height: 120px;
+				border-radius: 50%;
+				background: #23A4D5;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.avatar-circle-large i {
+				font-size: 50px;
+				color: white;
+			}
+
+			.avatar-info {
+				text-align: center;
+			}
+
+			.avatar-name {
+				font-size: 24px;
+				font-weight: 700;
+				color: #1F2937;
+				margin-bottom: 5px;
+				text-transform: uppercase;
+			}
+
+			.avatar-role {
+				font-size: 14px;
+				color: #6B7280;
+				font-weight: 600;
+				background-color: #e3f2fd;
+				padding: 4px 12px;
+				border-radius: 12px;
+			}
+
+			.section-divider {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin: 35px 0 25px 0;
+				padding-bottom: 12px;
+				border-bottom: 1px solid #EBEBEB;
+			}
+
+			.section-divider i {
+				font-size: 22px;
+				color: #23A4D5;
+			}
+
+			.section-divider h3 {
+				margin: 0;
+				font-size: 18px;
+				font-weight: 700;
+				color: #374151;
+			}
+
+			.checkbox-container {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 20px;
+			}
+
+			.checkbox-container label {
+				font-weight: 600;
+				color: #374151;
+				cursor: pointer;
+				user-select: none;
+			}
+
+			.action-buttons {
+				display: flex;
+				justify-content: center;
+				gap: 15px;
+				margin-top: 40px;
+				padding-top: 25px;
+				border-top: 1px solid #EBEBEB;
+			}
+
+			@keyframes fadeInUp {
+				from { opacity: 0; transform: translateY(20px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
+			
+			body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon {
+				overflow: visible;
+				position: absolute;
+				left: 50%;
+				top: 50%;
+				margin-left: -0.5rem;
+				margin-top: -0.5rem;
+				transform: translate(-2%, -17%);
+			}
+			
+			/* Estilos do Modal de Verificação */
+			.modal-verificacao .ui-dialog-content {
+				padding: 30px !important;
+			}
+			
+			.modal-content-verificacao {
+				text-align: center;
+			}
+			
+			.modal-icon {
+				font-size: 60px;
+				color: #23A4D5;
+				margin-bottom: 20px;
+			}
+			
+			.modal-content-verificacao h3 {
+				margin: 0 0 10px 0;
+				color: #374151;
+				font-size: 24px;
+			}
+			
+			.modal-content-verificacao p {
+				margin: 0 0 25px 0;
+				color: #6B7280;
+				font-size: 14px;
+			}
+			
+			.input-codigo input {
+				text-align: center;
+				font-size: 24px;
+				letter-spacing: 8px;
+				font-weight: bold;
+			}
+			
+			.modal-actions {
+				display: flex;
+				gap: 10px;
+				justify-content: center;
+				margin-top: 20px;
+			}
+		</style>
+		
+		<script type="text/javascript">
+			function toggleSenha() {
+				var container = document.getElementById('senhaFieldsContainer');
+				if (container.style.display === 'none' || container.style.display === '') {
+					container.style.display = 'block';
+				} else {
+					container.style.display = 'none';
+				}
+			}
+		</script>
+	</ui:define>
+
+	<!-- Conteúdo da página -->
+	<ui:define name="content">
+		<p:messages id="messages" showDetail="false" closable="true" />
+		
+		<div class="config-container">
+			<!-- Avatar e informações do usuário -->
+			<h:panelGroup id="avatarSection">
+				<div class="avatar-section">
+					<div class="avatar-circle-large">
+						<i class="fa-solid fa-user-shield"></i>
+					</div>
+					<div class="avatar-info">
+						<div class="avatar-name">#{configuracaoGeralController.nomeUsuario}</div>
+						<div class="avatar-role">Administrador</div>
+					</div>
+				</div>
+			</h:panelGroup>
+			
+			<!-- Seção de Dados Pessoais -->
+			<div class="section-divider">
+				<i class="fa-solid fa-user"></i>
+				<h3>Dados da Conta</h3>
+			</div>
+			
+			<div class="row">
+				<div class="col-md-6">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input" value="Nome de Usuário *"/>
+						<p:inputText id="nomeUsuario" value="#{configuracaoGeralController.nomeUsuario}"
+									 maxlength="100" />
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="input-combined">
+						<p:outputLabel styleClass="title-input" value="Email *"/>
+						<p:inputText id="emailUsuario" value="#{configuracaoGeralController.loginUsuario}"
+									 maxlength="100" />
+					</div>
+				</div>
+			</div>
+
+			<!-- Seção de Senha -->
+			<div class="section-divider">
+				<i class="fa-solid fa-lock"></i>
+				<h3>Segurança</h3>
+			</div>
+			
+			<div class="checkbox-container">
+				<p:selectBooleanCheckbox id="alterarSenhaCheckbox" 
+										 value="#{configuracaoGeralController.alterarSenha}"
+										 onchange="toggleSenha();" />
+				<p:outputLabel for="alterarSenhaCheckbox" value="Desejo alterar minha senha" />
+			</div>
+			
+			<div id="senhaFieldsContainer" style="display: none;">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Senha Atual *"/>
+							<p:password id="senhaAtual" value="#{configuracaoGeralController.senhaAtual}"
+									   feedback="false" />
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Nova Senha *"/>
+							<p:password id="novaSenha" value="#{configuracaoGeralController.novaSenha}"
+									   feedback="true" weakLabel="Fraca" goodLabel="Média" strongLabel="Forte" />
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="input-combined">
+							<p:outputLabel styleClass="title-input" value="Confirmar Nova Senha *"/>
+							<p:password id="confirmaNovaSenha" value="#{configuracaoGeralController.confirmaNovaSenha}"
+									   feedback="false" />
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Botões de ação -->
+			<div class="action-buttons">
+				<p:commandButton value="Salvar Alterações" 
+								 styleClass="btn btn-green medium"
+								 action="#{configuracaoGeralController.salvarConfiguracoes}"
+								 process="@form"
+								 update="messages avatarSection :form:nomeUsuarioHeader" />
+			</div>
+		</div>
+		
+		<!-- Modal de Validação de Código -->
+		<p:dialog id="dlgValidarEmailAdmin" widgetVar="dlgValidarEmailAdmin" modal="true" 
+			showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false"
+			styleClass="dialog-validar-email">
+			<h:panelGroup id="dlgValidarEmailAdminForm">
+				
+				<div class="header-modal">
+					<div class="flex align-center">
+						<div class="icon-circle">
+							<i class="fa-solid fa-envelope-circle-check"></i>
+						</div>
+						<label>Validar Email</label>
+					</div>
+					<div class="flex align-center">
+						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
+							onclick="PF('dlgValidarEmailAdmin').hide()"/>
+					</div>
+				</div>
+
+				<div style="padding: 20px 20px 0 20px; text-align: center;">
+					<p style="margin-bottom: 25px; color: #666; font-size: 14px;">
+						Digite o código de 6 dígitos enviado para<br/>
+						<strong>#{configuracaoGeralController.loginUsuario}</strong>
+					</p>
+
+					<div class="input-combined" style="margin: 0 auto 25px auto; max-width: 280px;">
+						<p:outputLabel styleClass="title-input" value="Código de Verificação *" />
+						<p:inputText id="codigoValidacaoAdmin" 
+							value="#{configuracaoGeralController.codigoDigitado}"
+							maxlength="6"/>
+					</div>
+				</div>
+
+				<div class="flex align-center justify-center" style="padding: 0 20px 20px 20px;">
+					<p:commandButton value="Validar" 
+						styleClass="btn medium btn-green"
+						action="#{configuracaoGeralController.validarCodigo()}"
+						update="dlgValidarEmailAdminForm messages"
+						process="dlgValidarEmailAdminForm"
+						ajax="true"/>
+						
+					<p:commandButton value="Reenviar Código" 
+						styleClass="btn medium btn-cancel"
+						action="#{configuracaoGeralController.reenviarCodigo()}"
+						update="dlgValidarEmailAdminForm messages"
+						process="@this"/>
+				</div>
+			</h:panelGroup>
+		</p:dialog>
+	</ui:define>
+
+</ui:composition>
+</html>

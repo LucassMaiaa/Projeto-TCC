@@ -76,7 +76,8 @@ public class ClienteDAO {
 			Usuario usuario = new Usuario();
 			usuario.setId(rs.getLong("usu_codigo"));
 			usuario.setLogin(rs.getString("usu_login"));
-			// A senha não é trafegada por segurança
+			usuario.setUser(rs.getString("usu_user")); // Nome do usuário
+			usuario.setSenha(rs.getString("usu_senha")); // Necessário para validação de senha
 			cliente.setUsuario(usuario);
 		}
 		return cliente;

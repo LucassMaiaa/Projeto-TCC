@@ -131,21 +131,53 @@
 				margin-top: -0.5rem;
 				transform: translate(-2%, -17%);
 			}
+			
+			/* Estilos do Modal de Verificação */
+			.modal-verificacao .ui-dialog-content {
+				padding: 30px !important;
+			}
+			
+			.modal-content-verificacao {
+				text-align: center;
+			}
+			
+			.modal-icon {
+				font-size: 60px;
+				color: #23A4D5;
+				margin-bottom: 20px;
+			}
+			
+			.modal-content-verificacao h3 {
+				margin: 0 0 10px 0;
+				color: #374151;
+				font-size: 24px;
+			}
+			
+			.modal-content-verificacao p {
+				margin: 0 0 25px 0;
+				color: #6B7280;
+				font-size: 14px;
+			}
+			
+			.input-codigo input {
+				text-align: center;
+				font-size: 24px;
+				letter-spacing: 8px;
+				font-weight: bold;
+			}
+			
+			.modal-actions {
+				display: flex;
+				gap: 10px;
+				justify-content: center;
+				margin-top: 20px;
+			}
 		</style>
 		
-		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script type="text/javascript">
 			function definirCorAvatar() {
-				var sexo = '#{configuracaoController.clienteModel.sexo}';
-				var cor = '#6366F1';
-				
-				if (sexo === 'M') {
-					cor = '#3B82F6';
-				} else if (sexo === 'F') {
-					cor = '#EC4899';
-				} else if (sexo === 'O') {
-					cor = '#8B5CF6';
-				}
+				var perfil = '#{configuracaoGeralController.usuarioModel.perfil.id}';
+                var cor = '#E74A46'; // Funcionario
 				
 				document.documentElement.style.setProperty('--avatar-color', cor);
 			}
@@ -173,35 +205,35 @@
 				<!-- Avatar e informações do usuário -->
 				<div class="avatar-section">
 					<div class="avatar-circle-large">
-						<i class="fa-solid fa-user"></i>
+						<i class="fa-solid #{configuracaoGeralController.iconeAvatar}"></i>
 					</div>
 					<div class="avatar-info">
 						<h:panelGroup id="nomeUsuarioDisplay">
-							<div class="avatar-name">#{configuracaoController.nomeUsuario}</div>
+							<div class="avatar-name">#{configuracaoGeralController.nomeUsuario}</div>
 						</h:panelGroup>
-						<div class="avatar-role">#{configuracaoController.tipoPerfil}</div>
+						<div class="avatar-role">#{configuracaoGeralController.tipoPerfil}</div>
 					</div>
 				</div>
 				
-				<!-- Seção: Dados Gerais -->
+				<!-- Seção: Dados Pessoais -->
 				<div class="section-divider">
 					<i class="fa-solid fa-user-gear"></i>
 					<h3>Dados Gerais</h3>
 				</div>
 				
-				<!-- Campos para CLIENTE -->
+				<!-- Campos para FUNCIONARIO -->
 				<div class="row">
 					<div class="col-md-6">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Nome de Usuário *"/>
-							<p:inputText id="nomeUsuarioCliente" value="#{configuracaoController.nomeUsuario}"
+							<p:inputText id="nomeUsuarioFunc" value="#{configuracaoGeralController.nomeUsuario}"
 										 maxlength="100" />
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Nome Completo *"/>
-							<p:inputText id="nomeCliente" value="#{configuracaoController.clienteModel.nome}"
+							<p:inputText id="nomeFunc" value="#{configuracaoGeralController.funcionarioModel.nome}"
 										 maxlength="100" />
 						</div>
 					</div>
@@ -210,7 +242,7 @@
 					<div class="col-md-12">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Email (Login) *"/>
-							<p:inputText id="emailCliente" value="#{configuracaoController.clienteModel.email}"
+							<p:inputText id="emailFunc" value="#{configuracaoGeralController.loginUsuario}"
 										 maxlength="100" />
 						</div>
 					</div>
@@ -219,7 +251,7 @@
 					<div class="col-md-4">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="CPF *"/>
-							<p:inputMask id="cpfCliente" value="#{configuracaoController.clienteModel.cpf}"
+							<p:inputMask id="cpfFunc" value="#{configuracaoGeralController.funcionarioModel.cpf}"
 										 mask="999.999.999-99"
 										 disabled="true" />
 						</div>
@@ -227,14 +259,14 @@
 					<div class="col-md-4">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Telefone *"/>
-							<p:inputMask id="telefoneCliente" value="#{configuracaoController.clienteModel.telefone}"
+							<p:inputMask id="telefoneFunc" value="#{configuracaoGeralController.funcionarioModel.telefone}"
 										 mask="(99) 99999-9999" />
 						</div>
 					</div>
 					<div class="col-md-4">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Sexo *" />
-							<p:selectOneMenu id="sexoCliente" value="#{configuracaoController.clienteModel.sexo}">
+							<p:selectOneMenu id="sexoFunc" value="#{configuracaoGeralController.funcionarioModel.sexo}">
 								<f:selectItem itemLabel="Selecione" itemValue=""/>
 								<f:selectItem itemLabel="Masculino" itemValue="M"/>
 								<f:selectItem itemLabel="Feminino" itemValue="F"/>
@@ -247,7 +279,7 @@
 					<div class="col-md-12">
 						 <div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Data de Nascimento *"/>
-							<p:datePicker id="dataNascCliente" value="#{configuracaoController.clienteModel.dataNascimento}"
+							<p:datePicker id="dataNascFunc" value="#{configuracaoGeralController.funcionarioModel.dataNascimento}"
 										pattern="dd/MM/yyyy"
 										disabled="true"
 										showIcon="true"/>
@@ -255,29 +287,29 @@
 					</div>
 				</div>
 				
-				<!-- ENDERECO DO CLIENTE (OPCIONAL) -->
+				<!-- ENDERECO DO FUNCIONARIO -->
 				<div class="section-divider">
 					<i class="fa-solid fa-map-marker-alt"></i>
-					<h3>Endereço (Opcional)</h3>
+					<h3>Endereço</h3>
 				</div>
 				<div class="row">
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="CEP"/>
-							<p:inputMask id="cepCliente" value="#{configuracaoController.clienteModel.cep}"
+							<p:outputLabel styleClass="title-input" value="CEP *"/>
+							<p:inputMask id="cepFunc" value="#{configuracaoGeralController.funcionarioModel.cep}"
 										 mask="99999-999" />
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Cidade"/>
-							<p:inputText id="cidadeCliente" value="#{configuracaoController.clienteModel.cidade}" />
+							<p:outputLabel styleClass="title-input" value="Cidade *"/>
+							<p:inputText id="cidadeFunc" value="#{configuracaoGeralController.funcionarioModel.cidade}" />
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="UF"/>
-							<p:inputText id="ufCliente" value="#{configuracaoController.clienteModel.estado}"
+							<p:outputLabel styleClass="title-input" value="UF *"/>
+							<p:inputText id="ufFunc" value="#{configuracaoGeralController.funcionarioModel.estado}"
 										 maxlength="2" />
 						</div>
 					</div>
@@ -285,20 +317,20 @@
 				<div class="row">
 					<div class="col-md-8">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Rua"/>
-							<p:inputText id="ruaCliente" value="#{configuracaoController.clienteModel.rua}" />
+							<p:outputLabel styleClass="title-input" value="Rua *"/>
+							<p:inputText id="ruaFunc" value="#{configuracaoGeralController.funcionarioModel.rua}" />
 						</div>
 					</div>
 					<div class="col-md-2">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Número"/>
-							<p:inputText id="numeroCliente" value="#{configuracaoController.clienteModel.numero}" />
+							<p:outputLabel styleClass="title-input" value="Número *"/>
+							<p:inputText id="numeroFunc" value="#{configuracaoGeralController.funcionarioModel.numero}" />
 						</div>
 					</div>
 					<div class="col-md-2">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Bairro"/>
-							<p:inputText id="bairroCliente" value="#{configuracaoController.clienteModel.bairro}" />
+							<p:outputLabel styleClass="title-input" value="Bairro *"/>
+							<p:inputText id="bairroFunc" value="#{configuracaoGeralController.funcionarioModel.bairro}" />
 						</div>
 					</div>
 				</div>
@@ -306,7 +338,7 @@
 					<div class="col-md-12">
 						<div class="input-combined">
 							<p:outputLabel styleClass="title-input" value="Complemento"/>
-							<p:inputText id="complementoCliente" value="#{configuracaoController.clienteModel.complemento}"/>
+							<p:inputText id="complementoFunc" value="#{configuracaoGeralController.funcionarioModel.complemento}"/>
 						</div>
 					</div>
 				</div>
@@ -320,13 +352,13 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="checkbox-container">
-							<p:selectBooleanCheckbox id="alterarSenhaCliente" 
-													 value="#{configuracaoController.alterarSenha}">
-								<p:ajax listener="#{configuracaoController.onAlterarSenhaChange}" 
-										update="senhaAtualCliente novaSenhaCliente confirmaNovaSenhaCliente"
+							<p:selectBooleanCheckbox id="alterarSenha" 
+													 value="#{configuracaoGeralController.alterarSenha}">
+								<p:ajax listener="#{configuracaoGeralController.onAlterarSenhaChange}" 
+										update="senhaAtual novaSenha confirmaNovaSenha"
 										oncomplete="toggleSenha();" />
 							</p:selectBooleanCheckbox>
-							<p:outputLabel for="alterarSenhaCliente" value="Desejo alterar minha senha" />
+							<p:outputLabel for="alterarSenha" value="Desejo alterar minha senha" />
 						</div>
 					</div>
 				</div>
@@ -336,7 +368,7 @@
 						<div class="col-md-4">
 							<div class="input-combined">
 								<p:outputLabel styleClass="title-input" value="Senha atual *" />
-								<p:password id="senhaAtualCliente" value="#{configuracaoController.senhaAtual}" 
+								<p:password id="senhaAtual" value="#{configuracaoGeralController.senhaAtual}" 
 										   feedback="false" />
 							</div>
 						</div>
@@ -344,7 +376,7 @@
 						<div class="col-md-4">
 							<div class="input-combined">
 								<p:outputLabel styleClass="title-input" value="Nova senha *" />
-								<p:password id="novaSenhaCliente" value="#{configuracaoController.novaSenha}" 
+								<p:password id="novaSenha" value="#{configuracaoGeralController.novaSenha}" 
 										   feedback="true"
 										   weakLabel="Fraca" goodLabel="Média" strongLabel="Forte"
 										   promptLabel="Insira a senha" />
@@ -354,7 +386,7 @@
 						<div class="col-md-4">
 							<div class="input-combined">
 								<p:outputLabel styleClass="title-input" value="Confirmar nova senha *" />
-								<p:password id="confirmaNovaSenhaCliente" value="#{configuracaoController.confirmaNovaSenha}" 
+								<p:password id="confirmaNovaSenha" value="#{configuracaoGeralController.confirmaNovaSenha}" 
 										   feedback="false" />
 							</div>
 						</div>
@@ -365,17 +397,17 @@
 				<div class="action-buttons">
 					<p:commandButton value="Salvar Alterações" 
 									 styleClass="btn btn-green medium"
-									 action="#{configuracaoController.salvarConfiguracoes}"
-									 process="@this nomeUsuarioCliente nomeCliente emailCliente telefoneCliente sexoCliente cepCliente cidadeCliente ufCliente ruaCliente numeroCliente bairroCliente complementoCliente alterarSenhaCliente senhaAtualCliente novaSenhaCliente confirmaNovaSenhaCliente"
+									 action="#{configuracaoGeralController.salvarConfiguracoes}"
+									 process="@this nomeUsuarioFunc nomeFunc emailFunc telefoneFunc sexoFunc cepFunc cidadeFunc ufFunc ruaFunc numeroFunc bairroFunc complementoFunc alterarSenha senhaAtual novaSenha confirmaNovaSenha"
 									 update="messages nomeUsuarioDisplay :form:nomeUsuarioHeader" />
 				</div>
 			</div>
 			
 <!-- Modal de Validação de Código -->
-		<p:dialog id="dlgValidarCodigoCliente" widgetVar="dlgValidarCodigoCliente" modal="true" 
+		<p:dialog id="dlgValidarCodigoGeral" widgetVar="dlgValidarCodigoGeral" modal="true" 
 			showEffect="fade" hideEffect="fade" closable="false" draggable="false" resizable="false"
 			styleClass="dialog-validar-email">
-			<h:panelGroup id="dlgValidarCodigoClienteForm">
+			<h:panelGroup id="dlgValidarCodigoGeralForm">
 				
 				<div class="header-modal">
 					<div class="flex align-center">
@@ -386,20 +418,20 @@
 					</div>
 					<div class="flex align-center">
 						<p:commandButton styleClass="btn-x" icon="fa-solid fa-xmark"
-							onclick="PF('dlgValidarCodigoCliente').hide()"/>
+							onclick="PF('dlgValidarCodigoGeral').hide()"/>
 					</div>
 				</div>
 
 				<div style="padding: 20px 20px 0 20px; text-align: center;">
 					<p style="margin-bottom: 25px; color: #666; font-size: 14px;">
 						Digite o código de 6 dígitos enviado para<br/>
-						<strong>#{configuracaoController.clienteModel.email}</strong>
+						<strong>#{configuracaoGeralController.loginUsuario}</strong>
 					</p>
 
 					<div class="input-combined" style="margin: 0 auto 25px auto; max-width: 280px;">
 						<p:outputLabel styleClass="title-input" value="Código de Verificação *" />
-						<p:inputText id="codigoValidacaoCliente" 
-							value="#{configuracaoController.codigoDigitado}"
+						<p:inputText id="codigoValidacaoFunc" 
+							value="#{configuracaoGeralController.codigoDigitado}"
 							maxlength="6"/>
 					</div>
 				</div>
@@ -407,15 +439,15 @@
 				<div class="flex align-center justify-center" style="padding: 0 20px 20px 20px;">
 					<p:commandButton value="Validar" 
 						styleClass="btn medium btn-green"
-						action="#{configuracaoController.validarCodigo()}"
-						update="dlgValidarCodigoClienteForm messages"
-						process="dlgValidarCodigoClienteForm"
+						action="#{configuracaoGeralController.validarCodigo()}"
+						update="dlgValidarCodigoGeralForm messages"
+						process="dlgValidarCodigoGeralForm"
 						ajax="true"/>
 						
 					<p:commandButton value="Reenviar Código" 
 						styleClass="btn medium btn-cancel"
-						action="#{configuracaoController.reenviarCodigo()}"
-						update="dlgValidarCodigoClienteForm messages"
+						action="#{configuracaoGeralController.reenviarCodigo()}"
+						update="dlgValidarCodigoGeralForm messages"
 						process="@this"/>
 				</div>
 			</h:panelGroup>

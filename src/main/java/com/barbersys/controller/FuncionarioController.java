@@ -371,6 +371,17 @@ public class FuncionarioController {
 				return;
 			}
 			
+			// Verifica se o email já existe no sistema (apenas se for um novo funcionário ou se mudou o email)
+			UsuarioDAO usuarioDAO = new UsuarioDAO();
+			if (editarModel.equals("I") || !email.equals(loginOriginal)) {
+				if (usuarioDAO.loginExiste(email)) {
+					FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, 
+							"Este email já está cadastrado no sistema.", "Erro!"));
+					return;
+				}
+			}
+			
 			codigoGerado = String.format("%06d", (int)(Math.random() * 1000000));
 			
 			EmailService emailService = new EmailService();
@@ -407,7 +418,6 @@ public class FuncionarioController {
 		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
 			exibirAlerta("error", "Código é obrigatório");
 			System.out.println("❌ Código vazio!");
-			// NÃO FECHA NADA - retorna para o usuário tentar novamente
 			return;
 		}
 		
@@ -415,11 +425,13 @@ public class FuncionarioController {
 			System.out.println("✅ Código correto! Salvando funcionário...");
 			aguardandoValidacao = false;
 			
-			// Limpa o código após validação bem-sucedida
+			// Limpa apenas o código digitado para permitir redigitação se der erro
 			codigoValidacao = null;
-			codigoGerado = null;
 			
-			// Salva o funcionário (só fecha modais SE SALVAR COM SUCESSO)
+			// NÃO limpa codigoGerado - será mantido para permitir nova tentativa
+			// Só será limpo após sucesso completo do salvamento
+			
+			// Salva o funcionário (só fecha modais e limpa código SE SALVAR COM SUCESSO)
 			if (editarModel.equals("I")) {
 				adicionarNovoFuncionario();
 			} else {
@@ -428,8 +440,8 @@ public class FuncionarioController {
 		} else {
 			System.out.println("❌ Código incorreto!");
 			exibirAlerta("error", "Código incorreto! Tente novamente.");
-			// NÃO FECHA NADA - mantém ambos os modais abertos
-			// Não retorna, não fecha, não faz nada - apenas mostra o erro
+			// Limpa código digitado para nova tentativa
+			codigoValidacao = null;
 		}
 	}
 	
@@ -638,8 +650,13 @@ public class FuncionarioController {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Erro ao salvar funcionário: " + e.getMessage(), "Erro!"));
+			// Tratar erro de login duplicado
+			if (e.getMessage().contains("Login já existe")) {
+				exibirAlerta("error", "O email informado já está sendo usado por outro usuário. Por favor, escolha outro email.");
+			} else {
+				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
+						"Erro ao salvar funcionário: " + e.getMessage(), "Erro!"));
+			}
 			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -810,7 +827,7 @@ public class FuncionarioController {
 		if (dataInicial == null || dataFinal == null || !dataInicial.before(dataFinal)) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"A hora inicial deve ser menor que a hora final!", "Erro!"));
-			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			PrimeFaces.current().ajax().update("form:messages");
 			return;
 		}
 
@@ -820,7 +837,7 @@ public class FuncionarioController {
 		if (horaInicial.getMinute() % 30 != 0 || horaFinal.getMinute() % 30 != 0) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Os horários devem ser em intervalos de 30 minutos (ex: 08:00, 08:30).", "Erro!"));
-			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			PrimeFaces.current().ajax().update("form:messages");
 			return;
 		}
 		
@@ -829,7 +846,7 @@ public class FuncionarioController {
 			!horarioModel.getQuarta() && !horarioModel.getQuinta() && !horarioModel.getSexta() && !horarioModel.getSabado()) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Selecione pelo menos um dia da semana!", "Erro!"));
-			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			PrimeFaces.current().ajax().update("form:messages");
 			return;
 		}
 		
@@ -838,7 +855,7 @@ public class FuncionarioController {
 		if (conflito != null) {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					conflito, "Conflito de Horários!"));
-			PrimeFaces.current().ajax().update("form:dlgFuncForm");
+			PrimeFaces.current().ajax().update("form:messages");
 			return;
 		}
 
@@ -869,7 +886,7 @@ public class FuncionarioController {
 		dataInicial = null;
 		dataFinal = null;
 		
-		PrimeFaces.current().ajax().update("form:dlgFuncForm");
+		PrimeFaces.current().ajax().update("form:messages", "dttLstHorarios", "dttLstHorariosAux");
 	}
 	
 	/**

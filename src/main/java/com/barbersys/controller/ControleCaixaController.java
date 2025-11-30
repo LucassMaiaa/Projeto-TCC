@@ -294,7 +294,7 @@ public class ControleCaixaController implements Serializable {
 		System.out.println("📊 mensagemMotivoFinal: " + mensagemMotivoFinal);
 		
 		// Validação 1: Valor final deve ser informado
-		if (valorFinal == null || valorFinal <= 0.0) {
+		if (valorFinal == null || valorFinal < 0.0) {
 			System.out.println("❌ Valor final não informado");
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Erro!");
@@ -364,7 +364,7 @@ public class ControleCaixaController implements Serializable {
 		System.out.println("📊 valorInicial DEPOIS: " + valorInicial);
 		
 		// Validação do valor inicial
-		if (valorInicial == null || valorInicial <= 0.0) {
+		if (valorInicial == null || valorInicial < 0.0) {
 			System.out.println("❌ Validação FALHOU!");
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Erro!");

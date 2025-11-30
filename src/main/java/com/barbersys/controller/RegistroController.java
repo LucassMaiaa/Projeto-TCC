@@ -45,6 +45,24 @@ public class RegistroController {
                 return;
             }
             
+            // Valida formato do email
+            if (!email.contains("@") || !email.contains(".")) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Email inválido. Por favor, digite um email válido (ex: usuario@email.com)");
+                return;
+            }
+            
+            // Verifica se o email já existe no sistema ANTES de enviar o código
+            UsuarioDAO usuarioDAO = new UsuarioDAO();
+            try {
+                if (usuarioDAO.loginExiste(email)) {
+                    addMessage(FacesMessage.SEVERITY_ERROR, "Este email já está cadastrado no sistema.");
+                    return;
+                }
+            } catch (SQLException e) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Erro ao verificar email: " + e.getMessage());
+                return;
+            }
+            
             if (clienteModel.getNome() == null || clienteModel.getNome().trim().isEmpty()) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Nome é obrigatório");
                 return;

@@ -159,6 +159,24 @@ public class ClienteController {
 				return;
 			}
 			
+			// Verifica se o email já existe no sistema (apenas se for um novo cliente ou se mudou o email)
+			UsuarioDAO usuarioDAO = new UsuarioDAO();
+			if (editarModel.equals("I") || !email.equals(loginOriginal)) {
+				try {
+					if (usuarioDAO.loginExiste(email)) {
+						FacesContext.getCurrentInstance().addMessage(null,
+							new FacesMessage(FacesMessage.SEVERITY_ERROR, 
+								"Este email já está cadastrado no sistema.", "Erro!"));
+						return;
+					}
+				} catch (SQLException e) {
+					FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, 
+							"Erro ao verificar email: " + e.getMessage(), "Erro!"));
+					return;
+				}
+			}
+			
 			codigoGerado = String.format("%06d", (int)(Math.random() * 1000000));
 			
 			EmailService emailService = new EmailService();
@@ -307,48 +325,6 @@ public class ClienteController {
 		if (clienteModel.getSexo() == null || clienteModel.getSexo().trim().isEmpty()) {
 			FacesContext.getCurrentInstance().addMessage(null, 
 				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Sexo é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// CEP
-		if (clienteModel.getCep() == null || clienteModel.getCep().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo CEP é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// Rua
-		if (clienteModel.getRua() == null || clienteModel.getRua().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Rua é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// Número
-		if (clienteModel.getNumero() == null || clienteModel.getNumero().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Número é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// Bairro
-		if (clienteModel.getBairro() == null || clienteModel.getBairro().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Bairro é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// Cidade
-		if (clienteModel.getCidade() == null || clienteModel.getCidade().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo Cidade é obrigatório", "Erro!"));
-			return false;
-		}
-		
-		// UF
-		if (clienteModel.getEstado() == null || clienteModel.getEstado().trim().isEmpty()) {
-			FacesContext.getCurrentInstance().addMessage(null, 
-				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo UF é obrigatório", "Erro!"));
 			return false;
 		}
 		

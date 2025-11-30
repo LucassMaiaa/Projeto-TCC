@@ -65,10 +65,10 @@ public class AuthorizationFilter implements Filter {
             
             // PERFIL FUNCIONÁRIO (ID = 2)
             else if (perfilId == 2) {
-                // Funcionário pode acessar: agendamento, controle_caixa, configuracoes_geral
+                // Funcionário pode acessar: agendamento, controle_caixa, configuracoes_funcionario
                 if (!requestPath.contains("agendamento.xhtml") && 
                     !requestPath.contains("controle_caixa.xhtml") && 
-                    !requestPath.contains("configuracoes_geral.xhtml") &&
+                    !requestPath.contains("configuracoes_funcionario.xhtml") &&
                     !requestPath.contains("modal_avaliacao.xhtml")) { // Modal de avaliação usado no agendamento
                     if (!httpResponse.isCommitted()) {
                         httpResponse.sendRedirect(httpRequest.getContextPath() + "/agendamento.xhtml");
