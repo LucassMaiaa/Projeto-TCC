@@ -6,25 +6,14 @@ import java.util.*;
 
 public class DashboardDAO {
     
-    /**
-     * Busca o faturamento por mês do ano atual COMPLETO
-     * Lógica:
-     * 1. Controle de Caixa:
-     *    - SE tem fechamento: SOMA todos os fechamentos + TUDO depois do último (Abertura + Entradas - Saídas)
-     *    - SE NÃO tem fechamento: (Aberturas + Entradas + Entradas Auto) - (Saídas + Estornos)
-     * 2. Agendamentos pagos com métodos QUE NÃO REGISTRAM NO CAIXA (integraCaixa = 0)
-     * 
-     * Evita duplicação: Agendamentos com pagamento que integra caixa já estão nas "Entradas automáticas"
-     */
+    // Busca faturamento mensal baseado no controle de caixa
     public static Map<Integer, Double> buscarFaturamentoPorMes(int ano) {
         Map<Integer, Double> faturamentoPorMes = new LinkedHashMap<>();
         
-        // Inicializa todos os meses com 0.0
         for (int i = 1; i <= 12; i++) {
             faturamentoPorMes.put(i, 0.0);
         }
         
-        // PARTE 1: Faturamento do CONTROLE DE CAIXA
         String sqlCaixa = "SELECT " +
                           "  MONTH(con_data) as mes, " +
                           "  DATE(con_data) as dia, " +
@@ -40,17 +29,14 @@ public class DashboardDAO {
             ps.setInt(1, ano);
             ResultSet rs = ps.executeQuery();
             
-            // Estrutura para processar dia a dia
             Map<String, Map<String, Object>> dadosPorDia = new LinkedHashMap<>();
             
-            // Agrupa movimentações por dia
             while (rs.next()) {
                 String dia = rs.getString("dia");
                 int mes = rs.getInt("mes");
                 String tipo = rs.getString("con_movimentacao");
                 double valor = rs.getDouble("con_valor");
                 
-                // Inicializa o dia se não existir
                 if (!dadosPorDia.containsKey(dia)) {
                     Map<String, Object> dadosDia = new HashMap<>();
                     dadosDia.put("mes", mes);
@@ -61,14 +47,12 @@ public class DashboardDAO {
                 Map<String, Object> dadosDia = dadosPorDia.get(dia);
                 List<Map<String, Object>> movimentacoes = (List<Map<String, Object>>) dadosDia.get("movimentacoes");
                 
-                // Adiciona a movimentação à lista
                 Map<String, Object> mov = new HashMap<>();
                 mov.put("tipo", tipo);
                 mov.put("valor", valor);
                 movimentacoes.add(mov);
             }
             
-            // Calcula faturamento de cada dia
             for (Map.Entry<String, Map<String, Object>> entry : dadosPorDia.entrySet()) {
                 Map<String, Object> dadosDia = entry.getValue();
                 int mes = (int) dadosDia.get("mes");
@@ -77,7 +61,6 @@ public class DashboardDAO {
                 double faturamentoDia = 0.0;
                 int indexUltimoFechamento = -1;
                 
-                // Procura o índice do ÚLTIMO fechamento do dia (de trás pra frente)
                 for (int i = movimentacoes.size() - 1; i >= 0; i--) {
                     String tipo = (String) movimentacoes.get(i).get("tipo");
                     if ("Fechamento de Caixa".equals(tipo)) {
@@ -87,7 +70,6 @@ public class DashboardDAO {
                 }
                 
                 if (indexUltimoFechamento >= 0) {
-                    // TEM FECHAMENTO: Soma TODOS os fechamentos até o último
                     for (int i = 0; i <= indexUltimoFechamento; i++) {
                         Map<String, Object> mov = movimentacoes.get(i);
                         String tipo = (String) mov.get("tipo");
@@ -97,7 +79,6 @@ public class DashboardDAO {
                         }
                     }
                     
-                    // Soma/subtrai movimentações DEPOIS do último fechamento (INCLUINDO Abertura)
                     for (int i = indexUltimoFechamento + 1; i < movimentacoes.size(); i++) {
                         Map<String, Object> mov = movimentacoes.get(i);
                         String tipo = (String) mov.get("tipo");
@@ -110,8 +91,6 @@ public class DashboardDAO {
                         }
                     }
                 } else {
-                    // NÃO TEM FECHAMENTO: Calcula manualmente
-                    // (Aberturas + Entradas + Entradas Auto) - (Saídas + Estornos)
                     for (Map<String, Object> mov : movimentacoes) {
                         String tipo = (String) mov.get("tipo");
                         double valor = (double) mov.get("valor");
@@ -124,17 +103,14 @@ public class DashboardDAO {
                     }
                 }
                 
-                // Soma ao mês correspondente
                 double totalMes = faturamentoPorMes.get(mes);
                 faturamentoPorMes.put(mes, totalMes + faturamentoDia);
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ Erro ao buscar faturamento do caixa: " + e.getMessage());
             e.printStackTrace();
         }
         
-        // PARTE 2: Agendamentos pagos com métodos QUE NÃO REGISTRAM NO CAIXA
         String sqlAgendamentos = "SELECT " +
                                  "  MONTH(a.age_data) as mes, " +
                                  "  SUM(s.ser_preco) as total " +
@@ -158,24 +134,18 @@ public class DashboardDAO {
                 int mes = rs.getInt("mes");
                 double totalAgendamentos = rs.getDouble("total");
                 
-                // Soma ao faturamento do caixa
                 double totalMes = faturamentoPorMes.get(mes);
                 faturamentoPorMes.put(mes, totalMes + totalAgendamentos);
-                
-                System.out.println("✅ Mês " + mes + ": Adicionado R$ " + String.format("%.2f", totalAgendamentos) + " de agendamentos sem integração caixa");
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ Erro ao buscar agendamentos sem integração caixa: " + e.getMessage());
             e.printStackTrace();
         }
         
         return faturamentoPorMes;
     }
     
-    /**
-     * Busca o faturamento dos últimos 12 meses
-     */
+    // Busca faturamento dos últimos 12 meses
     public static Map<String, Double> buscarFaturamentoUltimos12Meses() {
         Map<String, Double> faturamento = new LinkedHashMap<>();
         
@@ -208,9 +178,7 @@ public class DashboardDAO {
         return faturamento;
     }
     
-    /**
-     * Busca o total faturado no mês atual BASEADO NO CONTROLE DE CAIXA
-     */
+    // Busca total faturado no mês atual
     public static double buscarFaturamentoMesAtual() {
         Calendar cal = Calendar.getInstance();
         int mesAtual = cal.get(Calendar.MONTH) + 1;
@@ -220,9 +188,7 @@ public class DashboardDAO {
         return faturamentoPorMes.getOrDefault(mesAtual, 0.0);
     }
     
-    /**
-     * Busca o total faturado no ano atual BASEADO NO CONTROLE DE CAIXA
-     */
+    // Busca total faturado no ano atual
     public static double buscarFaturamentoAnoAtual() {
         Calendar cal = Calendar.getInstance();
         int anoAtual = cal.get(Calendar.YEAR);
@@ -237,9 +203,7 @@ public class DashboardDAO {
         return totalAno;
     }
     
-    /**
-     * Busca o total de agendamentos no mês atual
-     */
+    // Busca total de agendamentos no mês atual
     public static int buscarTotalAgendamentosMesAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -261,9 +225,7 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca o total de agendamentos no ano atual
-     */
+    // Busca total de agendamentos no ano atual
     public static int buscarTotalAgendamentosAnoAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -284,9 +246,7 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca o total de agendamentos finalizados no mês atual
-     */
+    // Busca total de agendamentos finalizados no mês atual
     public static int buscarAgendamentosFinalizadosMesAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -309,9 +269,7 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca o total de agendamentos finalizados no ano atual
-     */
+    // Busca total de agendamentos finalizados no ano atual
     public static int buscarAgendamentosFinalizadosAnoAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -333,9 +291,7 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca o total de agendamentos cancelados no mês atual
-     */
+    // Busca total de agendamentos cancelados no mês atual
     public static int buscarAgendamentosCanceladosMesAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -358,9 +314,7 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca o total de agendamentos cancelados no ano atual
-     */
+    // Busca total de agendamentos cancelados no ano atual
     public static int buscarAgendamentosCanceladosAnoAtual() {
         String sql = "SELECT COUNT(*) as total " +
                      "FROM agendamento " +
@@ -382,33 +336,26 @@ public class DashboardDAO {
         return 0;
     }
     
-    /**
-     * Busca total de agendamentos de hoje (excluindo cancelados)
-     */
+    // Busca total de agendamentos de hoje (apenas pendentes/ativos)
     public static int buscarAgendamentosHoje() {
         String sql = "SELECT COUNT(*) as total FROM agendamento " +
                      "WHERE DATE(age_data) = CURDATE() " +
-                     "AND age_status != 'I'";
+                     "AND age_status = 'A'";  // Apenas ativos/pendentes
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             
             if (rs.next()) {
-                int total = rs.getInt("total");
-                System.out.println("✅ Agendamentos de hoje: " + total);
-                return total;
+                return rs.getInt("total");
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erro ao buscar agendamentos de hoje: " + e.getMessage());
             e.printStackTrace();
         }
         return 0;
     }
     
-    /**
-     * Busca faturamento de hoje (apenas finalizados e pagos)
-     */
+    // Busca faturamento de hoje (apenas finalizados e pagos)
     public static double buscarFaturamentoHoje() {
         String sql = "SELECT COALESCE(SUM(s.ser_preco), 0) as total " +
                      "FROM agendamento a " +
@@ -431,12 +378,9 @@ public class DashboardDAO {
         return 0.0;
     }
     
-    /**
-     * Busca o próximo agendamento (mais próximo com base na data e hora)
-     * Sempre mostra DATA + HORA + CLIENTE
-     */
+    // Busca o próximo agendamento mais próximo (data e hora) - apenas ativos
     public static String buscarProximoAgendamento() {
-        // Busca o próximo agendamento (hoje ou futuro)
+        // Busca o próximo agendamento ativo (hoje ou futuro)
         String sql = "SELECT " +
                      "CONCAT(" +
                      "  DATE_FORMAT(a.age_data, '%d/%m'), " +
@@ -449,7 +393,7 @@ public class DashboardDAO {
                      "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
                      "WHERE (a.age_data > CURDATE() OR " +
                      "       (a.age_data = CURDATE() AND TIME(a.age_hora) >= TIME(NOW()))) " +
-                     "AND a.age_status != 'I' " +
+                     "AND a.age_status = 'A' " +  // Apenas ativos/pendentes
                      "ORDER BY a.age_data ASC, a.age_hora ASC " +
                      "LIMIT 1";
         
@@ -461,16 +405,13 @@ public class DashboardDAO {
                 return rs.getString("info");
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erro ao buscar próximo agendamento: " + e.getMessage());
             e.printStackTrace();
         }
         
         return null;
     }
     
-    /**
-     * Busca os últimos N agendamentos (para dashboard)
-     */
+    // Busca os últimos N agendamentos
     public static List<Map<String, Object>> buscarUltimosAgendamentos(int limite) {
         List<Map<String, Object>> agendamentos = new ArrayList<>();
         
@@ -516,9 +457,7 @@ public class DashboardDAO {
         return agendamentos;
     }
     
-    /**
-     * Busca o total de visitas (agendamentos) por dia da semana atual
-     */
+    // Busca total de visitas por dia da semana atual
     public static Map<Integer, Integer> buscarVisitasPorDiaSemana() {
         Map<Integer, Integer> visitasPorDia = new LinkedHashMap<>();
         
@@ -543,21 +482,16 @@ public class DashboardDAO {
                 int diaSemana = rs.getInt("dia_semana");
                 int total = rs.getInt("total");
                 visitasPorDia.put(diaSemana, total);
-                System.out.println("✅ Dia " + diaSemana + ": " + total + " agendamento(s)");
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ Erro ao buscar visitas por dia: " + e.getMessage());
             e.printStackTrace();
         }
         
         return visitasPorDia;
     }
     
-    /**
-     * Busca o funcionário com mais agendamentos finalizados no mês/ano atual
-     * Retorna: [funcionario_id, nome, total_atendimentos, media_avaliacao]
-     */
+    // Busca funcionário com mais atendimentos finalizados (mês ou ano)
     public static Map<String, Object> buscarTopFuncionario(boolean mesAtual) {
         Map<String, Object> dados = new HashMap<>();
         
@@ -590,7 +524,6 @@ public class DashboardDAO {
                 dados.put("totalAtendimentos", rs.getInt("total_atendimentos"));
                 dados.put("mediaAvaliacao", rs.getDouble("media_avaliacao"));
             } else {
-                // Se não houver dados, retorna valores padrão
                 dados.put("id", 0L);
                 dados.put("nome", "Nenhum");
                 dados.put("totalAtendimentos", 0);
@@ -608,10 +541,7 @@ public class DashboardDAO {
         return dados;
     }
     
-    /**
-     * Busca os 5 serviços mais solicitados do mês atual
-     * Retorna: [servico_nome, total_solicitacoes, preco_medio]
-     */
+    // Busca os N serviços mais solicitados do mês
     public static List<Map<String, Object>> buscarTopServicosMesAtual(int limite) {
         List<Map<String, Object>> servicos = new ArrayList<>();
         
@@ -638,7 +568,6 @@ public class DashboardDAO {
             int totalGeral = 0;
             List<Map<String, Object>> temp = new ArrayList<>();
             
-            // Primeira passagem: coletar dados e calcular total
             while (rs.next()) {
                 Map<String, Object> servico = new HashMap<>();
                 servico.put("nome", rs.getString("nome"));
@@ -648,7 +577,6 @@ public class DashboardDAO {
                 totalGeral += rs.getInt("total");
             }
             
-            // Segunda passagem: calcular porcentagens
             for (Map<String, Object> servico : temp) {
                 int total = (Integer) servico.get("total");
                 int porcentagem = totalGeral > 0 ? (int) Math.round((total * 100.0) / totalGeral) : 0;

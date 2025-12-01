@@ -14,10 +14,8 @@ import org.primefaces.model.FilterMeta;
 import org.primefaces.model.LazyDataModel;
 import org.primefaces.model.SortMeta;
 
-import com.barbersys.dao.ClienteDAO;
 import com.barbersys.dao.PagamentoDAO;
 import com.barbersys.dao.PagamentoRelatorioDAO;
-import com.barbersys.model.Cliente;
 import com.barbersys.model.Pagamento;
 import com.barbersys.model.PagamentoRelatorio;
 import com.barbersys.util.RelatorioPagamentosPDF;
@@ -50,6 +48,7 @@ public class RelatorioPagamentosController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Inicializa modelo lazy para carregamento paginado
     private void inicializarLazyModel() {
         lstPagamentos = new LazyDataModel<PagamentoRelatorio>() {
             private static final long serialVersionUID = 1L;
@@ -81,6 +80,7 @@ public class RelatorioPagamentosController implements Serializable {
         };
     }
     
+    // Retorna status do filtro ou null se vazio
     private String obterStatusFiltro() {
         if (statusPagamentoFiltro != null && !statusPagamentoFiltro.trim().isEmpty()) {
             return statusPagamentoFiltro;
@@ -88,14 +88,16 @@ public class RelatorioPagamentosController implements Serializable {
         return null;
     }
 
+    // Carrega formas de pagamento do banco
     private void carregarFormasPagamento() {
         lstFormasPagamento = pagamentoDAO.buscarTodos();
     }
 
+    // Recarrega dados com filtros aplicados
     public void filtrar() {
-        // Método para recarregar os dados quando um filtro for alterado
     }
     
+    // Limpa todos os filtros
     public void limparFiltros() {
         formaPagamentoFiltro = null;
         statusPagamentoFiltro = "";
@@ -104,6 +106,7 @@ public class RelatorioPagamentosController implements Serializable {
         nomeClienteFiltro = null;
     }
 
+    // Exporta relatório em PDF
     public void exportarPDF() {
         try {
             String status = obterStatusFiltro();
@@ -123,7 +126,6 @@ public class RelatorioPagamentosController implements Serializable {
                 new FacesMessage(FacesMessage.SEVERITY_INFO, 
                     "PDF gerado com sucesso!", "Sucesso"));
         } catch (Exception e) {
-            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro ao gerar PDF: " + e.getMessage(), "Erro"));

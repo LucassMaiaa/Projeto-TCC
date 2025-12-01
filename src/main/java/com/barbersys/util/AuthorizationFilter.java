@@ -27,7 +27,7 @@ public class AuthorizationFilter implements Filter {
             requestPath.contains("recuperar_senha.xhtml") ||
             requestPath.contains("validar_codigo_recuperacao.xhtml") ||
             requestPath.contains("validar_codigo_registro.xhtml") ||
-            requestPath.contains("logout.xhtml") ||  // IMPORTANTE: Permite logout
+            requestPath.contains("logout.xhtml") ||  
             requestPath.contains("/javax.faces.resource/")) {
             chain.doFilter(request, response);
             return;

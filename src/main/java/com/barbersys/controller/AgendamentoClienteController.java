@@ -242,26 +242,16 @@ public class AgendamentoClienteController implements Serializable {
     
     public void proximoPasso() {
         try {
-            // Debug: Mostra estado atual antes de validar
-            System.out.println("=== AVANÇANDO DO PASSO " + activeIndex + " ===");
-            System.out.println("funcionarioId: " + funcionarioId);
-            System.out.println("dataSelecionada: " + dataSelecionada);
-            System.out.println("servicosSelecionadosIds size: " + (servicosSelecionadosIds != null ? servicosSelecionadosIds.size() : "null"));
-            
-            // Validações antes de avançar
+            // Validar Passo 1: Funcionário selecionado
             if (activeIndex == 0) {
-                // Validar Passo 1: Cliente e Funcionário
-                
                 if (funcionarioId == null) {
                     exibirAlerta("warning", "Por favor, selecione um funcionário.");
                     return;
                 }
-                // Calcula datas desabilitadas quando sair do passo 1 (otimizado)
                 calcularDatasDesabilitadas();
                 
+            // Validar Passo 2: Data e Serviços selecionados
             } else if (activeIndex == 1) {
-                // Validar Passo 2: Data e Serviços
-                
                 if (dataSelecionada == null) {
                     exibirAlerta("warning", "Por favor, selecione uma data.");
                     return;
@@ -270,10 +260,9 @@ public class AgendamentoClienteController implements Serializable {
                     exibirAlerta("warning", "Por favor, selecione ao menos um serviço.");
                     return;
                 }
-                // Carregar horários disponíveis para o próximo passo
+                
                 gerarHorariosDisponiveis();
                 
-                // Verifica se há horários disponíveis
                 if (horariosDisponiveis.isEmpty()) {
                     exibirAlerta("warning", "Não há horários disponíveis para esta data com os serviços selecionados.");
                     return;
@@ -282,8 +271,6 @@ public class AgendamentoClienteController implements Serializable {
             
             if (activeIndex < 2) {
                 activeIndex++;
-                System.out.println("=== AVANÇOU PARA PASSO " + activeIndex + " ===");
-                // NÃO FAZ UPDATE AQUI - o update é feito pelo botão no XHTML
             }
         } catch (Exception e) {
             System.err.println("ERRO em proximoPasso(): " + e.getMessage());
@@ -296,15 +283,6 @@ public class AgendamentoClienteController implements Serializable {
         try {
             if (activeIndex > 0) {
                 activeIndex--;
-                
-                // Debug: Mostra estado das variáveis ao voltar
-                System.out.println("=== VOLTANDO PARA PASSO " + activeIndex + " ===");
-                System.out.println("funcionarioId: " + funcionarioId);
-                System.out.println("dataSelecionada: " + dataSelecionada);
-                System.out.println("servicosSelecionadosIds size: " + (servicosSelecionadosIds != null ? servicosSelecionadosIds.size() : "null"));
-                System.out.println("horaSelecionada: " + horaSelecionada);
-                
-                // NÃO FAZ UPDATE AQUI - o update é feito pelo botão no XHTML
             }
         } catch (Exception e) {
             System.err.println("ERRO em passoAnterior(): " + e.getMessage());
@@ -313,9 +291,6 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
     
-    /**
-     * Verifica se pode avançar para o próximo passo
-     */
     public boolean isPodeAvancarPasso() {
         try {
             if (activeIndex == 0) {
@@ -333,9 +308,6 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
     
-    /**
-     * Verifica se pode finalizar o agendamento
-     */
     public boolean isPodeAgendar() {
         try {
             if (activeIndex != 2) {
@@ -379,11 +351,9 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
 
+    // Cancela agendamento do cliente, com estorno automático se já foi pago
     public void cancelarMeuAgendamento(Long agendamentoId) {
         try {
-            System.out.println("=== CANCELAMENTO DE AGENDAMENTO (CLIENTE) ===");
-            System.out.println("Agendamento ID: " + agendamentoId);
-            
             // Busca o agendamento completo antes de cancelar
             Agendamento agendamentoCancelado = null;
             for (Agendamento ag : meusAgendamentos) {
@@ -398,19 +368,13 @@ public class AgendamentoClienteController implements Serializable {
                 return;
             }
 
-            // Verifica se o agendamento foi pago
             boolean agendamentoPago = "S".equals(agendamentoCancelado.getPago());
-            System.out.println("Agendamento Pago: " + (agendamentoPago ? "SIM" : "NÃO"));
 
             if (agendamentoPago) {
-                // CASO 1: Agendamento já foi pago → ESTORNAR
-                System.out.println("🔄 Iniciando processo de ESTORNO...");
-                
-                // Verifica se o pagamento integra com o caixa
+                // CASO 1: Agendamento pago - ESTORNAR
                 boolean registrarNoCaixa = false;
                 if (agendamentoCancelado.getPagamento() != null && agendamentoCancelado.getPagamento().getIntegraCaixa()) {
                     registrarNoCaixa = true;
-                    System.out.println("✅ Pagamento integra com caixa - será registrado estorno");
                 }
 
                 if (registrarNoCaixa) {
@@ -419,7 +383,6 @@ public class AgendamentoClienteController implements Serializable {
                     List<com.barbersys.model.CaixaData> checkData = com.barbersys.dao.CaixaDataDAO.verificaExisteData(dataAtual);
 
                     if (checkData.isEmpty() || "I".equals(checkData.get(0).getStatus())) {
-                        System.out.println("❌ Caixa fechado - não é possível estornar agora");
                         exibirAlerta("error", "O caixa do dia precisa estar aberto para cancelar um agendamento pago. Entre em contato com a barbearia.");
                         return;
                     }
@@ -435,7 +398,6 @@ public class AgendamentoClienteController implements Serializable {
                             totalGastoServicos += servico.getPreco();
                         }
                     }
-                    System.out.println("💰 Valor do estorno: R$ " + totalGastoServicos);
 
                     // Cria movimentação de estorno no caixa
                     com.barbersys.model.ControleCaixa estornoCaixa = new com.barbersys.model.ControleCaixa();
@@ -445,7 +407,6 @@ public class AgendamentoClienteController implements Serializable {
                     estornoCaixa.setMovimentacao("Saída de estorno");
                     estornoCaixa.setValor(-totalGastoServicos);
                     com.barbersys.dao.ControleCaixaDAO.salvar(estornoCaixa);
-                    System.out.println("✅ Estorno registrado no caixa");
                 }
 
                 // Atualiza agendamento para ESTORNADO
@@ -455,13 +416,11 @@ public class AgendamentoClienteController implements Serializable {
                     "E",  // E = Estornado
                     agendamentoCancelado.getPagamento() != null ? agendamentoCancelado.getPagamento().getId() : null
                 );
-                System.out.println("✅ Agendamento marcado como ESTORNADO");
                 
                 exibirAlerta("success", "Agendamento cancelado e valor estornado com sucesso!");
 
             } else {
-                // CASO 2: Agendamento NÃO foi pago → Cancelamento normal
-                System.out.println("✅ Cancelamento normal (sem pagamento)");
+                // CASO 2: Agendamento não pago - Cancelamento normal
                 AgendamentoDAO.cancelarAgendamento(agendamentoId);
                 exibirAlerta("success", "Agendamento cancelado com sucesso!");
             }
@@ -486,17 +445,15 @@ public class AgendamentoClienteController implements Serializable {
             notificacao.setMensagem(mensagem);
             notificacao.setDataEnvio(new java.util.Date());
             notificacao.setAgendamento(agendamentoCancelado);
-            notificacao.setCliente(null); // NULL = notificação para funcionários/admins
+            notificacao.setCliente(null);
 
             com.barbersys.dao.NotificacaoDAO notificacaoDAO = new com.barbersys.dao.NotificacaoDAO();
             notificacaoDAO.salvar(notificacao);
-            System.out.println("✅ Notificação enviada para admin/funcionários");
 
-            popularMeusAgendamentos(); // Atualiza a lista
-            System.out.println("=== CANCELAMENTO CONCLUÍDO ===");
+            popularMeusAgendamentos();
 
         } catch (Exception e) {
-            System.out.println("❌ ERRO ao cancelar agendamento: " + e.getMessage());
+            System.err.println("ERRO ao cancelar agendamento: " + e.getMessage());
             e.printStackTrace();
             exibirAlerta("error", "Não foi possível cancelar o agendamento. Entre em contato com a barbearia.");
         }
@@ -504,12 +461,7 @@ public class AgendamentoClienteController implements Serializable {
 
     public void aoSelecionarData() {
         try {
-            // No fluxo de steps, não limpamos mais os serviços ao selecionar a data
-            // Os serviços são selecionados no mesmo passo que a data
             this.horaSelecionada = null;
-            
-            // Não precisa gerar horários aqui, pois será feito no próximo passo
-            // quando os serviços forem selecionados
         } catch (Exception e) {
             System.err.println("ERRO em aoSelecionarData(): " + e.getMessage());
             e.printStackTrace();
@@ -523,19 +475,10 @@ public class AgendamentoClienteController implements Serializable {
             this.horariosDisponiveis.clear();
             this.servicosSelecionadosIds.clear();
             this.servicosSelecionadosMap.clear();
-            
-            // Não calcula datas desabilitadas aqui mais, será feito ao avançar do passo 1
-            // calcularDatasDesabilitadas();
         } catch (Exception e) {
             System.err.println("ERRO em aoSelecionarFuncionario(): " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-
-
-    public void aoSelecionarHorario() {
-        // Os serviços devem ser habilitados automaticamente pelo getter isAgendamentoDesabilitado
     }
     
     public void aoSelecionarServico() {
@@ -548,18 +491,12 @@ public class AgendamentoClienteController implements Serializable {
                     servicosSelecionadosIds.add(entry.getKey());
                 }
             }
-            
-            // No fluxo de steps, não recalculamos datas ou horários aqui
-            // Os horários serão calculados apenas quando avançar para o passo 3
         } catch (Exception e) {
             System.err.println("ERRO em aoSelecionarServico(): " + e.getMessage());
             e.printStackTrace();
         }
     }
     
-    /**
-     * Filtra serviços conforme o texto digitado
-     */
     public void filtrarServicos() {
         try {
             if (filtroServico == null || filtroServico.trim().isEmpty()) {
@@ -580,9 +517,6 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
     
-    /**
-     * Retorna o tempo total dos serviços selecionados em minutos
-     */
     public int getTempoTotalMinutos() {
         int total = 0;
         if (servicosDisponiveis != null && servicosSelecionadosIds != null) {
@@ -597,9 +531,6 @@ public class AgendamentoClienteController implements Serializable {
         return total;
     }
     
-    /**
-     * Retorna o tempo total formatado (ex: "1h 30min" ou "45min")
-     */
     public String getTempoTotalFormatado() {
         int totalMinutos = getTempoTotalMinutos();
         if (totalMinutos == 0) {
@@ -618,9 +549,6 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
     
-    /**
-     * Formata a duração de um serviço individual
-     */
     public String formatarDuracaoServico(Integer minutos) {
         if (minutos == null || minutos == 0) {
             return "";
@@ -638,9 +566,6 @@ public class AgendamentoClienteController implements Serializable {
         }
     }
     
-    /**
-     * Lista de serviços para exibição (filtrados ou todos)
-     */
     public List<Servicos> getServicosParaExibir() {
         if (filtroServico != null && !filtroServico.trim().isEmpty()) {
             return servicosFiltrados;
@@ -648,10 +573,6 @@ public class AgendamentoClienteController implements Serializable {
         return servicosDisponiveis;
     }
     
-    /**
-	 * Verifica se uma data tem horários disponíveis (sem considerar serviços)
-	 * Otimizado para evitar loop infinito
-	 */
 	private boolean temHorariosDisponiveisNaData(Date data, Funcionario funcionario) {
 		// Busca os horários de trabalho do funcionário
 		List<Horario> horariosFuncionario = FuncionarioDAO.buscarHorarioPorFuncionario(funcionario);
@@ -709,8 +630,7 @@ public class AgendamentoClienteController implements Serializable {
 		LocalDate dataLocal = new java.sql.Date(data.getTime()).toLocalDate();
 		LocalDateTime agora = LocalDateTime.now();
 		
-		// Otimização: Verifica se há pelo menos UM slot de 30min livre
-		// Não precisa considerar a duração dos serviços neste momento
+		// Verifica se há pelo menos um slot de 30min disponível
 		for (Horario periodo : horariosValidosParaDia) {
 			LocalTime horaAtual = periodo.getHoraInicial();
 			LocalTime horaFinal = periodo.getHoraFinal().minusMinutes(30);
@@ -746,11 +666,6 @@ public class AgendamentoClienteController implements Serializable {
 		return false; // Nenhum horário disponível
 	}
 	
-	/**
-	 * Calcula as datas que devem ser desabilitadas no datepicker
-	 * baseado no funcionário selecionado (SEM considerar serviços)
-	 * Calcula para os próximos 3 anos (rápido e suficiente)
-	 */
 	public void calcularDatasDesabilitadas() {
 		datasDesabilitadas.clear();
 		datasDesabilitadasDate.clear();
@@ -847,10 +762,6 @@ public class AgendamentoClienteController implements Serializable {
 		}
 	}
 	
-	/**
-	 * Retorna string JavaScript com array de datas desabilitadas
-	 * Formato: "2025-11-13,2025-11-14,2025-11-17"
-	 */
 	public String getDatasDesabilitadasString() {
 		if (datasDesabilitadas.isEmpty()) {
 			return "";
@@ -894,23 +805,17 @@ public class AgendamentoClienteController implements Serializable {
     }
 
     public boolean isDataDesabilitada() {
-        // NUNCA desabilitar - o controle é feito pelo activeIndex e validações
         return false;
     }
 
     public boolean isFuncionarioDesabilitado() {
-        // NUNCA desabilitar
         return false;
     }
 
     public boolean isHorarioDesabilitado() {
-        // NUNCA desabilitar - o dropdown mostra "Nenhum horário disponível" quando vazio
         return false;
     }
     
-    /**
-     * Serviços SEMPRE habilitados
-     */
     public boolean isAgendamentoDesabilitado() {
         return false;
     }
@@ -1013,8 +918,6 @@ public class AgendamentoClienteController implements Serializable {
 			int maxIteracoes = 100;
 			int iteracao = 0;
 
-			// CORREÇÃO: Para evitar overflow de horário (passar de 23:59 para 00:00)
-			// Usa isBefore e equals ao invés de isAfter
 			while ((horaAtual.isBefore(horaFinalPeriodo) || horaAtual.equals(horaFinalPeriodo)) 
 					&& iteracao < maxIteracoes 
 					&& horaAtual.compareTo(horaInicialPeriodo) >= 0) {
@@ -1025,11 +928,9 @@ public class AgendamentoClienteController implements Serializable {
 
 				if (isHorarioFuturo) {
 					// Calcula quando o serviço terminaria se começasse neste horário
-					// CORREÇÃO: Usa totalMinutos ao invés de (slots-1)*30
 					LocalTime horarioTermino = horaAtual.plusMinutes(totalMinutos);
 					
 					// Verifica se o serviço termina dentro do período de trabalho
-					// E não ultrapassa o limite (evita overflow para 00:00, 01:00, etc)
 					if (!horarioTermino.isAfter(horaFinalPeriodo) 
 							&& horarioTermino.compareTo(horaAtual) >= 0) {
 						// Verifica se todos os slots necessários estão livres

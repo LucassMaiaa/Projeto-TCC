@@ -17,8 +17,8 @@ import com.barbersys.util.DatabaseConnection;
 
 public class ControleCaixaDAO {
 
+	// Busca o total de entradas e saídas do caixa em um dia específico
 	public static List<Map<String, Object>> buscarCaixasContagem(Date dataSelecionada) {
-		System.out.println("🔍 ===== BUSCAR CAIXAS CONTAGEM DIA =====");
 		Double totalEntradas = 0.0;
 		Double totalSaidas = 0.0;
 
@@ -30,7 +30,6 @@ public class ControleCaixaDAO {
 
 			SimpleDateFormat dataFormatada = new SimpleDateFormat("yyyy-MM-dd");
 			String dataFiltro = dataFormatada.format(dataSelecionada);
-			System.out.println("📅 Data filtro: " + dataFiltro);
 
 			ps.setString(1, dataFiltro);
 
@@ -42,25 +41,12 @@ public class ControleCaixaDAO {
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
 
-				System.out.println("📝 Movimentação: " + caixa.getMovimentacao() + " | Valor: R$ " + String.format("%.2f", caixa.getValor()));
-
 				if (caixa.getMovimentacao().equals("Entrada") || caixa.getMovimentacao().equals("Entrada automática")) {
 					totalEntradas += caixa.getValor();
-					System.out.println("  ✅ Contabilizado em ENTRADAS");
-
 				} else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
 					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
-					System.out.println("  ✅ Contabilizado em SAÍDAS");
-
-				} else if (caixa.getMovimentacao().equals("Abertura de Caixa") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
-					System.out.println("  ⏭️  IGNORADO (controle interno)");
 				}
-
 			}
-			
-			System.out.println("💰 TOTAL ENTRADAS DIA: R$ " + String.format("%.2f", totalEntradas));
-			System.out.println("💸 TOTAL SAÍDAS DIA: R$ " + String.format("%.2f", totalSaidas));
-			System.out.println("🔍 ===== FIM BUSCAR CAIXAS CONTAGEM DIA =====\n");
 
 			lista.put("entrada", totalEntradas);
 			lista.put("saida", totalSaidas);
@@ -73,8 +59,8 @@ public class ControleCaixaDAO {
 		return listaCarregada;
 	}
 
+	// Busca o total de entradas e saídas do caixa em um mês específico
 	public static List<Map<String, Object>> buscarCaixasContagemPorMes(Date dataSelecionada) {
-		System.out.println("🔍 ===== BUSCAR CAIXAS CONTAGEM MÊS =====");
 		Double totalEntradas = 0.0;
 		Double totalSaidas = 0.0;
 
@@ -90,8 +76,6 @@ public class ControleCaixaDAO {
 			calendar.setTime(dataSelecionada);
 			int mes = calendar.get(java.util.Calendar.MONTH) + 1;
 			int ano = calendar.get(java.util.Calendar.YEAR);
-			
-			System.out.println("📅 Mês/Ano filtro: " + mes + "/" + ano);
 
 			ps.setInt(1, mes);
 			ps.setInt(2, ano);
@@ -103,29 +87,17 @@ public class ControleCaixaDAO {
 				caixa.setValor(rs.getDouble("con_valor"));
 				caixa.setData(rs.getDate("con_data"));
 				caixa.setMovimentacao(rs.getString("con_movimentacao"));
-				
-				System.out.println("📝 Movimentação: " + caixa.getMovimentacao() + " | Valor: R$ " + String.format("%.2f", caixa.getValor()));
 
 				// Soma APENAS entradas reais (manual e automática)
 				if (caixa.getMovimentacao().equals("Entrada")
 						|| caixa.getMovimentacao().equals("Entrada automática")) {
 					totalEntradas += caixa.getValor();
-					System.out.println("  ✅ Contabilizado em ENTRADAS");
 				} 
 				// Soma APENAS saídas reais (manual e estorno)
 				else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
 					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
-					System.out.println("  ✅ Contabilizado em SAÍDAS");
-				}
-				// Ignora: Abertura de Caixa e Fechamento de Caixa
-				else if (caixa.getMovimentacao().equals("Abertura de Caixa") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
-					System.out.println("  ⏭️  IGNORADO (controle interno)");
 				}
 			}
-			
-			System.out.println("💰 TOTAL ENTRADAS MÊS: R$ " + String.format("%.2f", totalEntradas));
-			System.out.println("💸 TOTAL SAÍDAS MÊS: R$ " + String.format("%.2f", totalSaidas));
-			System.out.println("🔍 ===== FIM BUSCAR CAIXAS CONTAGEM MÊS =====\n");
 
 			lista.put("entrada", totalEntradas);
 			lista.put("saida", totalSaidas);
@@ -138,6 +110,7 @@ public class ControleCaixaDAO {
 		return listaCarregada;
 	}
 
+	// Busca registros do caixa com paginação, filtros e ordenação
 	public static List<ControleCaixa> buscarCaixasPaginado(int first, int pageSize, Date dataSelecionada,
 			String tipoValor, String sortField, String sortOrder) {
 		List<ControleCaixa> lista = new ArrayList<>();
@@ -192,6 +165,7 @@ public class ControleCaixaDAO {
 		return lista;
 	}
 
+	// Conta o total de registros do caixa com base nos filtros
 	public static int contarTotalCaixas(Date dataSelecionada, String tipoValor) {
 		String sql = "SELECT COUNT(*) FROM controlecaixa WHERE con_data = ? AND (? = '' OR con_movimentacao = ?)";
 		int total = 0;
@@ -217,6 +191,7 @@ public class ControleCaixaDAO {
 		return total;
 	}
 
+	// Calcula entradas e saídas desde a última abertura de caixa
 	public static Map<String, Double> buscarEntradasESaidasDesdeUltimaAbertura(Date dataSelecionada) {
 		Map<String, Double> resultado = new HashMap<>();
 		double totalEntradas = 0.0;
@@ -278,6 +253,7 @@ public class ControleCaixaDAO {
 		return resultado;
 	}
 
+	// Busca o último registro do caixa em uma data específica
 	public static ControleCaixa buscarUltimoRegistroPorData(Date dataSelecionada) {
 	    String sql = "SELECT * FROM controlecaixa WHERE con_data = ? ORDER BY con_hora DESC LIMIT 1";
 	    ControleCaixa controle = null;
@@ -312,6 +288,7 @@ public class ControleCaixaDAO {
 	    return controle;
 	}
 	
+	// Verifica se o último registro do dia é um fechamento de caixa
 	public static boolean ultimoRegistroEhFechamento(Date dataSelecionada) {
 	    ControleCaixa ultimoRegistro = buscarUltimoRegistroPorData(dataSelecionada);
 	    if (ultimoRegistro == null) {
@@ -320,6 +297,7 @@ public class ControleCaixaDAO {
 	    return "Fechamento de Caixa".equalsIgnoreCase(ultimoRegistro.getMovimentacao());
 	}
 
+	// Salva um novo registro de movimentação no caixa
 	public static void salvar(ControleCaixa caixa) {
 		String sql = "INSERT INTO controlecaixa (con_valor, con_movimentacao, "
 				+ "con_hora, con_motivo, con_data, cai_codigo) VALUES (?, ?, ?, ?, ?, ?)";

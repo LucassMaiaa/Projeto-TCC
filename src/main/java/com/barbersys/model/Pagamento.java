@@ -26,6 +26,6 @@ public class Pagamento implements Serializable{
 	private String status = "A";
 	
 	@Column
-	private Boolean integraCaixa;
+	private Boolean integraCaixa = false;
 }
 

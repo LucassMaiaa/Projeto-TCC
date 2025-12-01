@@ -37,21 +37,19 @@ public class RegistroController {
         clienteModel.setUsuario(new Usuario());
     }
 
+    // Valida os dados do formulário e envia código de verificação por email
     public void enviarCodigoRegistro() {
         try {
-            // Validações básicas
             if (email == null || email.trim().isEmpty()) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "E-mail é obrigatório");
                 return;
             }
             
-            // Valida formato do email
             if (!email.contains("@") || !email.contains(".")) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Email inválido. Por favor, digite um email válido (ex: usuario@email.com)");
                 return;
             }
             
-            // Verifica se o email já existe no sistema ANTES de enviar o código
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             try {
                 if (usuarioDAO.loginExiste(email)) {
@@ -78,13 +76,11 @@ public class RegistroController {
                 return;
             }
             
-            // Valida formato do CPF
             if (!com.barbersys.util.CpfCnpjValidator.validarCPF(clienteModel.getCpf())) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "CPF inválido. Por favor, digite um CPF válido.");
                 return;
             }
             
-            // Verifica se o CPF já existe em TODO O SISTEMA (clientes e funcionários)
             if (ClienteDAO.existeCpfNoSistema(clienteModel.getCpf(), null)) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Este CPF já está cadastrado no sistema.");
                 return;
@@ -115,19 +111,11 @@ public class RegistroController {
                 return;
             }
 
-            // Definir o email como login do usuário
             clienteModel.getUsuario().setLogin(email);
-            
-            // Gerar código de 6 dígitos
             codigoGerado = String.format("%06d", new Random().nextInt(999999));
             
-            // Enviar email
             EmailService emailService = new EmailService();
-            boolean enviado = emailService.enviarCodigoVerificacao(
-                email, 
-                clienteModel.getNome(), 
-                codigoGerado
-            );
+            boolean enviado = emailService.enviarCodigoVerificacao(email, clienteModel.getNome(), codigoGerado);
             
             if (enviado) {
                 codigoEnviado = true;
@@ -142,14 +130,12 @@ public class RegistroController {
         }
     }
     
+    // Valida o código digitado pelo usuário
     public void validarCodigo() {
         if (codigoDigitado == null || codigoDigitado.trim().isEmpty()) {
             addMessage(FacesMessage.SEVERITY_ERROR, "Digite o código de verificação");
             return;
         }
-        
-        System.out.println("Código digitado: " + codigoDigitado);
-        System.out.println("Código gerado: " + codigoGerado);
         
         if (codigoDigitado.trim().equals(codigoGerado)) {
             codigoValidado = true;
@@ -160,18 +146,13 @@ public class RegistroController {
         }
     }
     
+    // Reenvia um novo código de verificação
     public void reenviarCodigo() {
         try {
-            // Gerar novo código
             codigoGerado = String.format("%06d", new Random().nextInt(999999));
             
-            // Enviar email
             EmailService emailService = new EmailService();
-            boolean enviado = emailService.enviarCodigoVerificacao(
-                email, 
-                clienteModel.getNome(), 
-                codigoGerado
-            );
+            boolean enviado = emailService.enviarCodigoVerificacao(email, clienteModel.getNome(), codigoGerado);
             
             if (enviado) {
                 addMessage(FacesMessage.SEVERITY_INFO, "Novo código enviado para " + email);
@@ -184,6 +165,7 @@ public class RegistroController {
         }
     }
     
+    // Salva o cliente no banco de dados após validação do código
     public void registrarCliente() {
         try {
             if (!codigoValidado) {
@@ -191,16 +173,14 @@ public class RegistroController {
                 return;
             }
 
-            // Salvar o usuário primeiro
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             Perfil perfil = new Perfil();
-            perfil.setId(3L); // 3 = Cliente
+            perfil.setId(3L);
             clienteModel.getUsuario().setPerfil(perfil);
             clienteModel.getUsuario().setUser(clienteModel.getNome());
             Usuario usuarioSalvo = usuarioDAO.salvar(clienteModel.getUsuario());
             clienteModel.setUsuario(usuarioSalvo);
 
-            // Salvar o cliente
             ClienteDAO.salvar(clienteModel);
 
             addMessage(FacesMessage.SEVERITY_INFO, "Conta criada com sucesso! Redirecionando...");

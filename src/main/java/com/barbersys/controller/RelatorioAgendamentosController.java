@@ -36,6 +36,7 @@ public class RelatorioAgendamentosController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Inicializa o modelo lazy para paginação dos agendamentos
     private void inicializarLazyModel() {
         lstAgendamentos = new LazyDataModel<AgendamentoSintetico>() {
             private static final long serialVersionUID = 1L;
@@ -64,32 +65,29 @@ public class RelatorioAgendamentosController implements Serializable {
         };
     }
 
+    // Limpa os filtros de data
     public void limparFiltros() {
         dataInicial = null;
         dataFinal = null;
     }
 
+    // Busca todos os agendamentos dentro do período filtrado
     private List<AgendamentoSintetico> obterTodosAgendamentosFiltrados() {
         return AgendamentoSinteticoDAO.buscarTodosAgendamentosSinteticos(dataInicial, dataFinal);
     }
 
+    // Gera o PDF do relatório de agendamentos
     public void gerarPDF() {
-        List<AgendamentoSintetico> todosAgendamentos = null;
-        
         try {
-            todosAgendamentos = obterTodosAgendamentosFiltrados();
+            List<AgendamentoSintetico> todosAgendamentos = obterTodosAgendamentosFiltrados();
             
             if (todosAgendamentos == null || todosAgendamentos.isEmpty()) {
-                System.out.println("[AVISO] Nenhum agendamento encontrado para gerar PDF");
                 return;
             }
             
-            System.out.println("[INFO] Gerando PDF com " + todosAgendamentos.size() + " registros...");
             RelatorioAgendamentosPDF.gerar(todosAgendamentos, dataInicial, dataFinal);
-            System.out.println("[SUCESSO] PDF gerado com sucesso!");
             
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha ao gerar PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }

@@ -206,36 +206,23 @@ public class ClienteController {
 	}
 	
 	public void validarCodigoCliente() {
-		System.out.println("🔍 Validando código do CLIENTE...");
-		System.out.println("📝 Código digitado: " + codigoValidacao);
-		System.out.println("✅ Código esperado: " + codigoGerado);
-		
 		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
 			exibirAlerta("error", "Código é obrigatório");
-			System.out.println("❌ Código vazio!");
-			// NÃO FECHA NADA - retorna para o usuário tentar novamente
 			return;
 		}
 		
 		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
-			System.out.println("✅ Código correto! Salvando cliente...");
 			aguardandoValidacao = false;
-			
-			// Limpa o código após validação bem-sucedida
 			codigoValidacao = null;
 			codigoGerado = null;
 			
-			// Salva o cliente (só fecha modais SE SALVAR COM SUCESSO)
 			if (editarModel.equals("I")) {
 				adicionarNovoCliente();
 			} else {
 				atualizarCliente();
 			}
 		} else {
-			System.out.println("❌ Código incorreto!");
 			exibirAlerta("error", "Código incorreto! Tente novamente.");
-			// NÃO FECHA NADA - mantém ambos os modais abertos
-			// Não retorna, não fecha, não faz nada - apenas mostra o erro
 		}
 	}
 	
@@ -347,26 +334,19 @@ public class ClienteController {
 	}
 	
 	public void adicionarNovoCliente() {
-		System.out.println("💾 Iniciando salvamento do cliente...");
 		try {
-			System.out.println("📝 Salvando usuário...");
-            // Salvar o usuário primeiro
             UsuarioDAO usuarioDAO = new UsuarioDAO();
             Perfil perfil = new Perfil();
-            perfil.setId(3L); // 3 para cliente
+            perfil.setId(3L);
             clienteModel.getUsuario().setPerfil(perfil);
-            
-            // Define o usu_user como o nome completo do cliente
             clienteModel.getUsuario().setUser(clienteModel.getNome());
             
             Usuario usuarioSalvo = usuarioDAO.salvar(clienteModel.getUsuario());
             clienteModel.setUsuario(usuarioSalvo);
 
 			ClienteDAO.salvar(clienteModel);
-
 			exibirAlerta("success", "Cliente cadastrado com sucesso!");
 
-			// SÓ FECHA OS MODAIS SE CHEGOU AQUI (SUCESSO TOTAL)
 			PrimeFaces.current().executeScript("PF('dlgValidarEmailCliente').hide();");
 			PrimeFaces.current().executeScript("PF('dlgCli').hide();");
 			PrimeFaces.current().ajax().update("form");
@@ -375,12 +355,10 @@ public class ClienteController {
             e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Erro ao salvar cliente: " + e.getMessage(), "Erro!"));
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
 		} catch (Exception e) {
             e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Erro inesperado ao salvar cliente: " + e.getMessage(), "Erro!"));
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
 		}
 	}
 
@@ -402,12 +380,10 @@ public class ClienteController {
             e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Erro ao atualizar cliente: " + e.getMessage(), "Erro!"));
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
         } catch (Exception e) {
             e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Erro inesperado ao atualizar cliente: " + e.getMessage(), "Erro!"));
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
         }
 
 	}

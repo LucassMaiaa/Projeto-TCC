@@ -12,6 +12,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class PagamentoDAO {
 	
+	// Conta total de pagamentos com filtros
 	public static int pagamentoCount(String nome, String status) {
 	    int total = 0;
 	    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM pagamento WHERE 1=1");
@@ -49,7 +50,7 @@ public class PagamentoDAO {
 	    return total;
 	}
 
-
+	// Busca pagamentos com filtros e paginação
 	public static List<Pagamento> buscarPagamento(String nome, String status, int first, int pageSize) {
 		List<Pagamento> lista = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM pagamento WHERE 1=1");
@@ -98,6 +99,7 @@ public class PagamentoDAO {
 		return lista;
 	}
 
+	// Busca todos os pagamentos ativos
 	public static List<Pagamento> buscarTodos() {
 	    List<Pagamento> lista = new ArrayList<>();
 	    String sql = "SELECT * FROM pagamento WHERE pag_status = 'A' ORDER BY pag_nome";
@@ -122,6 +124,7 @@ public class PagamentoDAO {
 	    return lista;
 	}
 
+	// Busca pagamento por ID
 	public static Pagamento buscarPorId(Long id) {
 	    String sql = "SELECT * FROM pagamento WHERE pag_codigo = ?";
 	    Pagamento pagamento = null;
@@ -147,6 +150,7 @@ public class PagamentoDAO {
 	    return pagamento;
 	}
 
+	// Atualiza dados do pagamento
 	public static void atualizar(Pagamento pagamento) {
 		String sql = "UPDATE pagamento SET pag_nome = ?, pag_status = ?, pag_integra_caixa = ? WHERE pag_codigo = ?";
 
@@ -164,7 +168,7 @@ public class PagamentoDAO {
 		}
 	}
 
-
+	// Deleta pagamento
 	public static void deletar(Pagamento pagamento) {
 		String sql = "DELETE FROM pagamento WHERE pag_codigo = ?";
 
@@ -179,6 +183,7 @@ public class PagamentoDAO {
 		}
 	}
 
+	// Salva novo pagamento
 	public static void salvar(Pagamento pagamento) {
 		String sql = "INSERT INTO pagamento (pag_nome, pag_status, pag_integra_caixa) VALUES (?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();

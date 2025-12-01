@@ -9,6 +9,7 @@ import java.util.List;
 
 public class AgendamentoSinteticoDAO {
 
+    // Busca agendamentos sintéticos com paginação e ordenação
     public static List<AgendamentoSintetico> buscarAgendamentosSinteticos(
             java.util.Date dataInicial, 
             java.util.Date dataFinal, 
@@ -38,7 +39,6 @@ public class AgendamentoSinteticoDAO {
         
         sql.append("GROUP BY DATE(a.age_data) ");
         
-        // Mapeamento de campos para ordenação
         String colunaBanco = "data";
         if ("data".equals(sortField)) colunaBanco = "data";
         else if ("totalAgendamentos".equals(sortField)) colunaBanco = "total_agendamentos";
@@ -86,6 +86,7 @@ public class AgendamentoSinteticoDAO {
         return resultado;
     }
 
+    // Conta total de dias com agendamentos para paginação
     public static int contarAgendamentosSinteticos(java.util.Date dataInicial, java.util.Date dataFinal) {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(DISTINCT DATE(a.age_data)) as total " +
@@ -122,6 +123,7 @@ public class AgendamentoSinteticoDAO {
         return 0;
     }
 
+    // Busca todos os agendamentos sintéticos para exportação PDF
     public static List<AgendamentoSintetico> buscarTodosAgendamentosSinteticos(
             java.util.Date dataInicial, 
             java.util.Date dataFinal) {

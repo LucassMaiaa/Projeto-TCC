@@ -44,6 +44,7 @@ public class RelatorioFeedbackController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Inicializa modelo lazy para paginação de avaliações
     private void inicializarLazyModel() {
         lstAvaliacoes = new LazyDataModel<Avaliacao>() {
             private static final long serialVersionUID = 1L;
@@ -73,6 +74,7 @@ public class RelatorioFeedbackController implements Serializable {
         };
     }
     
+    // Converte filtro de avaliação para Integer
     private Integer obterNotaFiltro() {
         if (avaliacaoFiltro != null && !avaliacaoFiltro.trim().isEmpty()) {
             return Integer.parseInt(avaliacaoFiltro);
@@ -80,10 +82,12 @@ public class RelatorioFeedbackController implements Serializable {
         return null;
     }
 
+    // Carrega lista de funcionários ativos
     private void carregarFuncionarios() {
         lstFuncionario = FuncionarioDAO.buscarFuncionario(null, "A", 0, 1000);
     }
 
+    // Limpa todos os filtros aplicados
     public void limparFiltros() {
         avaliacaoFiltro = "";
         funcionarioFiltro = null;
@@ -91,31 +95,24 @@ public class RelatorioFeedbackController implements Serializable {
         dataFinal = null;
     }
 
-    /**
-     * Busca TODAS as avaliações (sem paginação) para gerar o PDF
-     */
+    // Busca todas as avaliações filtradas para geração do PDF
     private List<Avaliacao> obterTodasAvaliacoesFiltradas() {
         Integer notaFiltro = obterNotaFiltro();
         return AvaliacaoDAO.buscarTodasAvaliacoes(notaFiltro, funcionarioFiltro, dataInicial, dataFinal);
     }
 
+    // Gera relatório PDF de feedback dos clientes
     public void gerarPDF() {
-        List<Avaliacao> todasAvaliacoes = null;
-        
         try {
-            todasAvaliacoes = obterTodasAvaliacoesFiltradas();
+            List<Avaliacao> todasAvaliacoes = obterTodasAvaliacoesFiltradas();
             
             if (todasAvaliacoes == null || todasAvaliacoes.isEmpty()) {
-                System.out.println("[AVISO] Nenhuma avaliação encontrada para gerar PDF");
                 return;
             }
             
-            System.out.println("[INFO] Gerando PDF com " + todasAvaliacoes.size() + " avaliações...");
             RelatorioFeedbackPDF.gerar(todasAvaliacoes, avaliacaoFiltro, funcionarioFiltro, dataInicial, dataFinal);
-            System.out.println("[SUCESSO] PDF gerado com sucesso!");
             
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha ao gerar PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }

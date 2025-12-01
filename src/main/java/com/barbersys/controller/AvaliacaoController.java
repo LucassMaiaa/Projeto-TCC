@@ -38,17 +38,14 @@ public class AvaliacaoController implements Serializable {
         this.avaliacaoModel = new Avaliacao();
     }
 
+    // Prepara o modal de avaliação com dados da notificação
     public void abrirModalAvaliacao(Notificacao notificacao) {
         this.notificacaoSelecionada = notificacao;
         this.notaSelecionada = 0;
         this.comentario = "";
         
-        // Buscar informações do agendamento pela notificação
         if (notificacao.getAgendamento() != null) {
             this.agendamentoId = notificacao.getAgendamento().getId();
-            
-            // Extrai o nome do funcionário da mensagem
-            // Mensagem: "Seu atendimento com [Nome] foi finalizado! Avalie o serviço prestado"
             String mensagem = notificacao.getMensagem();
             
             if (mensagem != null && mensagem.contains("Seu atendimento com")) {
@@ -72,6 +69,7 @@ public class AvaliacaoController implements Serializable {
         }
     }
 
+    // Salva a avaliação do cliente e remove a notificação
     public void salvarAvaliacao() {
         try {
             Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance()
@@ -89,13 +87,11 @@ public class AvaliacaoController implements Serializable {
 
             Long clienteId = usuarioLogado.getClienteAssociado().getId();
             
-            // Verifica se já avaliou este agendamento
             if (AvaliacaoDAO.verificarSeJaAvaliou(agendamentoId, clienteId)) {
                 exibirAlerta("warning", "Você já avaliou este atendimento!");
                 return;
             }
 
-            // Cria a avaliação
             Avaliacao avaliacao = new Avaliacao();
             avaliacao.setNota(notaSelecionada);
             avaliacao.setComentario(comentario);
@@ -114,43 +110,31 @@ public class AvaliacaoController implements Serializable {
             avaliacao.setFuncionario(funcionario);
 
             AvaliacaoDAO.salvar(avaliacao);
-            
-            System.out.println("✅ Avaliação salva com sucesso!");
 
-            // Remove a notificação após avaliar
             if (notificacaoSelecionada != null) {
-                System.out.println("🗑️ Removendo notificação ID: " + notificacaoSelecionada.getId());
                 NotificacaoDAO notificacaoDAO = new NotificacaoDAO();
                 notificacaoDAO.marcarComoInativa(notificacaoSelecionada);
                 
-                // Atualiza o NotificacaoController na sessão
                 NotificacaoController notificacaoController = (NotificacaoController) 
                     FacesContext.getCurrentInstance().getExternalContext()
                     .getSessionMap().get("notificacaoController");
                 
                 if (notificacaoController != null) {
-                    System.out.println("🔄 Atualizando lista de notificações...");
                     notificacaoController.atualizarNotificacoes();
                 }
-                
-                System.out.println("✅ Notificação removida com sucesso!");
             }
 
             exibirAlerta("success", "Avaliação registrada com sucesso!");
-            PrimeFaces.current().executeScript("PF('dlgAvaliacao').hide();");
-            
-            // Atualiza o painel de notificações na interface
             PrimeFaces.current().ajax().update("form:painelNotificacoes");
 
         } catch (Exception e) {
-            System.out.println("❌ ERRO ao salvar avaliação: " + e.getMessage());
             e.printStackTrace();
             exibirAlerta("error", "Erro ao salvar avaliação!");
         }
     }
 
+    // Busca o ID do funcionário associado ao agendamento
     private Long getFuncionarioIdDoAgendamento(Long agendamentoId) {
-        // Buscar o funcionarioId do agendamento no banco
         String sql = "SELECT fun_codigo FROM agendamento WHERE age_codigo = ?";
         try (java.sql.Connection conn = com.barbersys.util.DatabaseConnection.getConnection();
              java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {

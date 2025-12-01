@@ -12,6 +12,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class ServicosDAO {
 	
+	// Conta o total de serviços com filtros
 	public static int servicosCount(String nome, String status) {
 	    int total = 0;
 	    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM servicos WHERE 1=1");
@@ -49,7 +50,7 @@ public class ServicosDAO {
 	    return total;
 	}
 
-
+	// Busca serviços com filtros e paginação
 	public static List<Servicos> buscarServico(String nome, String status, int first, int pageSize) {
 		List<Servicos> lista = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM servicos WHERE 1=1");
@@ -99,6 +100,7 @@ public class ServicosDAO {
 		return lista;
 	}
 
+	// Busca todos os serviços ativos
 	public static List<Servicos> buscarTodos() {
 	    List<Servicos> lista = new ArrayList<>();
 	    String sql = "SELECT * FROM servicos WHERE ser_status = 'A' ORDER BY ser_nome";
@@ -124,6 +126,7 @@ public class ServicosDAO {
 	    return lista;
 	}
 
+	// Busca serviço por ID
 	public static Servicos buscarPorId(Long id) {
 	    String sql = "SELECT * FROM servicos WHERE ser_codigo = ?";
 	    Servicos servico = null;
@@ -150,6 +153,7 @@ public class ServicosDAO {
 	    return servico;
 	}
 
+	// Atualiza dados de um serviço
 	public static void atualizar(Servicos servicos) {
 		String sql = "UPDATE servicos SET ser_nome = ?, ser_preco = ?, ser_minutos = ?, ser_status = ? WHERE ser_codigo = ?";
 
@@ -168,7 +172,7 @@ public class ServicosDAO {
 		}
 	}
 
-
+	// Deleta um serviço
 	public static void deletar(Servicos servicos) {
 		String sql = "DELETE FROM servicos WHERE ser_codigo = ?";
 
@@ -183,6 +187,7 @@ public class ServicosDAO {
 		}
 	}
 
+	// Salva um novo serviço
 	public static void salvar(Servicos servicos) {
 		String sql = "INSERT INTO servicos (ser_nome, ser_preco, ser_minutos ,ser_status) VALUES (?, ?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();

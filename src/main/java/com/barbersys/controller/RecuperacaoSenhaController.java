@@ -20,45 +20,34 @@ import java.util.Date;
 public class RecuperacaoSenhaController implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    // Atributos para o fluxo
     private String cpfOuEmail;
     private String codigoDigitado;
     private String novaSenha;
     private String confirmarSenha;
-    
-    // Atributos de controle
     private String codigoGerado;
     private Date dataGeracao;
-    private String tipoUsuario; // "CLIENTE" ou "FUNCIONARIO"
+    private String tipoUsuario;
     private Long idUsuario;
     private String emailUsuario;
     private String nomeUsuario;
     
-    // Tempo de expiração do código em milissegundos (15 minutos)
     private static final long TEMPO_EXPIRACAO = 15 * 60 * 1000;
     
-    /**
-     * PASSO 1: Solicitar código de recuperação
-     */
+    // Solicita código de recuperação por CPF ou email
     public String solicitarCodigo() {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
             
-            // Validação
             if (cpfOuEmail == null || cpfOuEmail.trim().isEmpty()) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Por favor, informe seu CPF ou Email"));
                 return null;
             }
             
-            // Limpar CPF se for informado
             String cpfLimpo = cpfOuEmail.replaceAll("[^0-9]", "");
-            
-            // Buscar usuário (primeiro tenta cliente, depois funcionário)
             Cliente cliente = null;
             Funcionario funcionario = null;
             
-            // Tentar buscar por CPF ou Email
             if (cpfLimpo.length() == 11) {
                 cliente = ClienteDAO.buscarPorCPFRecuperacao(cpfLimpo);
             }
@@ -74,14 +63,12 @@ public class RecuperacaoSenhaController implements Serializable {
                 }
             }
             
-            // Verificar se encontrou algum usuário
             if (cliente == null && funcionario == null) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "CPF ou Email não encontrado no sistema"));
                 return null;
             }
             
-            // Definir tipo e dados do usuário
             if (cliente != null) {
                 tipoUsuario = "CLIENTE";
                 idUsuario = cliente.getId();
@@ -94,18 +81,15 @@ public class RecuperacaoSenhaController implements Serializable {
                 nomeUsuario = funcionario.getNome();
             }
             
-            // Verificar se tem email cadastrado
             if (emailUsuario == null || emailUsuario.trim().isEmpty()) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Usuário não possui email cadastrado. Entre em contato com o administrador."));
                 return null;
             }
             
-            // Gerar código
             codigoGerado = EmailService.gerarCodigo();
             dataGeracao = new Date();
             
-            // Enviar email
             boolean enviado = EmailService.enviarCodigoRecuperacao(emailUsuario, nomeUsuario, codigoGerado);
             
             if (enviado) {
@@ -119,28 +103,23 @@ public class RecuperacaoSenhaController implements Serializable {
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                 "Erro", "Erro ao processar solicitação: " + e.getMessage()));
             return null;
         }
     }
     
-    /**
-     * PASSO 2: Validar código digitado
-     */
+    // Valida código digitado pelo usuário
     public String validarCodigo() {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
             
-            // Validação básica
             if (codigoDigitado == null || codigoDigitado.trim().isEmpty()) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Por favor, digite o código"));
                 return null;
             }
             
-            // Verificar se o código foi gerado
             if (codigoGerado == null) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Sessão expirada. Por favor, solicite um novo código"));
@@ -148,7 +127,6 @@ public class RecuperacaoSenhaController implements Serializable {
                 return null;
             }
             
-            // Verificar expiração (15 minutos)
             long tempoDecorrido = new Date().getTime() - dataGeracao.getTime();
             if (tempoDecorrido > TEMPO_EXPIRACAO) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
@@ -157,34 +135,28 @@ public class RecuperacaoSenhaController implements Serializable {
                 return null;
             }
             
-            // Validar código
             if (!codigoDigitado.trim().equals(codigoGerado)) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Código inválido. Verifique e tente novamente"));
                 return null;
             }
             
-            // Código válido, ir para redefinir senha (permanece na mesma página)
             context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, 
                 "Sucesso", "Código validado! Defina sua nova senha"));
             return null;
             
         } catch (Exception e) {
-            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                 "Erro", "Erro ao validar código: " + e.getMessage()));
             return null;
         }
     }
     
-    /**
-     * PASSO 3: Redefinir senha
-     */
+    // Atualiza senha do usuário
     public String redefinirSenha() {
         try {
             FacesContext context = FacesContext.getCurrentInstance();
             
-            // Validações
             if (novaSenha == null || novaSenha.trim().isEmpty()) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Por favor, informe a nova senha"));
@@ -203,7 +175,6 @@ public class RecuperacaoSenhaController implements Serializable {
                 return null;
             }
             
-            // Verificar sessão
             if (tipoUsuario == null || idUsuario == null) {
                 context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Sessão expirada. Por favor, inicie o processo novamente"));
@@ -211,7 +182,6 @@ public class RecuperacaoSenhaController implements Serializable {
                 return null;
             }
             
-            // Atualizar senha no banco
             boolean sucesso = false;
             if ("CLIENTE".equals(tipoUsuario)) {
                 sucesso = ClienteDAO.atualizarSenha(idUsuario, novaSenha);
@@ -231,16 +201,13 @@ public class RecuperacaoSenhaController implements Serializable {
             }
             
         } catch (Exception e) {
-            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                 "Erro", "Erro ao redefinir senha: " + e.getMessage()));
             return null;
         }
     }
     
-    /**
-     * Reenviar código
-     */
+    // Reenvia código de recuperação
     public String reenviarCodigo() {
         if (emailUsuario != null && nomeUsuario != null) {
             codigoGerado = EmailService.gerarCodigo();
@@ -259,9 +226,6 @@ public class RecuperacaoSenhaController implements Serializable {
         return null;
     }
     
-    /**
-     * Limpar sessão
-     */
     private void limparSessao() {
         cpfOuEmail = null;
         codigoDigitado = null;
@@ -275,9 +239,6 @@ public class RecuperacaoSenhaController implements Serializable {
         nomeUsuario = null;
     }
     
-    /**
-     * Mascara email para exibição
-     */
     private String mascarEmail(String email) {
         if (email == null || !email.contains("@")) return email;
         String[] partes = email.split("@");
@@ -290,7 +251,6 @@ public class RecuperacaoSenhaController implements Serializable {
         return usuario.substring(0, 3) + "***@" + dominio;
     }
     
-    // Métodos auxiliares para JSF
     public String getEmailMascarado() { 
         return mascarEmail(emailUsuario); 
     }

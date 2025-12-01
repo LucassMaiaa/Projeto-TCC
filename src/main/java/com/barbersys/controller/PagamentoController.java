@@ -51,24 +51,25 @@ public class PagamentoController {
 		};
 	}
 
+	// Carrega dados do pagamento selecionado
 	public void pagamentoSelecionado(Pagamento event) {
 		pagamentoModel = new Pagamento();
 		pagamentoModel.setId(event.getId());
 		pagamentoModel.setNome(event.getNome());
 		pagamentoModel.setStatus(event.getStatus());
+		pagamentoModel.setIntegraCaixa(event.getIntegraCaixa());
 		editarModel = "A";
-		System.out.println("🔍 Pagamento selecionado: " + pagamentoModel.getNome());
 	}
 
+	// Prepara modal para novo cadastro
 	public void novoPagamento() {
 		pagamentoModel = new Pagamento();
 		editarModel = "I";
-		System.out.println("➕ Novo pagamento - Model limpo");
 	}
 
+	// Salva novo tipo de pagamento
 	public void adicionarNovoPagamento() {
 		try {
-			// Validação do campo nome
 			if (pagamentoModel.getNome() == null || pagamentoModel.getNome().trim().isEmpty()) {
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Nome do tipo de pagamento é obrigatório", "Erro!"));
@@ -91,9 +92,9 @@ public class PagamentoController {
 		}
 	}
 
+	// Atualiza dados do tipo de pagamento
 	public void atualizarPagamento() {
 		try {
-			// Validação do campo nome
 			if (pagamentoModel.getNome() == null || pagamentoModel.getNome().trim().isEmpty()) {
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Nome do tipo de pagamento é obrigatório", "Erro!"));
@@ -114,6 +115,7 @@ public class PagamentoController {
 		}
 	}
 
+	// Remove tipo de pagamento
 	public void deletaPagamento() {
 		PagamentoDAO.deletar(pagamentoModel);
 

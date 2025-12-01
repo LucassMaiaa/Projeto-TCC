@@ -15,6 +15,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class RestricaoDataDAO {
 
+	// Busca restrições de data com filtros e paginação
 	public static List<RestricaoData> buscarRestricoes(String descricao, Date dataInicial, Date dataFinal, int first, int pageSize) {
 		List<RestricaoData> lista = new ArrayList<>();
 		String sql = "SELECT r.*, f.fun_nome FROM restricao_data r " +
@@ -82,6 +83,7 @@ public class RestricaoDataDAO {
 		return lista;
 	}
 
+	// Conta total de restrições com filtros
 	public static int restricaoCount(String descricao, Date dataInicial, Date dataFinal) {
 		int total = 0;
 		String sql = "SELECT COUNT(*) FROM restricao_data WHERE res_status = 'A'";
@@ -127,6 +129,7 @@ public class RestricaoDataDAO {
 		return total;
 	}
 
+	// Salva nova restrição de data
 	public static void salvar(RestricaoData restricao) throws SQLException {
 		String sql = "INSERT INTO restricao_data (res_data, res_descricao, res_tipo, fun_codigo, res_status) " +
 					 "VALUES (?, ?, ?, ?, ?)";
@@ -159,6 +162,7 @@ public class RestricaoDataDAO {
 		}
 	}
 
+	// Atualiza restrição de data existente
 	public static void atualizar(RestricaoData restricao) throws SQLException {
 		String sql = "UPDATE restricao_data SET res_data = ?, res_descricao = ?, res_tipo = ?, fun_codigo = ?, res_status = ? " +
 					 "WHERE res_codigo = ?";
@@ -187,6 +191,7 @@ public class RestricaoDataDAO {
 		}
 	}
 
+	// Inativa restrição de data
 	public static void deletar(RestricaoData restricao) throws SQLException {
 		String sql = "UPDATE restricao_data SET res_status = 'I' WHERE res_codigo = ?";
 
@@ -202,7 +207,7 @@ public class RestricaoDataDAO {
 		}
 	}
 
-	// Verifica se uma data está bloqueada para um funcionário específico
+	// Verifica se data está bloqueada para funcionário específico
 	public static boolean isDataBloqueada(Date data, Long funcionarioId) {
 		String sql = "SELECT COUNT(*) FROM restricao_data " +
 					 "WHERE res_data = ? AND res_status = 'A' " +
@@ -226,7 +231,7 @@ public class RestricaoDataDAO {
 		return false;
 	}
 	
-	// Busca todas as datas bloqueadas para relatórios/visualização
+	// Busca todas as datas bloqueadas
 	public static List<Date> buscarDatasBloqueadas() {
 		List<Date> datas = new ArrayList<>();
 		String sql = "SELECT DISTINCT res_data FROM restricao_data WHERE res_status = 'A' ORDER BY res_data";

@@ -78,45 +78,26 @@ public class FuncionarioController {
 		};
 	}
 	
-	/**
-	 * Método auxiliar para limpar TODAS as variáveis do controller
-	 * Garante que não há resíduos de edições anteriores
-	 */
+	// Limpa todas as variáveis do controller
 	private void limparTodasVariaveis() {
-		System.out.println("🧹 LIMPANDO TODAS AS VARIÁVEIS...");
-		
-		// Limpa modelo principal
 		funcionarioModel = new Funcionario();
 		funcionarioModel.setUsuario(new Usuario());
-		
-		// Limpa modelo de horário
 		horarioModel = new Horario();
-		
-		// Limpa listas
 		lstHorarioAux = new ArrayList<Horario>();
-		
-		// Limpa campos de data/hora
 		dataInicial = null;
 		dataFinal = null;
-		
-		// Limpa variáveis de validação
 		loginOriginal = null;
 		codigoValidacao = null;
 		codigoGerado = null;
 		aguardandoValidacao = false;
 		confirmarSenha = null;
-		
-		// Limpa variáveis de exclusão
 		horarioParaExcluir = null;
 		qtdAgendamentosAfetar = 0;
 		indexListAux = 0;
-		
-		// Limpa modo de edição
 		editarModel = null;
-		
-		System.out.println("✅ VARIÁVEIS LIMPAS!");
 	}
     
+	// Exibe alerta Sweet Alert
     private void exibirAlerta(String icon, String title) {
 		String script = String.format(
 				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 4000, width: '350px' });",
@@ -124,6 +105,7 @@ public class FuncionarioController {
 		PrimeFaces.current().executeScript(script);
 	}
 
+	// Carrega horários paginados do funcionário
 	public void carregarHorariosFuncionario() {
 		if (funcionarioModel != null && funcionarioModel.getId() != null && funcionarioModel.getId() > 0) {
 			lstHorarios = new LazyDataModel<Horario>() {
@@ -158,6 +140,7 @@ public class FuncionarioController {
 		}
 	}
 
+	// Limpa lista auxiliar de horários
 	public void limpaListaHorario() {
 		lstHorarioAux = new ArrayList<Horario>();
 		dataInicial = null;
@@ -165,200 +148,126 @@ public class FuncionarioController {
 		PrimeFaces.current().ajax().update("form");
 	}
 
+	// Carrega funcionário selecionado para edição
 	public void funcionarioSelecionado(Funcionario event) {
-		// SEMPRE recarrega do banco para evitar dados antigos
 		if (event != null && event.getId() != null) {
 			try {
-				System.out.println("🔍 CARREGANDO FUNCIONÁRIO ID: " + event.getId());
-				
-				// 1. LIMPA TUDO ANTES DE CARREGAR
 				limparTodasVariaveis();
-				
-				// 2. Recarrega do banco
 				funcionarioModel = FuncionarioDAO.buscarPorId(event.getId());
 				
-				// 3. Verifica se carregou corretamente
 				if (funcionarioModel == null) {
-					System.err.println("❌ ERRO: Funcionário não encontrado no banco!");
 					FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Funcionário não encontrado", "Erro!"));
 					return;
 				}
 				
-				System.out.println("✅ Funcionário carregado: " + funcionarioModel.getNome());
-				
-				// 4. Garante que o usuário existe
 				if (funcionarioModel.getUsuario() == null) {
 					funcionarioModel.setUsuario(new Usuario());
 				}
 				
-				// 5. Modo edição
 				editarModel = "A";
-				
-				// 6. Limpa campos de horário
 				dataInicial = null;
 				dataFinal = null;
 				horarioModel = new Horario();
-				
-				// 7. Salva login original
 				loginOriginal = funcionarioModel.getUsuario().getLogin();
-				
-				// 8. Reseta validação e senha
 				aguardandoValidacao = false;
 				confirmarSenha = null;
 				codigoValidacao = null;
 				codigoGerado = null;
-				
-				// 9. LIMPA a senha do modelo (para não mostrar no campo)
 				funcionarioModel.getUsuario().setSenha(null);
 				
-				// 10. Carrega horários do banco para a lista temporária
 				lstHorarioAux.clear();
 				lstHorarioAux.addAll(HorarioDAO.listarPorFuncionario(funcionarioModel.getId()));
-				System.out.println("📋 Carregados " + lstHorarioAux.size() + " horários para edição");
-				
-				// 11. Carrega lazy model de horários
 				carregarHorariosFuncionario();
-				
-				System.out.println("✅ FUNCIONÁRIO CARREGADO COM SUCESSO!");
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.err.println("❌ ERRO ao carregar funcionário: " + e.getMessage());
 				FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao carregar funcionário: " + e.getMessage(), "Erro!"));
 			}
 		}
 	}
 
+	// Prepara formulário para novo funcionário
 	public void novoFuncionario() {
-		System.out.println("➕ CRIANDO NOVO FUNCIONÁRIO...");
-		
-		// LIMPA TUDO
 		limparTodasVariaveis();
-		
-		// Modo de inserção
 		editarModel = "I";
-		
-		// Cria novos objetos zerados
 		funcionarioModel = new Funcionario();
 		funcionarioModel.setUsuario(new Usuario());
-		funcionarioModel.setStatus("A"); // Status ativo por padrão
-		
+		funcionarioModel.setStatus("A");
 		horarioModel = new Horario();
-		
-		// Reseta todas as variáveis
 		loginOriginal = null;
 		aguardandoValidacao = false;
 		confirmarSenha = null;
 		codigoValidacao = null;
 		codigoGerado = null;
-		
-		// Limpa campos de horário
 		lstHorarioAux.clear();
 		dataInicial = null;
 		dataFinal = null;
-		
-		// Reseta variáveis de exclusão
 		horarioParaExcluir = null;
 		qtdAgendamentosAfetar = 0;
-		
-		System.out.println("✅ NOVO FUNCIONÁRIO INICIALIZADO!");
 	}
 	
+	// Cancela edição/cadastro do funcionário
 	public void cancelarFuncionario() {
-		System.out.println("❌ CANCELANDO EDIÇÃO/CADASTRO...");
-		
-		// Se estava editando, recarrega do banco
 		if (funcionarioModel != null && funcionarioModel.getId() != null && funcionarioModel.getId() > 0) {
 			try {
-				System.out.println("↻ Recarregando funcionário ID: " + funcionarioModel.getId());
-				
-				// Recarrega do banco para descartar alterações
 				Funcionario funcionarioRecarregado = FuncionarioDAO.buscarPorId(funcionarioModel.getId());
 				
 				if (funcionarioRecarregado != null) {
 					funcionarioModel = funcionarioRecarregado;
 					
-					// Garante usuário
 					if (funcionarioModel.getUsuario() == null) {
 						funcionarioModel.setUsuario(new Usuario());
 					}
 					
-					// Salva login original
 					if (funcionarioModel.getUsuario() != null) {
 						loginOriginal = funcionarioModel.getUsuario().getLogin();
 					}
 					
-					// LIMPA senha (não mostra no campo)
 					funcionarioModel.getUsuario().setSenha(null);
 					
-					// Recarrega horários do banco
 					lstHorarioAux.clear();
 					lstHorarioAux.addAll(HorarioDAO.listarPorFuncionario(funcionarioModel.getId()));
-					System.out.println("↻ Recarregados " + lstHorarioAux.size() + " horários do banco");
 				} else {
-					System.err.println("⚠️ Funcionário não encontrado no banco, limpando tudo");
 					limparTodasVariaveis();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.err.println("❌ Erro ao recarregar, limpando tudo");
-				// Em caso de erro, limpa tudo
 				limparTodasVariaveis();
 			}
 		} else {
-			// Se era novo funcionário, apenas limpa tudo
-			System.out.println("🧹 Era novo funcionário, limpando tudo");
 			limparTodasVariaveis();
 		}
 		
-		// Limpa variáveis de validação
 		aguardandoValidacao = false;
 		codigoValidacao = null;
 		codigoGerado = null;
 		confirmarSenha = null;
-		
-		// Limpa campos de horário
 		dataInicial = null;
 		dataFinal = null;
 		horarioModel = new Horario();
-		
-		// Limpa variáveis de exclusão
 		horarioParaExcluir = null;
 		qtdAgendamentosAfetar = 0;
-		
-		System.out.println("✅ CANCELAMENTO CONCLUÍDO!");
 	}
 	
+	// Prepara salvamento do funcionário (valida e envia código se necessário)
 	public void prepararSalvarFuncionario() {
-		System.out.println("🔍 Preparando para salvar funcionário...");
-		
-		// Valida campos obrigatórios ANTES de tentar enviar email
 		if (!validarCamposFuncionario()) {
 			return;
 		}
 		
-		System.out.println("📝 Login: " + funcionarioModel.getUsuario().getLogin());
-		System.out.println("📝 Senha: " + (funcionarioModel.getUsuario().getSenha() != null ? "***" : "NULL"));
-		System.out.println("📝 EditarModel: " + editarModel);
-		
 		String loginAtual = funcionarioModel.getUsuario().getLogin();
-		
-		// Verifica se é novo funcionário OU se o login foi alterado
 		boolean loginAlterado = loginOriginal == null || !loginAtual.equals(loginOriginal);
 		
 		if (editarModel.equals("I") || (editarModel.equals("A") && loginAlterado)) {
-			System.out.println("✅ Precisa validar email");
-			// Precisa validar email
 			enviarCodigoValidacaoFuncionario();
 		} else {
-			System.out.println("✅ Não precisa validar, salvando direto");
-			// Não precisa validar, salva direto
 			atualizarFuncionario();
 		}
 	}
 	
+	// Envia código de validação por email
 	private void enviarCodigoValidacaoFuncionario() {
 		try {
 			String email = funcionarioModel.getUsuario().getLogin();
@@ -410,37 +319,24 @@ public class FuncionarioController {
 		}
 	}
 	
+	// Valida código de verificação enviado por email
 	public void validarCodigoFuncionario() {
-		System.out.println("🔍 Validando código...");
-		System.out.println("📝 Código digitado: " + codigoValidacao);
-		System.out.println("✅ Código esperado: " + codigoGerado);
-		
 		if (codigoValidacao == null || codigoValidacao.trim().isEmpty()) {
 			exibirAlerta("error", "Código é obrigatório");
-			System.out.println("❌ Código vazio!");
 			return;
 		}
 		
 		if (codigoValidacao != null && codigoValidacao.equals(codigoGerado)) {
-			System.out.println("✅ Código correto! Salvando funcionário...");
 			aguardandoValidacao = false;
-			
-			// Limpa apenas o código digitado para permitir redigitação se der erro
 			codigoValidacao = null;
 			
-			// NÃO limpa codigoGerado - será mantido para permitir nova tentativa
-			// Só será limpo após sucesso completo do salvamento
-			
-			// Salva o funcionário (só fecha modais e limpa código SE SALVAR COM SUCESSO)
 			if (editarModel.equals("I")) {
 				adicionarNovoFuncionario();
 			} else {
 				atualizarFuncionario();
 			}
 		} else {
-			System.out.println("❌ Código incorreto!");
 			exibirAlerta("error", "Código incorreto! Tente novamente.");
-			// Limpa código digitado para nova tentativa
 			codigoValidacao = null;
 		}
 	}
@@ -620,90 +516,65 @@ public class FuncionarioController {
 		return true;
 	}
 
+	// Salva novo funcionário no banco
 	public void adicionarNovoFuncionario() {
-		System.out.println("💾 Iniciando salvamento do funcionário...");
 		try {
-			System.out.println("📝 Salvando usuário...");
-			// Salvar o usuário primeiro
 			UsuarioDAO usuarioDAO = new UsuarioDAO();
 			Perfil perfil = new Perfil();
-			perfil.setId(2L); // 2 para funcionário
+			perfil.setId(2L);
 			funcionarioModel.getUsuario().setPerfil(perfil);
-			
-			// Define o usu_user como o nome completo do funcionário
 			funcionarioModel.getUsuario().setUser(funcionarioModel.getNome());
 			
 			Usuario usuarioSalvo = usuarioDAO.salvar(funcionarioModel.getUsuario());
 			funcionarioModel.setUsuario(usuarioSalvo);
-			System.out.println("✅ Usuário salvo com ID: " + usuarioSalvo.getId());
 
-			System.out.println("📝 Salvando funcionário...");
 			FuncionarioDAO.salvar(funcionarioModel);
-			System.out.println("✅ Funcionário salvo com ID: " + funcionarioModel.getId());
 
 			if (funcionarioModel.getId() != null) {
-				System.out.println("📝 Salvando " + lstHorarioAux.size() + " horários...");
 				for (Horario item : lstHorarioAux) {
 					item.setFuncionario(funcionarioModel);
 					HorarioDAO.salvar(item);
 				}
-				System.out.println("✅ Horários salvos!");
 
-				// LIMPA TUDO após salvar com sucesso
 				limparTodasVariaveis();
-				
 				exibirAlerta("success", "Funcionário criado com sucesso!");
-		
-				// SÓ FECHA OS MODAIS SE CHEGOU AQUI (SUCESSO TOTAL)
 				PrimeFaces.current().executeScript("PF('dlgValidarEmailFuncionario').hide();");
 				PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
 				PrimeFaces.current().ajax().update("form");
 			} else {
 				FacesContext.getCurrentInstance().addMessage(null,
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao salvar o funcionário!", "Erro!"));
-				// NÃO FECHA NADA - mantém os modais abertos
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-			// Tratar erro de login duplicado
 			if (e.getMessage().contains("Login já existe")) {
 				exibirAlerta("error", "O email informado já está sendo usado por outro usuário. Por favor, escolha outro email.");
 			} else {
 				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 						"Erro ao salvar funcionário: " + e.getMessage(), "Erro!"));
 			}
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
 		} catch (Exception e) {
 			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
 					"Erro inesperado ao salvar funcionário: " + e.getMessage(), "Erro!"));
-			// NÃO FECHA NADA - mantém os modais abertos para o usuário corrigir
 		}
 	}
 
+	// Atualiza funcionário existente (verifica agendamentos antes)
 	public void atualizarFuncionario() {
 		try {
-			System.out.println("💾 Iniciando atualização do funcionário...");
-			
-			// VERIFICAÇÃO 1: Se está tentando INATIVAR o funcionário (status A → I)
 			if (funcionarioModel.getId() != null && "I".equals(funcionarioModel.getStatus())) {
-				// Busca o status atual no banco
 				try {
 					Funcionario funcAtual = FuncionarioDAO.buscarPorId(funcionarioModel.getId());
 					if (funcAtual != null && "A".equals(funcAtual.getStatus())) {
-						// Está mudando de ATIVO para INATIVO
-						// Verifica se tem agendamentos pendentes
 						int qtdAgendamentos = AgendamentoDAO.contarAgendamentosPendentesPorFuncionario(funcionarioModel.getId());
 						
 						if (qtdAgendamentos > 0) {
-							System.out.println("⚠️ Funcionário tem " + qtdAgendamentos + " agendamento(s) pendente(s)");
 							qtdAgendamentosAfetar = qtdAgendamentos;
-							
-							// Mostra modal de confirmação
 							PrimeFaces.current().ajax().update("form:dlgConfirmarInativarFuncionario");
 							PrimeFaces.current().executeScript("PF('dlgConfirmarInativarFuncionario').show();");
-							return; // PARA aqui e aguarda confirmação
+							return;
 						}
 					}
 				} catch (Exception e) {
@@ -711,15 +582,12 @@ public class FuncionarioController {
 				}
 			}
 			
-			// VERIFICAÇÃO 2: Verifica se algum horário que será deletado tem agendamentos pendentes
 			List<Long> horariosParaDeletar = new ArrayList<>();
 			int totalAgendamentosAfetar = 0;
 			
 			if (funcionarioModel.getId() != null) {
-				// 1. Busca horários atuais do banco
 				List<Horario> horariosNoBanco = HorarioDAO.listarPorFuncionario(funcionarioModel.getId());
 				
-				// 2. Identifica quais horários serão deletados (estão no banco mas não na lista)
 				for (Horario horarioBanco : horariosNoBanco) {
 					boolean existeNaLista = false;
 					
@@ -731,7 +599,6 @@ public class FuncionarioController {
 					}
 					
 					if (!existeNaLista) {
-						// Este horário será deletado
 						int qtd = AgendamentoDAO.contarAgendamentosPendentesPorHorario(horarioBanco.getId());
 						if (qtd > 0) {
 							horariosParaDeletar.add(horarioBanco.getId());
@@ -740,23 +607,16 @@ public class FuncionarioController {
 					}
 				}
 				
-				// 3. Se existem agendamentos, mostra modal de confirmação
 				if (!horariosParaDeletar.isEmpty()) {
-					System.out.println("⚠️ " + horariosParaDeletar.size() + " horário(s) com agendamentos pendentes");
 					qtdAgendamentosAfetar = totalAgendamentosAfetar;
-					
-					// Salva os IDs para cancelar depois
 					FacesContext.getCurrentInstance().getExternalContext().getSessionMap()
 						.put("horariosParaDeletar", horariosParaDeletar);
-					
-					// Mostra modal de confirmação
 					PrimeFaces.current().ajax().update("form:dlgConfirmarExclusaoHorarioSalvar");
 					PrimeFaces.current().executeScript("PF('dlgConfirmarExclusaoHorarioSalvar').show();");
-					return; // PARA aqui e aguarda confirmação
+					return;
 				}
 			}
 			
-			// Se chegou aqui, não tem agendamentos OU usuário já confirmou
 			executarAtualizacaoFuncionario();
 			
 		} catch (Exception e) {
@@ -766,58 +626,41 @@ public class FuncionarioController {
 		}
 	}
 	
+	// Executa atualização do funcionário no banco
 	public void executarAtualizacaoFuncionario() {
 		try {
-			System.out.println("💾 Executando atualização do funcionário...");
-			
-			// Atualiza o usu_user com o nome completo do funcionário
 			if (funcionarioModel.getUsuario() != null) {
 				funcionarioModel.getUsuario().setUser(funcionarioModel.getNome());
 			}
 			
 			FuncionarioDAO.atualizar(funcionarioModel);
 			
-			// CANCELA agendamentos dos horários que serão deletados
 			@SuppressWarnings("unchecked")
 			List<Long> horariosParaDeletar = (List<Long>) FacesContext.getCurrentInstance()
 				.getExternalContext().getSessionMap().get("horariosParaDeletar");
 			
 			if (horariosParaDeletar != null && !horariosParaDeletar.isEmpty()) {
-				System.out.println("🗑️ Cancelando agendamentos de " + horariosParaDeletar.size() + " horário(s)");
 				for (Long horarioId : horariosParaDeletar) {
-					int qtdCancelados = AgendamentoDAO.cancelarAgendamentosPendentesPorHorario(horarioId);
-					System.out.println("   ↳ Horário " + horarioId + ": " + qtdCancelados + " agendamento(s) cancelado(s)");
+					AgendamentoDAO.cancelarAgendamentosPendentesPorHorario(horarioId);
 				}
-				// Limpa a lista
 				FacesContext.getCurrentInstance().getExternalContext().getSessionMap().remove("horariosParaDeletar");
 			}
 			
-			// SINCRONIZA HORÁRIOS: Deleta todos e insere os da lstHorarioAux
 			if (funcionarioModel.getId() != null) {
-				System.out.println("🔄 Sincronizando horários...");
-				
-				// 1. Deletar todos os horários existentes do funcionário
 				List<Horario> horariosAntigos = HorarioDAO.listarPorFuncionario(funcionarioModel.getId());
 				for (Horario h : horariosAntigos) {
 					HorarioDAO.deletar(h.getId());
 				}
-				System.out.println("🗑️ " + horariosAntigos.size() + " horários antigos deletados");
 				
-				// 2. Inserir os novos horários da lstHorarioAux
 				for (Horario item : lstHorarioAux) {
-					item.setId(null); // Remove ID para forçar INSERT
+					item.setId(null);
 					item.setFuncionario(funcionarioModel);
 					HorarioDAO.salvar(item);
 				}
-				System.out.println("✅ " + lstHorarioAux.size() + " horários salvos!");
 			}
 			
 			exibirAlerta("success", "Funcionário atualizado com sucesso!");
-			
-			// LIMPA TUDO após salvar com sucesso
 			limparTodasVariaveis();
-			
-			// SÓ FECHA OS MODAIS SE CHEGOU AQUI (SUCESSO TOTAL)
 			PrimeFaces.current().executeScript("PF('dlgValidarEmailFuncionario').hide();");
 			PrimeFaces.current().executeScript("PF('dlgConfirmarExclusaoHorarioSalvar').hide();");
 			PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
@@ -905,13 +748,7 @@ public class FuncionarioController {
 		PrimeFaces.current().ajax().update("form:messages", "dttLstHorarios", "dttLstHorariosAux");
 	}
 	
-	/**
-	 * Verifica se há conflito entre horários nos mesmos dias da semana
-	 * @param novoInicio Hora de início do novo horário
-	 * @param novoFim Hora de fim do novo horário
-	 * @param idHorarioEditando ID do horário sendo editado (null se for novo)
-	 * @return Mensagem de erro se houver conflito, null se estiver OK
-	 */
+
 	private String verificarConflitoHorarios(LocalTime novoInicio, LocalTime novoFim, Long idHorarioEditando) {
 		// Pega os dias selecionados do horário que está sendo adicionado
 		List<String> diasNovo = new ArrayList<>();
@@ -979,12 +816,10 @@ public class FuncionarioController {
 		PrimeFaces.current().executeScript("PF('dlgHoraAux').show();");
 	}
 
+	// Desativa funcionário (soft delete)
 	public void deletaFuncionario() {
 		try {
-			// SOFT DELETE: Apenas marca funcionário como inativo
-			// NÃO deleta agendamentos - mantém histórico completo!
             FuncionarioDAO.deletar(funcionarioModel);
-
             exibirAlerta("success", "Funcionário desativado com sucesso! Histórico mantido.");
             PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
             PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
@@ -998,46 +833,38 @@ public class FuncionarioController {
         }
 	}
 
+	// Remove horário da lista auxiliar
 	public void deletaHorarioAux() {
-		// Verifica se tem apenas 1 horário
 		if (lstHorarioAux.size() <= 1) {
 			exibirAlerta("warning", "O funcionário precisa ter pelo menos 1 horário cadastrado.");
 			PrimeFaces.current().executeScript("PF('dlgHoraAux').hide();");
 			return;
 		}
 		
-		// Remove APENAS da lista (não do banco)
-		// A exclusão real acontece apenas quando salvar o funcionário
 		try {
 			lstHorarioAux.remove(indexListAux);
 			PrimeFaces.current().executeScript("PF('dlgHoraAux').hide();");
 			PrimeFaces.current().ajax().update("form:dlgFuncForm");
 			exibirAlerta("success", "Horário removido da lista!");
-			System.out.println("✅ Horário removido da lista temporária (lstHorarioAux)");
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			exibirAlerta("error", "Erro ao remover horário: " + e.getMessage());
 		}
 	}
 
+	// Remove horário da lista auxiliar
 	public void deletaHorario() {
-		// Verifica se tem apenas 1 horário
 		if (lstHorarioAux.size() <= 1) {
 			exibirAlerta("warning", "O funcionário precisa ter pelo menos 1 horário cadastrado.");
 			PrimeFaces.current().executeScript("PF('dlgHora').hide();");
 			return;
 		}
 		
-		// Remove APENAS da lista (não do banco)
-		// A exclusão real acontece apenas quando salvar o funcionário
 		try {
 			lstHorarioAux.remove(horarioModel);
 			PrimeFaces.current().executeScript("PF('dlgHora').hide();");
 			PrimeFaces.current().ajax().update("form:dlgFuncForm");
 			exibirAlerta("success", "Horário removido da lista!");
-			System.out.println("✅ Horário removido da lista temporária (lstHorarioAux)");
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			exibirAlerta("error", "Erro ao remover horário: " + e.getMessage());
@@ -1069,12 +896,10 @@ public class FuncionarioController {
 		}
 	}
 
+	// Desativa funcionário e mantém histórico
 	public void confirmarExclusaoComCancelamento() {
 		try {
-			// SOFT DELETE: Apenas marca funcionário como inativo
-			// NÃO deleta agendamentos - mantém histórico completo!
 			FuncionarioDAO.deletar(funcionarioModel);
-
 			exibirAlerta("success", "Funcionário desativado! Agendamentos mantidos para histórico.");
 			PrimeFaces.current().executeScript("PF('dlgConfirmarExclusaoFuncionario').hide();");
 			PrimeFaces.current().executeScript("PF('dlgFunc').hide();");
@@ -1085,18 +910,12 @@ public class FuncionarioController {
 		}
 	}
 	
+	// Inativa funcionário e cancela agendamentos pendentes
 	public void confirmarInativarFuncionario() {
 		try {
-			// Cancela todos os agendamentos pendentes do funcionário
-			int qtdCancelados = AgendamentoDAO.cancelarAgendamentosPendentesPorFuncionario(funcionarioModel.getId());
-			System.out.println("🔴 Cancelados " + qtdCancelados + " agendamentos ao inativar funcionário");
-			
-			// Agora pode salvar como inativo
+			AgendamentoDAO.cancelarAgendamentosPendentesPorFuncionario(funcionarioModel.getId());
 			executarAtualizacaoFuncionario();
-			
-			// Fecha o modal de confirmação
 			PrimeFaces.current().executeScript("PF('dlgConfirmarInativarFuncionario').hide();");
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			exibirAlerta("error", "Erro ao inativar funcionário: " + e.getMessage());

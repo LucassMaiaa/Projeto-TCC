@@ -24,8 +24,8 @@ public class UsuarioController implements Serializable{
 
     private String login;
     private String senha;
-    private boolean loginFalhou = false; // Controla a exibição do diálogo
-    private final UsuarioDAO usuarioDAO = new UsuarioDAO(); // Instância única do DAO
+    private boolean loginFalhou = false; 
+    private final UsuarioDAO usuarioDAO = new UsuarioDAO(); 
 
     // Método de login
     public String efetuarLogin() {

@@ -7,6 +7,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class ProdutividadeFuncionarioDAO {
 
+    // Busca produtividade com paginação e ordenação
     public static List<ProdutividadeFuncionario> buscarProdutividade(
             java.util.Date dataInicial, java.util.Date dataFinal, Long funcionarioId, int first, int pageSize,
             String sortField, String sortOrder) {
@@ -39,7 +40,6 @@ public class ProdutividadeFuncionarioDAO {
 
         sql.append("GROUP BY f.fun_codigo, f.fun_nome, a.age_data ");
         
-        // Mapeamento de campos para ordenação
         String colunaBanco = "data";
         if ("funcionarioNome".equals(sortField)) colunaBanco = "f.fun_nome";
         else if ("data".equals(sortField)) colunaBanco = "data";
@@ -90,6 +90,7 @@ public class ProdutividadeFuncionarioDAO {
         return resultado;
     }
 
+    // Conta total de registros para paginação
     public static int contarProdutividade(java.util.Date dataInicial, java.util.Date dataFinal, Long funcionarioId) {
 
         StringBuilder sql = new StringBuilder(
@@ -134,6 +135,7 @@ public class ProdutividadeFuncionarioDAO {
         return 0;
     }
 
+    // Busca todas as produtividades sem paginação (para exportação)
     public static List<ProdutividadeFuncionario> buscarTodasProdutividade(
             java.util.Date dataInicial, java.util.Date dataFinal, Long funcionarioId) {
 

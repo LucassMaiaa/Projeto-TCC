@@ -15,6 +15,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class FuncionarioDAO {
 	
+	// Conta total de funcionários com base nos filtros
 	public static int funcionarioCount(String nome, String status) {
 	    int total = 0;
 	    StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM funcionario WHERE 1=1");
@@ -52,6 +53,7 @@ public class FuncionarioDAO {
 	    return total;
 	}
 
+	// Converte ResultSet para objeto Funcionario
 	private static Funcionario mapResultSetToFuncionario(ResultSet rs) throws SQLException {
 		Funcionario funcionario = new Funcionario();
 		funcionario.setId(rs.getLong("fun_codigo"));
@@ -60,8 +62,6 @@ public class FuncionarioDAO {
 		funcionario.setTelefone(rs.getString("fun_telefone"));
 		funcionario.setCpf(rs.getString("fun_cpf"));
 		funcionario.setEndereco(rs.getString("fun_endereco"));
-		
-		// Novos campos
 		funcionario.setSexo(rs.getString("fun_sexo"));
 		funcionario.setDataNascimento(rs.getDate("fun_data_nascimento"));
 		funcionario.setDataAdmissao(rs.getDate("fun_data_admissao"));
@@ -83,6 +83,7 @@ public class FuncionarioDAO {
 		return funcionario;
 	}
 
+	// Busca funcionários com paginação e filtros
 	public static List<Funcionario> buscarFuncionario(String nome, String status, int first, int pageSize) {
 		List<Funcionario> lista = new ArrayList<>();
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE 1=1";
@@ -126,6 +127,7 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
+	// Busca todos os funcionários ativos
 	public static List<Funcionario> buscarTodosFuncionarios() {
 		List<Funcionario> lista = new ArrayList<>();
 		String sql = "SELECT * FROM funcionario WHERE fun_status = 'A' ORDER BY fun_nome";
@@ -150,7 +152,7 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
-	
+	// Busca funcionário por ID
 	public static Funcionario buscarPorId(Long id) {
 		Funcionario funcionario = null;
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_codigo = ?";
@@ -172,6 +174,7 @@ public class FuncionarioDAO {
 		return funcionario;
 	}
 
+	// Busca funcionário pelo ID do usuário
 	public static Funcionario buscarFuncionarioPorUsuarioId(Long usuarioId) {
 		Funcionario funcionario = null;
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.usu_codigo = ?";
@@ -192,6 +195,7 @@ public class FuncionarioDAO {
 		return funcionario;
 	}
 
+	// Busca horários de trabalho do funcionário
 	public static List<Horario> buscarHorarioPorFuncionario(Funcionario funcionario) {
 		List<Horario> lista = new ArrayList<>();
 		String sql = "SELECT * FROM horario WHERE fun_codigo = ?";
@@ -224,6 +228,7 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
+	// Atualiza dados do funcionário
 	public static void atualizar(Funcionario funcionario) throws SQLException {
         if (funcionario.getUsuario() != null && funcionario.getUsuario().getId() != null && funcionario.getUsuario().getId() > 0) {
             UsuarioDAO usuarioDAO = new UsuarioDAO();
@@ -278,6 +283,7 @@ public class FuncionarioDAO {
 		}
 	}
 
+	// Remove todos os horários de um funcionário
 	public static void deletarHorariosPorFuncionario(Funcionario funcionario) {
 		String sql = "DELETE FROM horario WHERE fun_codigo = ?";
 
@@ -292,6 +298,7 @@ public class FuncionarioDAO {
 		}
 	}
 
+	// Remove funcionário do sistema
 	public static void deletar(Funcionario funcionario) throws SQLException {
 		String sql = "DELETE FROM funcionario WHERE fun_codigo = ?";
 
@@ -314,6 +321,7 @@ public class FuncionarioDAO {
 		}
 	}
 
+	// Cadastra novo funcionário
 	public static void salvar(Funcionario funcionario) throws SQLException {
 		String sql = "INSERT INTO funcionario (fun_nome, fun_status, usu_codigo, fun_telefone, fun_cpf, fun_endereco, " +
 					 "fun_sexo, fun_data_nascimento, fun_data_admissao, fun_observacoes, " +
@@ -369,6 +377,7 @@ public class FuncionarioDAO {
 		}
 	}
 	
+	// Busca funcionário pelo CPF para recuperação de senha
 	public static Funcionario buscarPorCPFRecuperacao(String cpf) {
 		String cpfLimpo = cpf.replaceAll("[^0-9]", "");
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_cpf = ? AND f.fun_status = 'A'";
@@ -388,6 +397,7 @@ public class FuncionarioDAO {
 		return null;
 	}
 	
+	// Busca funcionário pelo email para recuperação de senha
 	public static Funcionario buscarPorEmailRecuperacao(String email) {
 		String sql = "SELECT f.*, u.* FROM funcionario f " +
 					 "LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo " +
@@ -396,7 +406,6 @@ public class FuncionarioDAO {
 		try (Connection conn = DatabaseConnection.getConnection();
 			 PreparedStatement ps = conn.prepareStatement(sql)) {
 			
-			System.out.println("Buscando funcionário por login: " + email);
 			ps.setString(1, email.trim());
 			ResultSet rs = ps.executeQuery();
 			
@@ -405,18 +414,15 @@ public class FuncionarioDAO {
 				if (func.getUsuario() != null) {
 					func.getUsuario().setUser(rs.getString("usu_user"));
 				}
-				System.out.println("Funcionário encontrado: " + func.getNome());
 				return func;
-			} else {
-				System.out.println("Nenhum funcionário encontrado com login: " + email);
 			}
 		} catch (Exception e) {
-			System.err.println("Erro ao buscar funcionário por login: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
+	// Busca funcionário pelo telefone para recuperação de senha
 	public static Funcionario buscarPorTelefoneRecuperacao(String telefone) {
 		String telefoneLimpo = telefone.replaceAll("[^0-9]", "");
 		String sql = "SELECT * FROM funcionario f LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo WHERE f.fun_telefone = ? AND f.fun_status = 'A'";
@@ -436,10 +442,12 @@ public class FuncionarioDAO {
 		return null;
 	}
 	
+	// Atualiza senha do funcionário
 	public static boolean atualizarSenha(Long funcionarioId, String novaSenha) {
 		return atualizarSenhaFuncionario(funcionarioId, novaSenha);
 	}
 	
+	// Atualiza senha do funcionário no banco
 	public static boolean atualizarSenhaFuncionario(Long funcionarioId, String novaSenha) {
 		String sql = "UPDATE usuario u INNER JOIN funcionario f ON u.usu_codigo = f.usu_codigo " +
 					 "SET u.usu_senha = ? WHERE f.fun_codigo = ?";
@@ -459,18 +467,12 @@ public class FuncionarioDAO {
 		}
 	}
 	
-	/**
-	 * Verifica se já existe um funcionário com o CPF/CNPJ informado
-	 * @param cpfCnpj CPF ou CNPJ a ser verificado (com ou sem formatação)
-	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
-	 * @return true se o CPF/CNPJ já existe em outro funcionário
-	 */
+	// Verifica se já existe um funcionário com o CPF/CNPJ informado
 	public static boolean existeCpfCnpj(String cpfCnpj, Long funcionarioIdAtual) {
 		if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) {
 			return false;
 		}
 		
-		// Remove formatação
 		cpfCnpj = cpfCnpj.replaceAll("[^0-9]", "");
 		
 		String sql;
@@ -499,23 +501,16 @@ public class FuncionarioDAO {
 		return false;
 	}
 	
-	/**
-	 * Verifica se já existe um CPF/CNPJ cadastrado em FUNCIONÁRIOS ou CLIENTES
-	 * @param cpfCnpj CPF ou CNPJ a ser verificado
-	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
-	 * @return true se o CPF/CNPJ já existe no sistema
-	 */
+	// Verifica se já existe um CPF/CNPJ cadastrado em funcionários ou clientes
 	public static boolean existeCpfCnpjNoSistema(String cpfCnpj, Long funcionarioIdAtual) {
 		if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) {
 			return false;
 		}
 		
-		// Remove formatação
 		cpfCnpj = cpfCnpj.replaceAll("[^0-9]", "");
 		
 		try (Connection conn = DatabaseConnection.getConnection()) {
 			
-			// Verifica na tabela FUNCIONARIO
 			String sqlFuncionario;
 			if (funcionarioIdAtual == null) {
 				sqlFuncionario = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf = ? AND fun_status = 'A'";
@@ -535,7 +530,6 @@ public class FuncionarioDAO {
 				}
 			}
 			
-			// Verifica na tabela CLIENTE
 			String sqlCliente = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_status = 'A'";
 			try (PreparedStatement ps = conn.prepareStatement(sqlCliente)) {
 				ps.setString(1, cpfCnpj);
@@ -552,12 +546,7 @@ public class FuncionarioDAO {
 		return false;
 	}
 	
-	/**
-	 * Verifica se já existe um funcionário com o Email informado (no usuario)
-	 * @param email Email a ser verificado
-	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
-	 * @return true se o email já existe em outro funcionário
-	 */
+	// Verifica se já existe um funcionário com o email informado
 	public static boolean existeEmail(String email, Long funcionarioIdAtual) {
 		if (email == null || email.trim().isEmpty()) {
 			return false;

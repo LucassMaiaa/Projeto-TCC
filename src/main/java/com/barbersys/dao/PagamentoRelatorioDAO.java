@@ -11,6 +11,7 @@ import java.util.List;
 
 public class PagamentoRelatorioDAO {
 
+    // Busca pagamentos com paginação e filtros
     public static List<PagamentoRelatorio> buscarPagamentosPaginado(
             java.util.Date dataInicial, 
             java.util.Date dataFinal,
@@ -62,7 +63,6 @@ public class PagamentoRelatorioDAO {
         
         sql.append("GROUP BY a.age_codigo, c.cli_nome, a.age_nome_cliente, p.pag_nome, a.age_data, a.age_pago ");
         
-        // Mapeamento de campos para ordenação
         String colunaBanco = "a.age_data";
         if ("nomeCliente".equals(sortField)) colunaBanco = "nome_cliente";
         else if ("formaPagamento".equals(sortField)) colunaBanco = "forma_pagamento";
@@ -122,6 +122,7 @@ public class PagamentoRelatorioDAO {
         return pagamentos;
     }
 
+    // Conta total de pagamentos com filtros
     public static int contarPagamentos(
             java.util.Date dataInicial, 
             java.util.Date dataFinal,
@@ -190,6 +191,7 @@ public class PagamentoRelatorioDAO {
         return 0;
     }
 
+    // Busca todos os pagamentos (para exportação PDF)
     public static List<PagamentoRelatorio> buscarTodosPagamentos(
             java.util.Date dataInicial, 
             java.util.Date dataFinal,

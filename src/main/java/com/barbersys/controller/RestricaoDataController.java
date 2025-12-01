@@ -42,6 +42,7 @@ public class RestricaoDataController implements Serializable {
 	private String editarModel;
 	private Long funcionarioId;
 	
+	// Inicializa lazy loading e carrega lista de funcionários
 	@PostConstruct
 	public void init() {
 		lstRestricoes = new LazyDataModel<RestricaoData>() {
@@ -62,12 +63,14 @@ public class RestricaoDataController implements Serializable {
 		lstFuncionario = FuncionarioDAO.buscarTodosFuncionarios();
 	}
 	
+	// Limpa todos os filtros de pesquisa
 	public void limparFiltros() {
 		descricaoFiltro = null;
 		dataInicial = null;
 		dataFinal = null;
 	}
 	
+	// Exibe alerta Sweet Alert
 	private void exibirAlerta(String icon, String title) {
 		String script = String.format(
 				"Swal.fire({ icon: '%s', title: '<span style=\"font-size: 14px\">%s</span>', showConfirmButton: false, timer: 2000, width: '350px' });",
@@ -75,6 +78,7 @@ public class RestricaoDataController implements Serializable {
 		PrimeFaces.current().executeScript(script);
 	}
 	
+	// Carrega restrição selecionada para edição
 	public void restricaoSelecionada(RestricaoData event) {
 		restricaoModel = event;
 		editarModel = "A";
@@ -85,13 +89,15 @@ public class RestricaoDataController implements Serializable {
 		}
 	}
 	
+	// Abre modal para nova restrição
 	public void novaRestricao() {
 		editarModel = "I";
 		restricaoModel = new RestricaoData();
-		restricaoModel.setTipo("G"); // Padrão: Geral
+		restricaoModel.setTipo("G");
 		funcionarioId = null;
 	}
 	
+	// Salva nova restrição de data
 	public void adicionarNovaRestricao() {
 		try {
 			if (restricaoModel.getData() == null) {
@@ -112,7 +118,6 @@ public class RestricaoDataController implements Serializable {
 				return;
 			}
 			
-			// Buscar funcionário se tipo for específico
 			if ("F".equals(restricaoModel.getTipo()) && funcionarioId != null && funcionarioId > 0) {
 				Funcionario func = lstFuncionario.stream()
 					.filter(f -> f.getId().equals(funcionarioId))
@@ -129,12 +134,12 @@ public class RestricaoDataController implements Serializable {
 			PrimeFaces.current().ajax().update("form");
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao salvar restrição: " + e.getMessage(), "Erro!"));
 		}
 	}
 	
+	// Atualiza restrição existente
 	public void atualizarRestricao() {
 		try {
 			if (restricaoModel.getData() == null) {
@@ -155,7 +160,6 @@ public class RestricaoDataController implements Serializable {
 				return;
 			}
 			
-			// Buscar funcionário se tipo for específico
 			if ("F".equals(restricaoModel.getTipo()) && funcionarioId != null && funcionarioId > 0) {
 				Funcionario func = lstFuncionario.stream()
 					.filter(f -> f.getId().equals(funcionarioId))
@@ -172,12 +176,12 @@ public class RestricaoDataController implements Serializable {
 			PrimeFaces.current().ajax().update("form");
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao atualizar restrição: " + e.getMessage(), "Erro!"));
 		}
 	}
 	
+	// Deleta restrição
 	public void deletarRestricao() {
 		try {
 			RestricaoDataDAO.deletar(restricaoModel);
@@ -186,12 +190,12 @@ public class RestricaoDataController implements Serializable {
 			PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
 			PrimeFaces.current().ajax().update("form");
 		} catch (SQLException e) {
-			e.printStackTrace();
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro ao deletar restrição: " + e.getMessage(), "Erro!"));
 		}
 	}
 	
+	// Atualiza interface quando tipo de restrição muda
 	public void onTipoChange() {
 		if ("G".equals(restricaoModel.getTipo())) {
 			restricaoModel.setFuncionario(null);

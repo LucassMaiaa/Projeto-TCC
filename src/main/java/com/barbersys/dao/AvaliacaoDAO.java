@@ -14,6 +14,7 @@ import java.util.List;
 
 public class AvaliacaoDAO {
 
+    // Salva uma nova avaliação no banco
     public static Avaliacao salvar(Avaliacao avaliacao) throws SQLException {
         String sql = "INSERT INTO avaliacao (ava_nota, ava_comentario, ava_data_criacao, age_codigo, cli_codigo, fun_codigo) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
@@ -39,6 +40,7 @@ public class AvaliacaoDAO {
         return avaliacao;
     }
 
+    // Verifica se o cliente já avaliou determinado agendamento
     public static boolean verificarSeJaAvaliou(Long agendamentoId, Long clienteId) {
         String sql = "SELECT COUNT(*) FROM avaliacao WHERE age_codigo = ? AND cli_codigo = ?";
         
@@ -58,6 +60,7 @@ public class AvaliacaoDAO {
         return false;
     }
 
+    // Busca avaliações com paginação e filtros
     public static List<Avaliacao> buscarAvaliacoesPaginado(Integer nota, Long funcionarioId, java.util.Date dataInicial, java.util.Date dataFinal, int first, int pageSize, String sortField, String sortOrder) {
         List<Avaliacao> avaliacoes = new ArrayList<>();
         
@@ -84,7 +87,6 @@ public class AvaliacaoDAO {
             sql.append("AND DATE(a.ava_data_criacao) <= ? ");
         }
         
-        // Mapeamento de campos para ordenação
         String colunaBanco = "a.ava_data_criacao";
         if ("dataCriacao".equals(sortField)) colunaBanco = "a.ava_data_criacao";
         else if ("funcionario.nome".equals(sortField)) colunaBanco = "f.fun_nome";
@@ -145,6 +147,7 @@ public class AvaliacaoDAO {
         return avaliacoes;
     }
 
+    // Conta total de avaliações com base nos filtros
     public static int contarAvaliacoes(Integer nota, Long funcionarioId, java.util.Date dataInicial, java.util.Date dataFinal) {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(*) FROM avaliacao a WHERE 1=1 "
@@ -191,14 +194,7 @@ public class AvaliacaoDAO {
         return 0;
     }
 
-    /**
-     * Busca TODAS as avaliações filtradas (sem paginação) - Ideal para relatórios/PDF
-     * @param nota Filtro de nota (1-5) ou null para todas
-     * @param funcionarioId Filtro de funcionário ou null para todos
-     * @param dataInicial Data inicial do filtro ou null
-     * @param dataFinal Data final do filtro ou null
-     * @return Lista completa de avaliações
-     */
+    // Busca todas as avaliações sem paginação (usado em relatórios)
     public static List<Avaliacao> buscarTodasAvaliacoes(Integer nota, Long funcionarioId, java.util.Date dataInicial, java.util.Date dataFinal) {
         List<Avaliacao> avaliacoes = new ArrayList<>();
         

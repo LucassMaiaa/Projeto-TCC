@@ -14,6 +14,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class ClienteDAO {
 
+	// Retorna a quantidade total de clientes com base nos filtros
 	public static int clienteCount(String nome, String status) {
 		int total = 0;
 		StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM cliente WHERE 1=1");
@@ -50,7 +51,8 @@ public class ClienteDAO {
 
 		return total;
 	}
-	
+
+	// Mapeia ResultSet para objeto Cliente
 	private static Cliente mapResultSetToCliente(ResultSet rs) throws SQLException {
 		Cliente cliente = new Cliente();
 		cliente.setId(rs.getLong("cli_codigo"));
@@ -58,8 +60,6 @@ public class ClienteDAO {
 		cliente.setEmail(rs.getString("cli_email"));
 		cliente.setTelefone(rs.getString("cli_telefone"));
 		cliente.setCpf(rs.getString("cli_cpf"));
-		
-		// Novos campos
 		cliente.setSexo(rs.getString("cli_sexo"));
 		cliente.setDataNascimento(rs.getDate("cli_data_nascimento"));
 		cliente.setObservacoes(rs.getString("cli_observacoes"));
@@ -76,13 +76,14 @@ public class ClienteDAO {
 			Usuario usuario = new Usuario();
 			usuario.setId(rs.getLong("usu_codigo"));
 			usuario.setLogin(rs.getString("usu_login"));
-			usuario.setUser(rs.getString("usu_user")); // Nome do usuário
-			usuario.setSenha(rs.getString("usu_senha")); // Necessário para validação de senha
+			usuario.setUser(rs.getString("usu_user"));
+			usuario.setSenha(rs.getString("usu_senha"));
 			cliente.setUsuario(usuario);
 		}
 		return cliente;
 	}
 
+	// Busca todos os clientes ativos
 	public static List<Cliente> buscarTodosClientes() {
 		List<Cliente> lista = new ArrayList<>();
 		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.cli_status = 'A' ORDER BY c.cli_codigo DESC";
@@ -103,6 +104,7 @@ public class ClienteDAO {
 		return lista;
 	}
 
+	// Busca clientes com filtros e paginação
 	public static List<Cliente> buscarCliente(String nome, String status, int first, int pageSize) {
 		List<Cliente> lista = new ArrayList<>();
 		StringBuilder sql = new StringBuilder("SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE 1=1");
@@ -146,6 +148,7 @@ public class ClienteDAO {
 		return lista;
 	}
 
+	// Busca cliente por ID
 	public static Cliente buscarPorId(Long id) {
 		Cliente cliente = null;
 		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.cli_codigo = ?";
@@ -165,7 +168,8 @@ public class ClienteDAO {
 		}
 		return cliente;
 	}
-	
+
+	// Busca cliente por ID do usuário
 	public static Cliente buscarClientePorUsuarioId(Long usuarioId) {
 		Cliente cliente = null;
 		String sql = "SELECT * FROM cliente c LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo WHERE c.usu_codigo = ?";
@@ -186,6 +190,7 @@ public class ClienteDAO {
 		return cliente;
 	}
 
+	// Atualiza os dados do cliente
 	public static void atualizar(Cliente cliente) throws SQLException {
         if (cliente.getUsuario() != null && cliente.getUsuario().getId() != null && cliente.getUsuario().getId() > 0) {
             UsuarioDAO usuarioDAO = new UsuarioDAO();
@@ -235,6 +240,7 @@ public class ClienteDAO {
 		}
 	}
 
+	// Inativa o cliente (soft delete)
 	public static void deletar(Cliente cliente) throws SQLException {
 		String sql = "UPDATE cliente SET cli_status = 'I' WHERE cli_codigo = ?";
 
@@ -255,6 +261,7 @@ public class ClienteDAO {
 		}
 	}
 
+	// Salva novo cliente
 	public static void salvar(Cliente cliente) throws SQLException {
 		String sql = "INSERT INTO cliente (cli_nome, cli_email, cli_telefone, cli_cpf, usu_codigo, " +
 					 "cli_sexo, cli_data_nascimento, cli_observacoes, " +
@@ -302,7 +309,8 @@ public class ClienteDAO {
             throw e;
 		}
 	}
-	
+
+	// Busca cliente por CPF para recuperação de senha
 	public static Cliente buscarPorCPFRecuperacao(String cpf) {
 		String cpfLimpo = cpf.replaceAll("[^0-9]", "");
 		String sql = "SELECT c.*, u.* FROM cliente c " +
@@ -325,7 +333,8 @@ public class ClienteDAO {
 		}
 		return null;
 	}
-	
+
+	// Busca cliente por email para recuperação de senha
 	public static Cliente buscarPorEmailRecuperacao(String email) {
 		String sql = "SELECT c.*, u.* FROM cliente c " +
 				"LEFT JOIN usuario u ON c.usu_codigo = u.usu_codigo " +
@@ -334,29 +343,26 @@ public class ClienteDAO {
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 			
-			System.out.println("Buscando cliente por login: " + email);
 			ps.setString(1, email.trim());
 			ResultSet rs = ps.executeQuery();
 			
 			if (rs.next()) {
 				Cliente cliente = mapResultSetToCliente(rs);
-				System.out.println("Cliente encontrado: " + cliente.getNome());
 				return cliente;
-			} else {
-				System.out.println("Nenhum cliente encontrado com login: " + email);
 			}
 			
 		} catch (Exception e) {
-			System.err.println("Erro ao buscar cliente por login: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
+	// Atualiza senha do cliente
 	public static boolean atualizarSenha(Long clienteId, String novaSenha) {
 		return atualizarSenhaCliente(clienteId, novaSenha);
 	}
-	
+
+	// Atualiza senha do cliente via JOIN com usuário
 	public static boolean atualizarSenhaCliente(Long clienteId, String novaSenha) {
 		String sql = "UPDATE usuario u INNER JOIN cliente c ON u.usu_codigo = c.usu_codigo " +
 					 "SET u.usu_senha = ? WHERE c.cli_codigo = ?";
@@ -375,19 +381,13 @@ public class ClienteDAO {
 			return false;
 		}
 	}
-	
-	/**
-	 * Verifica se já existe um cliente com o CPF informado
-	 * @param cpf CPF a ser verificado (com ou sem formatação)
-	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
-	 * @return true se o CPF já existe em outro cliente
-	 */
+
+	// Verifica se CPF já está cadastrado
 	public static boolean existeCpf(String cpf, Long clienteIdAtual) {
 		if (cpf == null || cpf.trim().isEmpty()) {
 			return false;
 		}
-		
-		// Remove formatação
+
 		cpf = cpf.replaceAll("[^0-9]", "");
 		
 		String sql;
@@ -415,24 +415,17 @@ public class ClienteDAO {
 		}
 		return false;
 	}
-	
-	/**
-	 * Verifica se já existe um CPF cadastrado em CLIENTES ou FUNCIONÁRIOS
-	 * @param cpf CPF a ser verificado
-	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
-	 * @return true se o CPF já existe no sistema
-	 */
+
+	// Verifica se CPF já existe no sistema (clientes ou funcionários)
 	public static boolean existeCpfNoSistema(String cpf, Long clienteIdAtual) {
 		if (cpf == null || cpf.trim().isEmpty()) {
 			return false;
 		}
-		
-		// Remove formatação
+
 		cpf = cpf.replaceAll("[^0-9]", "");
 		
 		try (Connection conn = DatabaseConnection.getConnection()) {
 			
-			// Verifica na tabela CLIENTE
 			String sqlCliente;
 			if (clienteIdAtual == null) {
 				sqlCliente = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_status = 'A'";
@@ -452,7 +445,6 @@ public class ClienteDAO {
 				}
 			}
 			
-			// Verifica na tabela FUNCIONARIO
 			String sqlFuncionario = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf = ?";
 			try (PreparedStatement ps = conn.prepareStatement(sqlFuncionario)) {
 				ps.setString(1, cpf);
@@ -468,13 +460,8 @@ public class ClienteDAO {
 		}
 		return false;
 	}
-	
-	/**
-	 * Verifica se já existe um cliente com o Email informado (no usuario)
-	 * @param email Email a ser verificado
-	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
-	 * @return true se o email já existe em outro cliente
-	 */
+
+	// Verifica se email já está cadastrado
 	public static boolean existeEmail(String email, Long clienteIdAtual) {
 		if (email == null || email.trim().isEmpty()) {
 			return false;

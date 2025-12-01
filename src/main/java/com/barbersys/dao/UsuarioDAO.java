@@ -12,6 +12,7 @@ import com.barbersys.util.DatabaseConnection;
 
 public class UsuarioDAO {
 
+    // Autentica usuário verificando login, senha e status ativo
     public Usuario autenticar(String login, String senha) {
         Usuario usuario = null;
         String sql = "SELECT u.usu_codigo, u.usu_login, u.usu_senha, u.usu_user, u.per_codigo, p.per_nome, " +
@@ -30,21 +31,17 @@ public class UsuarioDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    // Verifica se é cliente ou funcionário e se está ativo
                     String clienteStatus = rs.getString("cli_status");
                     String funcionarioStatus = rs.getString("fun_status");
                     
-                    // Se for cliente e estiver inativo
                     if (clienteStatus != null && !"A".equals(clienteStatus)) {
-                        return null; // Retorna null para indicar usuário inativo
+                        return null;
                     }
                     
-                    // Se for funcionário e estiver inativo
                     if (funcionarioStatus != null && !"A".equals(funcionarioStatus)) {
-                        return null; // Retorna null para indicar usuário inativo
+                        return null;
                     }
                     
-                    // Usuário ativo, cria o objeto
                     usuario = new Usuario();
                     usuario.setId(rs.getLong("usu_codigo"));
                     usuario.setLogin(rs.getString("usu_login"));
@@ -64,6 +61,7 @@ public class UsuarioDAO {
         return usuario;
     }
     
+    // Verifica se usuário existe mas está inativo
     public boolean verificarUsuarioInativo(String login, String senha) {
         String sql = "SELECT c.cli_status, f.fun_status " +
                      "FROM usuario u " +
@@ -82,10 +80,9 @@ public class UsuarioDAO {
                     String clienteStatus = rs.getString("cli_status");
                     String funcionarioStatus = rs.getString("fun_status");
                     
-                    // Se for cliente inativo ou funcionário inativo
                     if ((clienteStatus != null && !"A".equals(clienteStatus)) ||
                         (funcionarioStatus != null && !"A".equals(funcionarioStatus))) {
-                        return true; // Usuário existe mas está inativo
+                        return true;
                     }
                 }
             }
@@ -93,9 +90,10 @@ public class UsuarioDAO {
             e.printStackTrace();
         }
         
-        return false; // Usuário não existe ou credenciais erradas
+        return false;
     }
     
+    // Verifica se já existe usuário com este login
     public boolean loginExiste(String login) throws SQLException {
         String sql = "SELECT COUNT(*) FROM usuario WHERE usu_login = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -111,6 +109,7 @@ public class UsuarioDAO {
         return false;
     }
     
+    // Busca usuário por ID
     public Usuario buscarPorId(Long id) {
         Usuario usuario = null;
         String sql = "SELECT u.usu_codigo, u.usu_login, u.usu_senha, u.usu_user, u.per_codigo, p.per_nome FROM usuario u " +
@@ -142,6 +141,7 @@ public class UsuarioDAO {
         return usuario;
     }
 
+    // Salva novo usuário
     public Usuario salvar(Usuario usuario) throws SQLException {
         if (loginExiste(usuario.getLogin())) {
             throw new SQLException("Login já existe no sistema. Por favor, escolha outro.");
@@ -170,6 +170,7 @@ public class UsuarioDAO {
         return usuario;
     }
 
+    // Atualiza dados do usuário
     public void atualizar(Usuario usuario) throws SQLException {
         StringBuilder sql = new StringBuilder("UPDATE usuario SET usu_login = ?");
         
@@ -206,6 +207,7 @@ public class UsuarioDAO {
         }
     }
 
+    // Remove usuário do banco
     public void deletar(Usuario usuario) throws SQLException {
         String sql = "DELETE FROM usuario WHERE usu_codigo = ?";
 
@@ -221,6 +223,7 @@ public class UsuarioDAO {
         }
     }
     
+    // Inativa usuário
     public void inativar(Usuario usuario) throws SQLException {
         String sql = "UPDATE usuario SET usu_ativo = 0 WHERE usu_codigo = ?";
 
@@ -236,6 +239,7 @@ public class UsuarioDAO {
         }
     }
 
+    // Busca usuários por perfis específicos
     public java.util.List<com.barbersys.model.Usuario> buscarUsuariosPorPerfis(java.util.List<String> nomesPerfis) {
         java.util.List<com.barbersys.model.Usuario> usuarios = new java.util.ArrayList<>();
         if (nomesPerfis == null || nomesPerfis.isEmpty()) {

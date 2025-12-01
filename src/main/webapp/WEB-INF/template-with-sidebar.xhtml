@@ -226,7 +226,9 @@
 				            <p:commandButton value="Enviar Avaliação" 
 				                           actionListener="#{avaliacaoController.salvarAvaliacao()}"
 				                           styleClass="btn btn-green medium"
-				                           update="@form:painelNotificacoes" />
+				                           process="@form"
+				                           update="@form:painelNotificacoes" 
+				                           oncomplete="if (args &amp;&amp; !args.validationFailed) PF('dlgAvaliacao').hide();" />
 				        </div>
 
 				    </h:panelGroup>
@@ -281,24 +283,12 @@
 
 				<script>
 					function abrirAjudaPDF() {
-						// Pega o nome da página atual
+
 						var paginaAtual = window.location.pathname.split('/').pop().replace('.xhtml', '');
 						
-						// ========================================================================
-						// MAPA DE PÁGINAS: Configure aqui qual página do PDF deve abrir para cada tela
-						// ========================================================================
-						// COMO USAR:
-						// 1. À esquerda: coloque o nome da sua página .xhtml (sem extensão)
-						// 2. À direita: coloque o número da página do PDF
-						// 
-						// EXEMPLO: Se sua tela é "minha_tela.xhtml" e deve abrir na página 5 do PDF:
-						//          'minha_tela': 5
-						//
-						// IMPORTANTE: O PDF vai fazer SCROLL automático até a página especificada
-						// usando o parâmetro #page=N na URL do PDF
-						// ========================================================================
+					
 						var mapaPaginas = {
-							'dashboard': 19,             // Dashboard abre na página 21 do PDF
+							'dashboard': 19,            
 							'agendamento': 20,
 							'relatorios': 23,      
 							'relatorio_feedback': 23,
@@ -320,11 +310,10 @@
 							'configuracoes_funcionario': 37,
 						};
 						
-						// Pega o número da página correspondente (se não encontrar, usa página 1)
+					
 						var numeroPagina = mapaPaginas[paginaAtual] || 1;
 						
-						// Abre o PDF na página correspondente em nova aba
-						// O parâmetro #page=N faz o PDF dar scroll automático até a página N
+					
 						var urlPDF = '#{request.contextPath}/resources/pdf/ManualDoSistema.pdf#page=' + numeroPagina;
 						window.open(urlPDF, '_blank');
 					}

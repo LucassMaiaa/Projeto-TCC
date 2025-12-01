@@ -41,6 +41,7 @@ public class RelatorioProdutividadeController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Inicializa o modelo lazy para carregar dados paginados da produtividade
     private void inicializarLazyModel() {
         lstProdutividade = new LazyDataModel<ProdutividadeFuncionario>() {
             private static final long serialVersionUID = 1L;
@@ -70,38 +71,36 @@ public class RelatorioProdutividadeController implements Serializable {
         };
     }
 
+    // Carrega lista de funcionários ativos
     private void carregarFuncionarios() {
         lstFuncionarios = FuncionarioDAO.buscarFuncionario(null, "A", 0, 1000);
     }
 
+    // Limpa os filtros de busca
     public void limparFiltros() {
         dataInicial = null;
         dataFinal = null;
         funcionarioFiltro = null;
     }
 
+    // Busca todas as produtividades com filtros aplicados
     private List<ProdutividadeFuncionario> obterTodasProdutividadeFiltradas() {
         return ProdutividadeFuncionarioDAO.buscarTodasProdutividade(
             dataInicial, dataFinal, funcionarioFiltro);
     }
 
+    // Gera o relatório de produtividade em PDF
     public void gerarPDF() {
-        List<ProdutividadeFuncionario> todasProdutividade = null;
-        
         try {
-            todasProdutividade = obterTodasProdutividadeFiltradas();
+            List<ProdutividadeFuncionario> todasProdutividade = obterTodasProdutividadeFiltradas();
             
             if (todasProdutividade == null || todasProdutividade.isEmpty()) {
-                System.out.println("[AVISO] Nenhum registro encontrado para gerar PDF");
                 return;
             }
             
-            System.out.println("[INFO] Gerando PDF com " + todasProdutividade.size() + " registros...");
             RelatorioProdutividadePDF.gerar(todasProdutividade, dataInicial, dataFinal, funcionarioFiltro);
-            System.out.println("[SUCESSO] PDF gerado com sucesso!");
             
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha ao gerar PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }

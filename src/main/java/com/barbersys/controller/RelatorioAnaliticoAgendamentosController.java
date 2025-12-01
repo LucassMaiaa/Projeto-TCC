@@ -40,6 +40,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
     private List<Cliente> lstClientes;
     private List<Funcionario> lstFuncionarios;
 
+    // Inicializa os dados ao carregar a página
     @PostConstruct
     public void init() {
         carregarClientes();
@@ -47,6 +48,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Configura o modelo lazy para carregar agendamentos paginados
     private void inicializarLazyModel() {
         lstAgendamentos = new LazyDataModel<Agendamento>() {
             private static final long serialVersionUID = 1L;
@@ -77,14 +79,17 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
         };
     }
 
+    // Carrega lista de clientes ativos
     private void carregarClientes() {
         lstClientes = ClienteDAO.buscarCliente(null, "ATIVO", 0, 1000);
     }
 
+    // Carrega lista de funcionários ativos
     private void carregarFuncionarios() {
         lstFuncionarios = FuncionarioDAO.buscarFuncionario(null, "A", 0, 1000);
     }
 
+    // Limpa todos os filtros de pesquisa
     public void limparFiltros() {
         dataInicial = null;
         dataFinal = null;
@@ -93,33 +98,30 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
         statusFiltro = "";
     }
 
+    // Busca todos os agendamentos sem paginação para exportação
     private List<Agendamento> obterTodosAgendamentosFiltrados() {
         return AgendamentoDAO.buscarTodosAgendamentosRelatorioAnalitico(
             dataInicial, dataFinal, nomeClienteFiltro, funcionarioFiltro, statusFiltro);
     }
 
+    // Gera relatório PDF com os agendamentos filtrados
     public void gerarPDF() {
-        List<Agendamento> todosAgendamentos = null;
-        
         try {
-            todosAgendamentos = obterTodosAgendamentosFiltrados();
+            List<Agendamento> todosAgendamentos = obterTodosAgendamentosFiltrados();
             
             if (todosAgendamentos == null || todosAgendamentos.isEmpty()) {
-                System.out.println("[AVISO] Nenhum agendamento encontrado para gerar PDF");
                 return;
             }
             
-            System.out.println("[INFO] Gerando PDF com " + todosAgendamentos.size() + " agendamentos...");
             RelatorioAnaliticoAgendamentosPDF.gerar(todosAgendamentos, dataInicial, dataFinal, 
                 nomeClienteFiltro, funcionarioFiltro, statusFiltro);
-            System.out.println("[SUCESSO] PDF gerado com sucesso!");
             
         } catch (Exception e) {
-            System.err.println("[ERRO] Falha ao gerar PDF: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
+    // Retorna descrição legível do status
     public String getStatusDescricao(String status) {
         if (status == null) return "";
         switch (status) {
@@ -130,6 +132,7 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
         }
     }
     
+    // Retorna classe CSS do badge baseada no status
     public String getStatusClass(String status) {
         if (status == null) return "";
         switch (status) {

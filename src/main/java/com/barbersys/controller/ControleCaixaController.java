@@ -96,108 +96,70 @@ public class ControleCaixaController implements Serializable {
 		calcularTotal();
 	}
 
+	// Calcula totais de entradas e saídas do dia e do mês
 	public void calcularTotal() {
-		System.out.println("📊 ===== CALCULANDO TOTAIS =====");
-		System.out.println("📅 Data selecionada: " + dataFormatada.format(dataSelecionada));
-		
 		List<Map<String, Object>> listaPorDia = ControleCaixaDAO.buscarCaixasContagem(dataSelecionada);
 		List<Map<String, Object>> listaPorMes = ControleCaixaDAO.buscarCaixasContagemPorMes(dataSelecionada);
 
-		System.out.println("📋 Registros do DIA: " + listaPorDia.size());
 		for (Map<String, Object> caixa : listaPorDia) {
 			Double tipoValorEntrada = (Double) caixa.get("entrada");
 			Double tipoValorSaida = (Double) caixa.get("saida");
 
 			this.totalEntradas = tipoValorEntrada != null ? tipoValorEntrada : 0.0;
 			this.totalSaidas = tipoValorSaida != null ? tipoValorSaida : 0.0;
-			
-			System.out.println("💵 Total Entradas DIA: R$ " + String.format("%.2f", this.totalEntradas));
-			System.out.println("💸 Total Saídas DIA: R$ " + String.format("%.2f", this.totalSaidas));
 		}
 		
 		if (listaPorDia.isEmpty()) {
 			this.totalEntradas = 0.0;
 			this.totalSaidas = 0.0;
-			System.out.println("⚠️ Nenhum registro encontrado para o dia");
 		}
 
-		System.out.println("📋 Registros do MÊS: " + listaPorMes.size());
 		for (Map<String, Object> caixa : listaPorMes) {
 			Double tipoValorEntrada = (Double) caixa.get("entrada");
 			Double tipoValorSaida = (Double) caixa.get("saida");
 
 			this.totalEntradasMes = tipoValorEntrada != null ? tipoValorEntrada : 0.0;
 			this.totalSaidasMes = tipoValorSaida != null ? tipoValorSaida : 0.0;
-			
-			System.out.println("💵 Total Entradas MÊS: R$ " + String.format("%.2f", this.totalEntradasMes));
-			System.out.println("💸 Total Saídas MÊS: R$ " + String.format("%.2f", this.totalSaidasMes));
 		}
 		
 		if (listaPorMes.isEmpty()) {
 			this.totalEntradasMes = 0.0;
 			this.totalSaidasMes = 0.0;
-			System.out.println("⚠️ Nenhum registro encontrado para o mês");
 		}
-		
-		System.out.println("📊 ===== FIM DO CÁLCULO =====\n");
 	}
 
+	// Prepara modal de abertura/fechamento do caixa
 	public void prepararModal() {
-		System.out.println("========================================");
-		System.out.println("🔧 PREPARANDO MODAL - MÉTODO CHAMADO!");
-		System.out.println("========================================");
-		System.out.println("📊 statusSelecionado (NOVO - clicado): " + statusSelecionado);
-		
-		// Pega o status ATUAL do banco
 		List<CaixaData> checkData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 		String statusAtualBanco = "I";
 		if (!checkData.isEmpty()) {
 			statusAtualBanco = checkData.get(0).getStatus();
 		}
 		
-		System.out.println("📊 statusAtualBanco (do BD): " + statusAtualBanco);
-		
-		// Guarda o status anterior (do banco) para restaurar se necessário
 		statusSelecionadoAnterior = statusAtualBanco;
 		
-		// Se clicou em "Aberto"
 		if (statusSelecionado.equals("A")) {
-			System.out.println("🔹 Usuario clicou em ABERTO");
-			// Se banco está "Fechado", pode abrir
 			if (statusAtualBanco.equals("I")) {
 				valorInicialTemp = null;
-				System.out.println("✅ Caixa FECHADO no banco → PODE ABRIR → abrindo modal");
 				PrimeFaces.current().ajax().addCallbackParam("aberto", true);
-			} 
-			// Se banco JÁ está "Aberto", restaura o status e não abre modal
-			else {
-				System.out.println("❌ Caixa JÁ está ABERTO no banco → NÃO PODE abrir novamente → revertendo");
-				statusSelecionado = statusAtualBanco; // Restaura para "A"
+			} else {
+				statusSelecionado = statusAtualBanco;
 				PrimeFaces.current().ajax().addCallbackParam("aberto", false);
 			}
-		} 
-		// Se clicou em "Fechado"
-		else if (statusSelecionado.equals("I")) {
-			System.out.println("🔹 Usuario clicou em FECHADO");
-			// Se banco está "Aberto", pode fechar
+		} else if (statusSelecionado.equals("I")) {
 			if (statusAtualBanco.equals("A")) {
 				buscaValorSugerido();
 				valorFinalTemp = valorSugerido;
 				mensagemMotivoFinal = "";
-				System.out.println("✅ Caixa ABERTO no banco → PODE FECHAR → abrindo modal");
-				System.out.println("💰 Valor sugerido calculado: " + valorSugerido);
 				PrimeFaces.current().ajax().addCallbackParam("aberto", true);
-			}
-			// Se banco JÁ está "Fechado", restaura o status e não abre modal
-			else {
-				System.out.println("❌ Caixa JÁ está FECHADO no banco → NÃO PODE fechar novamente → revertendo");
-				statusSelecionado = statusAtualBanco; // Restaura para "I"
+			} else {
+				statusSelecionado = statusAtualBanco;
 				PrimeFaces.current().ajax().addCallbackParam("aberto", false);
 			}
 		}
-		System.out.println("========================================");
 	}
 
+	// Busca o valor sugerido para fechamento do caixa
 	public void buscaValorSugerido() {
 		Map<String, Double> valoresFechamento = ControleCaixaDAO
 				.buscarEntradasESaidasDesdeUltimaAbertura(dataSelecionada);
@@ -208,6 +170,7 @@ public class ControleCaixaController implements Serializable {
 		this.valorSugerido = (tipoValorEntrada - tipoValorSaida) + caixaDataModel.getValorInicial();
 	}
 
+	// Verifica se a data é passada e realiza fechamento automático se necessário
 	public void verificaData() {
 		List<CaixaData> checkData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 
@@ -263,6 +226,7 @@ public class ControleCaixaController implements Serializable {
 		getValoresRegistro();
 	}
 
+	// Carrega valores do caixa do banco de dados
 	public void getValoresRegistro() {
 		List<CaixaData> checkData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 
@@ -278,11 +242,7 @@ public class ControleCaixaController implements Serializable {
 				valorFinal = caixaDataModel.getValorFinal();
 				statusSelecionado = caixaDataModel.getStatus();
 
-				if (statusSelecionado.equals("A")) {
-					dadosLiberados = false;
-				} else {
-					dadosLiberados = true;
-				}
+				dadosLiberados = statusSelecionado.equals("I");
 			}
 		} else {
 			valorInicial = 0.0;
@@ -290,39 +250,25 @@ public class ControleCaixaController implements Serializable {
 			statusSelecionado = "I";
 			dadosLiberados = true;
 		}
-
 	}
 
+	// Salva o fechamento do caixa
 	public void salvarRegistroFinal() {
-		System.out.println("⭐ MÉTODO CHAMADO: salvarRegistroFinal");
-		System.out.println("📊 valorFinalTemp RECEBIDO: " + valorFinalTemp);
-		
-		// Transfere o valor temporário para o valor definitivo
 		valorFinal = (valorFinalTemp != null) ? valorFinalTemp : 0.0;
 		
-		System.out.println("📊 valorFinal DEPOIS: " + valorFinal);
-		System.out.println("📊 valorSugerido: " + valorSugerido);
-		System.out.println("📊 mensagemMotivoFinal: " + mensagemMotivoFinal);
-		
-		// Validação 1: Valor final deve ser informado
 		if (valorFinal == null || valorFinal < 0.0) {
-			System.out.println("❌ Valor final não informado");
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Erro!");
 			PrimeFaces.current().ajax().addCallbackParam("mensagem", "Informe o valor final do caixa.");
 			return;
 		}
 		
-		// Validação 2: Se valor final < valor sugerido, motivo é obrigatório
 		if (valorFinal < valorSugerido && (mensagemMotivoFinal == null || mensagemMotivoFinal.trim().isEmpty())) {
-			System.out.println("❌ Valor final menor que sugerido sem motivo");
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Atenção!");
 			PrimeFaces.current().ajax().addCallbackParam("mensagem", "Informe o motivo da diferença de valor.");
 			return;
 		}
-		
-		System.out.println("✅ Validações passaram - prosseguindo com fechamento");
 		
 		List<CaixaData> checkData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 		controleCaixaModel.setMotivo(mensagemMotivoFinal);
@@ -334,7 +280,6 @@ public class ControleCaixaController implements Serializable {
 			caixaDataModel.setStatus("I");
 		}
 		
-		// Altera o status para Fechado
 		statusSelecionado = "I";
 		motivoFinal = "I";
 		CaixaDataDAO.atualizar(caixaDataModel);
@@ -343,61 +288,47 @@ public class ControleCaixaController implements Serializable {
 		controleCaixaModel.setCaixaData(caixaDataModel);
 		controleCaixaModel.setHoraAtual(horaAtualFormatada);
 		controleCaixaModel.setData(dataSelecionada);
-		controleCaixaModel.setValor(valorFinal); // Valor do fechamento é o valor final
+		controleCaixaModel.setValor(valorFinal);
 		controleCaixaModel.setMovimentacao("Fechamento de Caixa");
 		ControleCaixaDAO.salvar(controleCaixaModel);
 
 		controleCaixaModel = new ControleCaixa();
 		mensagemMotivoFinal = "";
-		getValoresRegistro(); // Atualiza statusSelecionado do banco
+		getValoresRegistro();
 		calcularTotal();
 		dadosLiberados = true;
-		
-		System.out.println("🎉 SUCESSO! Caixa fechado com valor: " + valorFinal);
 		
 		PrimeFaces.current().ajax().addCallbackParam("validado", true);
 		PrimeFaces.current().ajax().addCallbackParam("mensagem", "Caixa fechado com sucesso!");
 	}
 	
+	// Formata valor monetário para exibição
 	public String formatarValor(Double valor) {
 		if (valor == null) return "R$ 0,00";
 		return String.format("R$ %,.2f", valor).replace(",", "X").replace(".", ",").replace("X", ".");
 	}
 
+	// Salva abertura do caixa
 	public void salvarRegistroInicial() {
-		System.out.println("⭐ MÉTODO CHAMADO: salvarRegistroInicial");
-		System.out.println("📊 valorInicialTemp RECEBIDO: " + valorInicialTemp);
-		System.out.println("📊 valorInicial ANTES: " + valorInicial);
-		
-		// Transfere o valor temporário para o valor definitivo
 		valorInicial = (valorInicialTemp != null) ? valorInicialTemp : 0.0;
 		
-		System.out.println("📊 valorInicial DEPOIS: " + valorInicial);
-		
-		// Validação do valor inicial
 		if (valorInicial == null || valorInicial < 0.0) {
-			System.out.println("❌ Validação FALHOU!");
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Erro!");
 			PrimeFaces.current().ajax().addCallbackParam("mensagem", "Informe um valor inicial válido (maior que zero).");
 			return;
 		}
-
-		System.out.println("✅ Valor válido: " + valorInicial + " - Prosseguindo...");
 		
-		// AGORA SIM altera o status para Aberto
 		statusSelecionado = "A";
 		
 		List<CaixaData> checkData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 
 		if (checkData.isEmpty()) {
-			System.out.println("📝 Criando NOVO registro de caixa com valor: " + valorInicial);
 			caixaDataModel.setValorInicial(valorInicial);
 			caixaDataModel.setValorFinal(0.0);
 			caixaDataModel.setDataCadastro(new Date());
 			caixaDataModel.setStatus("A");
 			CaixaDataDAO.salvar(caixaDataModel);
-			System.out.println("✅ CaixaData SALVO no banco");
 
 			List<CaixaData> searchData = CaixaDataDAO.verificaExisteData(dataSelecionada);
 
@@ -411,20 +342,16 @@ public class ControleCaixaController implements Serializable {
 			controleCaixaModel.setValor(valorInicial);
 			controleCaixaModel.setMovimentacao("Abertura de Caixa");
 			ControleCaixaDAO.salvar(controleCaixaModel);
-			System.out.println("✅ ControleCaixa SALVO - Movimentação registrada");
 
 			controleCaixaModel = new ControleCaixa();
 
 		} else {
-			System.out.println("📝 ATUALIZANDO registro existente com valor: " + valorInicial);
-
 			for (CaixaData item : checkData) {
 				caixaDataModel.setId(item.getId());
 				caixaDataModel.setValorInicial(valorInicial);
 				caixaDataModel.setValorFinal(0.0);
 				caixaDataModel.setStatus("A");
 				CaixaDataDAO.atualizar(caixaDataModel);
-				System.out.println("✅ CaixaData ATUALIZADO no banco");
 			}
 
 			String horaAtualFormatada = LocalTime.now().format(horaFormatada);
@@ -434,29 +361,21 @@ public class ControleCaixaController implements Serializable {
 			controleCaixaModel.setValor(valorInicial);
 			controleCaixaModel.setMovimentacao("Abertura de Caixa");
 			ControleCaixaDAO.salvar(controleCaixaModel);
-			System.out.println("✅ ControleCaixa SALVO - Movimentação registrada");
 
 			valorFinal = caixaDataModel.getValorFinal();
 
 			controleCaixaModel = new ControleCaixa();
 		}
 		dadosLiberados = false;
-		getValoresRegistro(); // Atualiza statusSelecionado do banco
+		getValoresRegistro();
 		calcularTotal();
-		
-		System.out.println("🎉 SUCESSO! Caixa aberto com valor: " + valorInicial);
 		
 		PrimeFaces.current().ajax().addCallbackParam("validado", true);
 		PrimeFaces.current().ajax().addCallbackParam("mensagem", "Caixa aberto com sucesso!");
 	}
 
+	// Registra entrada ou saída manual no caixa
 	public void salvarValores() {
-		System.out.println("💰 SALVANDO ENTRADA/SAÍDA");
-		System.out.println("📊 Tipo: " + tipodeValor);
-		System.out.println("📊 Valor: " + controleCaixaModel.getValor());
-		System.out.println("📊 Motivo: " + controleCaixaModel.getMotivo());
-		
-		// Validação: Valor obrigatório
 		if (controleCaixaModel.getValor() == null || controleCaixaModel.getValor() <= 0) {
 			PrimeFaces.current().ajax().addCallbackParam("validado", false);
 			PrimeFaces.current().ajax().addCallbackParam("titulo", "Erro!");
@@ -476,11 +395,8 @@ public class ControleCaixaController implements Serializable {
 		}
 
 		ControleCaixaDAO.salvar(controleCaixaModel);
-		
-		System.out.println("✅ Movimentação salva com sucesso!");
 
 		controleCaixaModel = new ControleCaixa();
-
 		calcularTotal();
 		
 		PrimeFaces.current().ajax().addCallbackParam("validado", true);

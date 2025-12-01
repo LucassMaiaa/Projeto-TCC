@@ -33,10 +33,10 @@ public class ServicosController {
 	private LazyDataModel<Servicos> lstServicos;
 	private String editarModel;
 
+	// Inicializa o lazy data model para listagem de serviços
 	@PostConstruct
 	public void init() {
 		lstServicos = new LazyDataModel<Servicos>() {
-
 			@Override
 			public List<Servicos> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 					Map<String, FilterMeta> filterBy) {
@@ -47,25 +47,26 @@ public class ServicosController {
 			public int count(Map<String, FilterMeta> filterBy) {
 				return ServicosDAO.servicosCount(nomeServicos, statusSelecionado);
 			}
-
 		};
 	}
 
+	// Carrega serviço selecionado para edição
 	public void servicoSelecionado(Servicos event) {
 		servicosModel = event;
 		editarModel = "A";
-		// Garantir que sempre tenha um valor válido
 		if (servicosModel.getMinutos() == null || servicosModel.getMinutos() < 30) {
 			servicosModel.setMinutos(30);
 		}
 	}
 
+	// Prepara novo serviço para cadastro
 	public void novoServico() {
 		editarModel = "I";
 		servicosModel = new Servicos();
-		servicosModel.setMinutos(30); // Inicializa com 30 minutos
+		servicosModel.setMinutos(30);
 	}
 
+	// Salva novo serviço no banco
 	public void adicionarNovoServico() {
 		try {
 			if (servicosModel.getNome().isEmpty()) {
@@ -90,20 +91,18 @@ public class ServicosController {
 			}
 
 			ServicosDAO.salvar(servicosModel);
-
 			PrimeFaces.current()
 					.executeScript("Swal.fire({" + "  icon: 'success',"
 							+ "  title: '<span style=\"font-size: 14px\">Serviço cadastrado com sucesso!</span>',"
 							+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-
 			PrimeFaces.current().executeScript("PF('dlgService').hide();");
 			PrimeFaces.current().ajax().update("form");
-
 		} catch (Exception e) {
-			System.out.println("Erro inesperado ao salvar serviço: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
+	// Atualiza serviço existente
 	public void atualizarServico() {
 		if (servicosModel.getNome().isEmpty()) {
 			FacesContext.getCurrentInstance().addMessage(null,
@@ -133,53 +132,41 @@ public class ServicosController {
 						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
 		PrimeFaces.current().executeScript("PF('dlgService').hide();");
 		PrimeFaces.current().ajax().update("form");
-
 	}
 
+	// Remove serviço do banco
 	public void deletaServico() {
 		ServicosDAO.deletar(servicosModel);
-
 		PrimeFaces.current()
 				.executeScript("Swal.fire({" + "  icon: 'success',"
 						+ "  title: '<span style=\"font-size: 14px\">Serviço deletado com sucesso!</span>',"
 						+ "  showConfirmButton: false," + "  timer: 2000," + "  width: '350px'" + "});");
-
 		PrimeFaces.current().executeScript("PF('dlgService').hide();");
 		PrimeFaces.current().executeScript("PF('dlgConfirm').hide();");
 		PrimeFaces.current().ajax().update("form");
 	}
 
+	// Aumenta tempo do serviço em 30 minutos
 	public void aumentarTempo() {
-		try {
-			if (servicosModel == null) {
-				servicosModel = new Servicos();
-				servicosModel.setMinutos(30);
-			} else if (servicosModel.getMinutos() == null) {
-				servicosModel.setMinutos(30);
-			} else if (servicosModel.getMinutos() < 300) {
-				servicosModel.setMinutos(servicosModel.getMinutos() + 30);
-			}
-			System.out.println("✅ Tempo aumentado para: " + servicosModel.getMinutos() + " minutos");
-		} catch (Exception e) {
-			System.err.println("❌ Erro ao aumentar tempo: " + e.getMessage());
-			e.printStackTrace();
+		if (servicosModel == null) {
+			servicosModel = new Servicos();
+			servicosModel.setMinutos(30);
+		} else if (servicosModel.getMinutos() == null) {
+			servicosModel.setMinutos(30);
+		} else if (servicosModel.getMinutos() < 300) {
+			servicosModel.setMinutos(servicosModel.getMinutos() + 30);
 		}
 	}
 
+	// Diminui tempo do serviço em 30 minutos
 	public void diminuirTempo() {
-		try {
-			if (servicosModel == null) {
-				servicosModel = new Servicos();
-				servicosModel.setMinutos(30);
-			} else if (servicosModel.getMinutos() == null || servicosModel.getMinutos() <= 30) {
-				servicosModel.setMinutos(30);
-			} else {
-				servicosModel.setMinutos(servicosModel.getMinutos() - 30);
-			}
-			System.out.println("✅ Tempo diminuído para: " + servicosModel.getMinutos() + " minutos");
-		} catch (Exception e) {
-			System.err.println("❌ Erro ao diminuir tempo: " + e.getMessage());
-			e.printStackTrace();
+		if (servicosModel == null) {
+			servicosModel = new Servicos();
+			servicosModel.setMinutos(30);
+		} else if (servicosModel.getMinutos() == null || servicosModel.getMinutos() <= 30) {
+			servicosModel.setMinutos(30);
+		} else {
+			servicosModel.setMinutos(servicosModel.getMinutos() - 30);
 		}
 	}
 

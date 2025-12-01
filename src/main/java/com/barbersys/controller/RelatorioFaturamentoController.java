@@ -45,6 +45,7 @@ public class RelatorioFaturamentoController implements Serializable {
         inicializarLazyModel();
     }
     
+    // Inicializa o modelo lazy para carregamento paginado dos dados
     private void inicializarLazyModel() {
         lstFaturamento = new LazyDataModel<FaturamentoMensal>() {
             private static final long serialVersionUID = 1L;
@@ -73,16 +74,19 @@ public class RelatorioFaturamentoController implements Serializable {
         };
     }
     
+    // Carrega lista de serviços para o filtro
     private void carregarServicos() {
         lstServicos = ServicosDAO.buscarTodos();
     }
     
+    // Limpa todos os filtros aplicados
     public void limparFiltros() {
         dataInicial = null;
         dataFinal = null;
         servicoFiltro = null;
     }
 
+    // Gera relatório em PDF com os dados filtrados
     public void gerarPDF() {
         try {
             List<FaturamentoMensal> todosRegistros = faturamentoDAO.buscarTodosFaturamento(
@@ -98,7 +102,6 @@ public class RelatorioFaturamentoController implements Serializable {
             RelatorioFaturamentoMensalPDF.gerarRelatorio(todosRegistros, dataInicial, dataFinal);
             
         } catch (Exception e) {
-            e.printStackTrace();
             FacesContext.getCurrentInstance().addMessage(null, 
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, 
                     "Erro", "Erro ao gerar o relatório PDF: " + e.getMessage()));

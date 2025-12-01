@@ -9,6 +9,7 @@ import java.util.List;
 
 public class FaturamentoMensalDAO {
 
+    // Busca faturamento paginado com filtros e ordenação
     public List<FaturamentoMensal> buscarFaturamentoPaginado(Date dataInicial, Date dataFinal, 
                                                               Long servicoFiltro, int first, int pageSize,
                                                               String sortField, String sortOrder) {
@@ -40,7 +41,6 @@ public class FaturamentoMensalDAO {
         
         sql.append("GROUP BY s.ser_codigo, s.ser_nome, DATE(a.age_data), s.ser_preco ");
         
-        // Mapeamento de campos para ordenação
         String colunaBanco = "data";
         if ("tipoServico".equals(sortField)) colunaBanco = "tipo_servico";
         else if ("data".equals(sortField)) colunaBanco = "data";
@@ -94,6 +94,7 @@ public class FaturamentoMensalDAO {
         return lista;
     }
     
+    // Conta total de registros para paginação
     public int contarFaturamento(Date dataInicial, Date dataFinal, Long servicoFiltro) {
         int total = 0;
         StringBuilder sql = new StringBuilder();
@@ -146,6 +147,7 @@ public class FaturamentoMensalDAO {
         return total;
     }
     
+    // Busca todos os registros para exportação
     public List<FaturamentoMensal> buscarTodosFaturamento(Date dataInicial, Date dataFinal, Long servicoFiltro) {
         List<FaturamentoMensal> lista = new ArrayList<>();
         StringBuilder sql = new StringBuilder();

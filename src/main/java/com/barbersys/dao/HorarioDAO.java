@@ -8,18 +8,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.barbersys.model.ControleCaixa;
 import com.barbersys.model.Funcionario;
 import com.barbersys.model.Horario;
 import com.barbersys.util.DatabaseConnection;
 
 public class HorarioDAO {
 
+	// Busca horários de um funcionário com paginação
 	public static List<Horario> buscarHorariosPorFuncionarioPaginado(Funcionario funcionario, int first, int pageSize) {
 		List<Horario> horarios = new ArrayList<>();
 		String sql = "SELECT * FROM horario WHERE fun_codigo = ? LIMIT ?, ?";
 
-		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DatabaseConnection.getConnection(); 
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			ps.setLong(1, funcionario.getId());
 			ps.setInt(2, first);
@@ -49,6 +50,7 @@ public class HorarioDAO {
 		return horarios;
 	}
 
+	// Conta total de horários de um funcionário
 	public static int countHorariosPorFuncionario(Funcionario funcionario) {
 		if (funcionario == null || funcionario.getId() == null) {
 			return 0;
@@ -57,7 +59,8 @@ public class HorarioDAO {
 		int total = 0;
 		String sql = "SELECT COUNT(*) FROM horario WHERE fun_codigo = ?";
 
-		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DatabaseConnection.getConnection(); 
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			ps.setLong(1, funcionario.getId());
 			ResultSet rs = ps.executeQuery();
@@ -72,11 +75,13 @@ public class HorarioDAO {
 		return total;
 	}
 	
+	// Lista todos os horários de um funcionário
 	public static List<Horario> listarPorFuncionario(Long funcionarioId) {
 		List<Horario> horarios = new ArrayList<>();
 		String sql = "SELECT * FROM horario WHERE fun_codigo = ?";
 
-		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+		try (Connection conn = DatabaseConnection.getConnection(); 
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
 
 			ps.setLong(1, funcionarioId);
 			ResultSet rs = ps.executeQuery();
@@ -102,11 +107,12 @@ public class HorarioDAO {
 		return horarios;
 	}
 
+	// Deleta um horário
 	public static void deletar(Long horario) {
 		String sql = "DELETE FROM horario WHERE hor_codigo = ?";
 
 		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
 			stmt.setLong(1, horario);
 			stmt.executeUpdate();
@@ -116,12 +122,13 @@ public class HorarioDAO {
 		}
 	}
 
+	// Salva um novo horário
 	public static void salvar(Horario horario) {
 		String sql = "INSERT INTO horario (hor_hora_inicio, hor_hora_fim, fun_codigo, " +
 					 "hor_domingo, hor_segunda, hor_terca, hor_quarta, hor_quinta, hor_sexta, hor_sabado) " +
 					 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		try (Connection conn = DatabaseConnection.getConnection();
-				PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setTime(1, java.sql.Time.valueOf(horario.getHoraInicial()));
 			stmt.setTime(2, java.sql.Time.valueOf(horario.getHoraFinal()));
 			stmt.setLong(3, horario.getFuncionario().getId());

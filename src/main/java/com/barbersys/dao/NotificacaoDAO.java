@@ -10,6 +10,7 @@ import java.util.List;
 
 public class NotificacaoDAO {
 
+    // Salva uma nova notificação no banco de dados
     public Notificacao salvar(Notificacao notificacao) throws SQLException {
         String sql = "INSERT INTO notificacao (not_mensagem, not_data_envio, not_status, not_lida, age_codigo, cli_codigo) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -17,8 +18,8 @@ public class NotificacaoDAO {
             
             stmt.setString(1, notificacao.getMensagem());
             stmt.setTimestamp(2, new Timestamp(notificacao.getDataEnvio().getTime()));
-            stmt.setString(3, "A"); // Sempre salva como Ativa
-            stmt.setString(4, "N"); // Sempre salva como Não Lida
+            stmt.setString(3, "A");
+            stmt.setString(4, "N");
             stmt.setLong(5, notificacao.getAgendamento().getId());
             
             if (notificacao.getCliente() != null) {
@@ -38,6 +39,7 @@ public class NotificacaoDAO {
         return notificacao;
     }
 
+    // Busca todas as notificações ativas do sistema (não vinculadas a clientes)
     public List<Notificacao> buscarAtivas() {
         List<Notificacao> notificacoes = new ArrayList<>();
         String sql = "SELECT not_codigo, not_mensagem, not_data_envio, not_lida FROM notificacao " +
@@ -61,6 +63,7 @@ public class NotificacaoDAO {
         return notificacoes;
     }
 
+    // Busca notificações ativas de um cliente específico
     public List<Notificacao> buscarAtivasPorCliente(Long clienteId) {
         List<Notificacao> notificacoes = new ArrayList<>();
         String sql = "SELECT not_codigo, not_mensagem, not_data_envio, not_lida, age_codigo FROM notificacao " +
@@ -79,7 +82,6 @@ public class NotificacaoDAO {
                 n.setDataEnvio(rs.getTimestamp("not_data_envio"));
                 n.setLida(rs.getString("not_lida"));
                 
-                // Adiciona o agendamento
                 Long agendamentoId = rs.getLong("age_codigo");
                 if (agendamentoId != null && agendamentoId > 0) {
                     Agendamento agendamento = new Agendamento();
@@ -95,6 +97,7 @@ public class NotificacaoDAO {
         return notificacoes;
     }
 
+    // Marca uma notificação como inativa
     public void marcarComoInativa(Notificacao notificacao) throws SQLException {
         String sql = "UPDATE notificacao SET not_status = 'I' WHERE not_codigo = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -104,6 +107,7 @@ public class NotificacaoDAO {
         }
     }
 
+    // Marca uma notificação como lida
     public void marcarComoLida(Long notificacaoId) throws SQLException {
         String sql = "UPDATE notificacao SET not_lida = 'S' WHERE not_codigo = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -113,6 +117,7 @@ public class NotificacaoDAO {
         }
     }
 
+    // Marca múltiplas notificações como lidas
     public void marcarTodasComoLidas(List<Long> notificacoesIds) throws SQLException {
         if (notificacoesIds == null || notificacoesIds.isEmpty()) {
             return;
@@ -136,10 +141,7 @@ public class NotificacaoDAO {
         }
     }
     
-    /**
-     * Deleta fisicamente notificações lidas há mais de 7 dias
-     * Chamado automaticamente quando o sistema inicializa
-     */
+    // Remove automaticamente notificações lidas há mais de 7 dias
     public void deletarNotificacoesAntigas() {
         String sql = "DELETE FROM notificacao " +
                      "WHERE not_lida = 'S' " +
@@ -147,12 +149,8 @@ public class NotificacaoDAO {
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            int deletados = stmt.executeUpdate();
-            System.out.println("🗑️ Limpeza automática: " + deletados + " notificações antigas deletadas (lidas há mais de 7 dias)");
-            
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("❌ Erro ao deletar notificações antigas: " + e.getMessage());
             e.printStackTrace();
         }
     }

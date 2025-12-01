@@ -58,10 +58,10 @@ public class HomeController implements Serializable {
         carregarDados();
     }
     
+    // Carrega todos os dados do dashboard
     public void carregarDados() {
         Calendar cal = Calendar.getInstance();
         int anoAtual = cal.get(Calendar.YEAR);
-        
         boolean isMesAtual = "m".equals(dataSelecionada);
         
         if (isMesAtual) {
@@ -76,27 +76,20 @@ public class HomeController implements Serializable {
             agendamentosCancelados = DashboardDAO.buscarAgendamentosCanceladosAnoAtual();
         }
         
-        // Busca faturamento por mês para o gráfico
         faturamentoPorMes = DashboardDAO.buscarFaturamentoPorMes(anoAtual);
         
-        // Busca top funcionário
         Map<String, Object> topFuncionario = DashboardDAO.buscarTopFuncionario(isMesAtual);
         topFuncionarioNome = (String) topFuncionario.get("nome");
         topFuncionarioAtendimentos = (Integer) topFuncionario.get("totalAtendimentos");
         topFuncionarioAvaliacao = (Double) topFuncionario.get("mediaAvaliacao");
         
-        // Busca visitas por dia da semana
         visitasPorDia = DashboardDAO.buscarVisitasPorDiaSemana();
-        
-        // Busca top 5 serviços mais solicitados do mês
         topServicosMes = DashboardDAO.buscarTopServicosMesAtual(5);
         
-        // Busca dados do resumo de hoje
         agendamentosHoje = DashboardDAO.buscarAgendamentosHoje();
         faturamentoHoje = DashboardDAO.buscarFaturamentoHoje();
         proximoAgendamento = DashboardDAO.buscarProximoAgendamento();
         
-        // Calcula o valor máximo para normalizar o gráfico
         valorMaximo = 0.0;
         for (Double valor : faturamentoPorMes.values()) {
             if (valor > valorMaximo) {
@@ -104,16 +97,12 @@ public class HomeController implements Serializable {
             }
         }
         
-        // Evita divisão por zero
         if (valorMaximo == 0.0) {
             valorMaximo = 1.0;
         }
     }
     
-    /**
-     * Retorna a altura da barra do gráfico em porcentagem (5-100)
-     * Meses sem dados mostram apenas uma pontinha (5%)
-     */
+    // Retorna a altura da barra do gráfico em porcentagem
     public int getAlturaBarra(int mes) {
         if (faturamentoPorMes == null || !faturamentoPorMes.containsKey(mes)) {
             return 5; // Pontinha para meses sem dados
@@ -143,9 +132,7 @@ public class HomeController implements Serializable {
         return Math.min(altura, alturaMaxima);
     }
     
-    /**
-     * Retorna o valor formatado do mês para tooltip
-     */
+    // Retorna o valor formatado do mês
     public String getValorMes(int mes) {
         if (faturamentoPorMes == null || !faturamentoPorMes.containsKey(mes)) {
             return "R$ 0,00";
@@ -161,9 +148,7 @@ public class HomeController implements Serializable {
         return "R$ " + df.format(valor);
     }
     
-    /**
-     * Verifica se o mês tem dados
-     */
+    // Verifica se o mês tem dados
     public boolean temDados(int mes) {
         if (faturamentoPorMes == null || !faturamentoPorMes.containsKey(mes)) {
             return false;
@@ -171,18 +156,14 @@ public class HomeController implements Serializable {
         return faturamentoPorMes.get(mes) > 0;
     }
     
-    /**
-     * Verifica se o mês é o mês atual
-     */
+    // Verifica se é o mês atual
     public boolean isMesAtual(int mes) {
         Calendar cal = Calendar.getInstance();
-        int mesAtual = cal.get(Calendar.MONTH) + 1; // Calendar.MONTH é 0-based
+        int mesAtual = cal.get(Calendar.MONTH) + 1;
         return mes == mesAtual;
     }
     
-    /**
-     * Retorna o label do mês
-     */
+    // Retorna o label do mês
     public String getLabelMes(int mes) {
         if (mes >= 1 && mes <= 12) {
             return MESES[mes - 1];
@@ -190,9 +171,7 @@ public class HomeController implements Serializable {
         return "";
     }
     
-    /**
-     * Formata o valor em Real (R$)
-     */
+    // Formata valor em Real
     public String getTotalFaturadoFormatado() {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("pt", "BR"));
         symbols.setGroupingSeparator('.');
@@ -202,32 +181,26 @@ public class HomeController implements Serializable {
         return "R$ " + df.format(totalFaturado);
     }
     
-    /**
-     * Listener para quando o filtro é alterado
-     */
+    // Atualiza dados quando filtro é alterado
     public void onFiltroChange() {
         carregarDados();
     }
     
-    /**
-     * Retorna a porcentagem de agendamentos finalizados
-     */
+    // Calcula porcentagem de finalizados (sobre finalizados + cancelados)
     public int getPorcentagemFinalizados() {
-        if (totalAgendamentos == 0) return 0;
-        return (int) Math.round((agendamentosFinalizados * 100.0) / totalAgendamentos);
+        int totalRelevante = agendamentosFinalizados + agendamentosCancelados;
+        if (totalRelevante == 0) return 0;
+        return (int) Math.round((agendamentosFinalizados * 100.0) / totalRelevante);
     }
     
-    /**
-     * Retorna a porcentagem de agendamentos cancelados
-     */
+    // Calcula porcentagem de cancelados (sobre finalizados + cancelados)
     public int getPorcentagemCancelados() {
-        if (totalAgendamentos == 0) return 0;
-        return (int) Math.round((agendamentosCancelados * 100.0) / totalAgendamentos);
+        int totalRelevante = agendamentosFinalizados + agendamentosCancelados;
+        if (totalRelevante == 0) return 0;
+        return (int) Math.round((agendamentosCancelados * 100.0) / totalRelevante);
     }
     
-    /**
-     * Retorna a avaliação média formatada do top funcionário
-     */
+    // Formata avaliação do top funcionário
     public String getTopFuncionarioAvaliacaoFormatada() {
         if (topFuncionarioAvaliacao == 0.0) {
             return "0.0";
@@ -235,9 +208,7 @@ public class HomeController implements Serializable {
         return String.format("%.1f", topFuncionarioAvaliacao);
     }
     
-    /**
-     * Retorna o total de visitas de um dia da semana
-     */
+    // Retorna total de visitas do dia
     public int getVisitasDia(int diaSemana) {
         if (visitasPorDia == null || !visitasPorDia.containsKey(diaSemana)) {
             return 0;
@@ -245,9 +216,7 @@ public class HomeController implements Serializable {
         return visitasPorDia.get(diaSemana);
     }
     
-    /**
-     * Retorna a porcentagem de visitas de um dia em relação ao maior valor
-     */
+    // Calcula porcentagem de visitas do dia
     public int getPorcentagemVisitasDia(int diaSemana) {
         if (visitasPorDia == null || visitasPorDia.isEmpty()) {
             return 5; // Mínimo de 5% para visualização
@@ -273,16 +242,11 @@ public class HomeController implements Serializable {
             return 5;
         }
         
-        // Calcula proporção entre 10% e 100%
         int porcentagem = (int) Math.round((visitasDia * 100.0) / maxVisitas);
-        
-        // Garante que sempre tenha pelo menos 10% de altura
         return Math.max(10, porcentagem);
     }
     
-    /**
-     * Retorna o nome do dia da semana
-     */
+    // Retorna nome do dia da semana
     public String getNomeDia(int diaSemana) {
         String[] dias = {"Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"};
         if (diaSemana >= 1 && diaSemana <= 7) {
@@ -291,18 +255,14 @@ public class HomeController implements Serializable {
         return "";
     }
     
-    /**
-     * Formata data para exibição (dd/MM)
-     */
+    // Formata data para exibição
     public String formatarData(Date data) {
         if (data == null) return "";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM");
         return sdf.format(data);
     }
     
-    /**
-     * Formata o faturamento de hoje
-     */
+    // Formata faturamento de hoje
     public String getFaturamentoHojeFormatado() {
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("pt", "BR"));
         symbols.setGroupingSeparator('.');
@@ -312,9 +272,7 @@ public class HomeController implements Serializable {
         return "R$ " + df.format(faturamentoHoje);
     }
     
-    /**
-     * Retorna a cor do status do agendamento
-     */
+    // Retorna cor do status
     public String getCorStatus(String status) {
         if (status == null || status.trim().isEmpty()) return "#999";
         
@@ -339,9 +297,7 @@ public class HomeController implements Serializable {
         }
     }
     
-    /**
-     * Retorna o texto do status do agendamento
-     */
+    // Retorna texto do status
     public String getTextoStatus(String status) {
         if (status == null || status.trim().isEmpty()) return "Desconhecido";
         
@@ -362,26 +318,19 @@ public class HomeController implements Serializable {
             case "CONFIRMADO":
                 return "Confirmado";
             default: 
-                return status; // Retorna o valor original se não reconhecer
+                return status;
         }
     }
     
-    /**
-     * Retorna o próximo agendamento formatado
-     * Formato: "27/11 às 22:00 - Nome do Cliente"
-     */
+    // Retorna próximo agendamento formatado
     public String getProximoAgendamentoFormatado() {
         if (proximoAgendamento == null || proximoAgendamento.trim().isEmpty()) {
             return null;
         }
-        
-        // O DAO já retorna formatado corretamente com data e hora
         return proximoAgendamento;
     }
     
-    /**
-     * Formata o preço em Real (R$)
-     */
+    // Formata preço em Real
     public String formatarPreco(Double preco) {
         if (preco == null) return "R$ 0,00";
         
