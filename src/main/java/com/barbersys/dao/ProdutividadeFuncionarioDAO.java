@@ -8,7 +8,8 @@ import com.barbersys.util.DatabaseConnection;
 public class ProdutividadeFuncionarioDAO {
 
     public static List<ProdutividadeFuncionario> buscarProdutividade(
-            java.util.Date dataInicial, java.util.Date dataFinal, Long funcionarioId, int first, int pageSize) {
+            java.util.Date dataInicial, java.util.Date dataFinal, Long funcionarioId, int first, int pageSize,
+            String sortField, String sortOrder) {
 
         List<ProdutividadeFuncionario> resultado = new ArrayList<>();
 
@@ -37,7 +38,21 @@ public class ProdutividadeFuncionarioDAO {
         }
 
         sql.append("GROUP BY f.fun_codigo, f.fun_nome, a.age_data ");
-        sql.append("ORDER BY a.age_data DESC, f.fun_nome ASC ");
+        
+        // Mapeamento de campos para ordenação
+        String colunaBanco = "data";
+        if ("funcionarioNome".equals(sortField)) colunaBanco = "f.fun_nome";
+        else if ("data".equals(sortField)) colunaBanco = "data";
+        else if ("atendimentosRealizados".equals(sortField)) colunaBanco = "atendimentos_realizados";
+        else if ("taxaCancelamento".equals(sortField)) colunaBanco = "taxa_cancelamento";
+        else if ("mediaAvaliacoes".equals(sortField)) colunaBanco = "media_avaliacoes";
+        
+        String ordem = "DESC";
+        if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+            ordem = "ASC";
+        }
+        
+        sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
         sql.append("LIMIT ? OFFSET ?");
 
         try (Connection conn = DatabaseConnection.getConnection();

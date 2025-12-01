@@ -375,5 +375,139 @@ public class ClienteDAO {
 			return false;
 		}
 	}
+	
+	/**
+	 * Verifica se já existe um cliente com o CPF informado
+	 * @param cpf CPF a ser verificado (com ou sem formatação)
+	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
+	 * @return true se o CPF já existe em outro cliente
+	 */
+	public static boolean existeCpf(String cpf, Long clienteIdAtual) {
+		if (cpf == null || cpf.trim().isEmpty()) {
+			return false;
+		}
+		
+		// Remove formatação
+		cpf = cpf.replaceAll("[^0-9]", "");
+		
+		String sql;
+		if (clienteIdAtual == null) {
+			sql = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_status = 'A'";
+		} else {
+			sql = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_codigo != ? AND cli_status = 'A'";
+		}
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, cpf);
+			if (clienteIdAtual != null) {
+				ps.setLong(2, clienteIdAtual);
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Verifica se já existe um CPF cadastrado em CLIENTES ou FUNCIONÁRIOS
+	 * @param cpf CPF a ser verificado
+	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
+	 * @return true se o CPF já existe no sistema
+	 */
+	public static boolean existeCpfNoSistema(String cpf, Long clienteIdAtual) {
+		if (cpf == null || cpf.trim().isEmpty()) {
+			return false;
+		}
+		
+		// Remove formatação
+		cpf = cpf.replaceAll("[^0-9]", "");
+		
+		try (Connection conn = DatabaseConnection.getConnection()) {
+			
+			// Verifica na tabela CLIENTE
+			String sqlCliente;
+			if (clienteIdAtual == null) {
+				sqlCliente = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_status = 'A'";
+			} else {
+				sqlCliente = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_codigo != ? AND cli_status = 'A'";
+			}
+			
+			try (PreparedStatement ps = conn.prepareStatement(sqlCliente)) {
+				ps.setString(1, cpf);
+				if (clienteIdAtual != null) {
+					ps.setLong(2, clienteIdAtual);
+				}
+				
+				ResultSet rs = ps.executeQuery();
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+			
+			// Verifica na tabela FUNCIONARIO
+			String sqlFuncionario = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf = ?";
+			try (PreparedStatement ps = conn.prepareStatement(sqlFuncionario)) {
+				ps.setString(1, cpf);
+				
+				ResultSet rs = ps.executeQuery();
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Verifica se já existe um cliente com o Email informado (no usuario)
+	 * @param email Email a ser verificado
+	 * @param clienteIdAtual ID do cliente atual (para edição) ou null (para novo cadastro)
+	 * @return true se o email já existe em outro cliente
+	 */
+	public static boolean existeEmail(String email, Long clienteIdAtual) {
+		if (email == null || email.trim().isEmpty()) {
+			return false;
+		}
+		
+		String sql;
+		if (clienteIdAtual == null) {
+			sql = "SELECT COUNT(*) FROM cliente c " +
+				  "INNER JOIN usuario u ON c.usu_codigo = u.usu_codigo " +
+				  "WHERE LOWER(u.usu_login) = LOWER(?) AND c.cli_status = 'A'";
+		} else {
+			sql = "SELECT COUNT(*) FROM cliente c " +
+				  "INNER JOIN usuario u ON c.usu_codigo = u.usu_codigo " +
+				  "WHERE LOWER(u.usu_login) = LOWER(?) AND c.cli_codigo != ? AND c.cli_status = 'A'";
+		}
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, email.trim().toLowerCase());
+			if (clienteIdAtual != null) {
+				ps.setLong(2, clienteIdAtual);
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 }

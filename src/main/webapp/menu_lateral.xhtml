@@ -116,8 +116,8 @@
                 <!-- Cadastro de Cliente - Apenas Funcionário -->
                 <p:commandButton 
                     icon="fa fa-user-plus" 
-                    styleClass="btn-personalized #{view.viewId.contains('cliente') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
-                    action="/cliente?faces-redirect=true"
+                    styleClass="btn-personalized #{view.viewId.contains('cadastro_clientes') ? 'btn-circle-menu-active' : 'btn-circle-menu'}"
+                    action="/cadastro_clientes?faces-redirect=true"
                     immediate="true"
                     ajax="false"
                     rendered="#{usuarioController != null and usuarioController.usuarioLogado != null and usuarioController.usuarioLogado.perfil.id == 2}"/>

@@ -83,6 +83,11 @@ public class ServicosController {
 						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo preço do serviço obrigatório", "Erro!"));
 				return;
 			}
+			if (servicosModel.getPreco() <= 0) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "O preço do serviço deve ser maior que R$ 0,00", "Erro!"));
+				return;
+			}
 
 			ServicosDAO.salvar(servicosModel);
 
@@ -113,6 +118,11 @@ public class ServicosController {
 		if (servicosModel.getPreco() == null) {
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo preço do serviço obrigatório", "Erro!"));
+			return;
+		}
+		if (servicosModel.getPreco() <= 0) {
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage(FacesMessage.SEVERITY_ERROR, "O preço do serviço deve ser maior que R$ 0,00", "Erro!"));
 			return;
 		}
 

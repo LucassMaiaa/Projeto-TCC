@@ -505,10 +505,26 @@ public class FuncionarioController {
 			return false;
 		}
 		
-		// CPF
+		// CPF/CNPJ - Obrigatório
 		if (funcionarioModel.getCpf() == null || funcionarioModel.getCpf().trim().isEmpty()) {
 			FacesContext.getCurrentInstance().addMessage(null, 
 				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo CPF é obrigatório", "Erro!"));
+			return false;
+		}
+		
+		// CPF/CNPJ - Validação de formato
+		if (!com.barbersys.util.CpfCnpjValidator.validarDocumento(funcionarioModel.getCpf())) {
+			String tipo = com.barbersys.util.CpfCnpjValidator.identificarTipo(funcionarioModel.getCpf());
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, tipo + " inválido. Por favor, digite um " + tipo + " válido.", "Erro!"));
+			return false;
+		}
+		
+		// CPF/CNPJ - Verifica duplicidade em TODO O SISTEMA (funcionários e clientes)
+		Long funcionarioIdAtual = ("A".equals(editarModel) && funcionarioModel.getId() != null) ? funcionarioModel.getId() : null;
+		if (FuncionarioDAO.existeCpfCnpjNoSistema(funcionarioModel.getCpf(), funcionarioIdAtual)) {
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Este CPF já está cadastrado no sistema.", "Erro!"));
 			return false;
 		}
 		

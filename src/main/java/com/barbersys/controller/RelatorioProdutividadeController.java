@@ -48,8 +48,18 @@ public class RelatorioProdutividadeController implements Serializable {
             @Override
             public List<ProdutividadeFuncionario> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
+                
+                String sortField = "data";
+                String sortOrder = "DESC";
+                
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    SortMeta sortMeta = sortBy.values().iterator().next();
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+                }
+                
                 return ProdutividadeFuncionarioDAO.buscarProdutividade(
-                    dataInicial, dataFinal, funcionarioFiltro, first, pageSize);
+                    dataInicial, dataFinal, funcionarioFiltro, first, pageSize, sortField, sortOrder);
             }
 
             @Override

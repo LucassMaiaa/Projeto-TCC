@@ -114,20 +114,36 @@ public class AvaliacaoController implements Serializable {
             avaliacao.setFuncionario(funcionario);
 
             AvaliacaoDAO.salvar(avaliacao);
+            
+            System.out.println("✅ Avaliação salva com sucesso!");
 
-            // Marca a notificação como inativa
+            // Remove a notificação após avaliar
             if (notificacaoSelecionada != null) {
+                System.out.println("🗑️ Removendo notificação ID: " + notificacaoSelecionada.getId());
                 NotificacaoDAO notificacaoDAO = new NotificacaoDAO();
                 notificacaoDAO.marcarComoInativa(notificacaoSelecionada);
+                
+                // Atualiza o NotificacaoController na sessão
+                NotificacaoController notificacaoController = (NotificacaoController) 
+                    FacesContext.getCurrentInstance().getExternalContext()
+                    .getSessionMap().get("notificacaoController");
+                
+                if (notificacaoController != null) {
+                    System.out.println("🔄 Atualizando lista de notificações...");
+                    notificacaoController.atualizarNotificacoes();
+                }
+                
+                System.out.println("✅ Notificação removida com sucesso!");
             }
 
             exibirAlerta("success", "Avaliação registrada com sucesso!");
             PrimeFaces.current().executeScript("PF('dlgAvaliacao').hide();");
             
-            // Atualiza o painel de notificações
+            // Atualiza o painel de notificações na interface
             PrimeFaces.current().ajax().update("form:painelNotificacoes");
 
         } catch (Exception e) {
+            System.out.println("❌ ERRO ao salvar avaliação: " + e.getMessage());
             e.printStackTrace();
             exibirAlerta("error", "Erro ao salvar avaliação!");
         }

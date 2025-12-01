@@ -22,7 +22,7 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), 
 body .ui-datatable tbody tr:not(.ui-datatable-empty-message) {
 	display: grid;
-	grid-template-columns: 90px 2fr 120px 150px 150px 120px;
+	    grid-template-columns: 90px 2fr 120px 182px 167px 153px;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -407,29 +407,29 @@ body .ui-datatable .ui-datatable-even>td {
 						<h:outputText value="#{relatorioProdutividadeController.lstProdutividade.rowIndex + status.index + 1}" />
 					</p:column>
 
-					<p:column headerText="Funcionário">
+					<p:column headerText="Funcionário" sortBy="#{prod.funcionarioNome}">
 						<h:outputText value="#{prod.funcionarioNome}" />
 					</p:column>
 
-					<p:column headerText="Data" style="text-align: center;">
+					<p:column headerText="Data" style="text-align: center;" sortBy="#{prod.data}">
 						<h:outputText value="#{prod.data}">
 							<f:convertDateTime pattern="dd/MM/yyyy" />
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="Atendimentos Realizados" style="text-align: center;">
+					<p:column headerText="Atendimentos Realizados" style="text-align: center;" sortBy="#{prod.atendimentosRealizados}">
 						<span class="badge badge-info">
 							<h:outputText value="#{prod.atendimentosRealizados}" />
 						</span>
 					</p:column>
 
-					<p:column headerText="Taxa de Cancelamento" style="text-align: center;">
+					<p:column headerText="Taxa de Cancelamento" style="text-align: center;" sortBy="#{prod.taxaCancelamento}">
 						<h:outputText value="#{prod.taxaCancelamento}">
 							<f:convertNumber type="number" minFractionDigits="2" maxFractionDigits="2" />
 						</h:outputText>%
 					</p:column>
 
-					<p:column headerText="Média de Avaliações" style="text-align: center;">
+					<p:column headerText="Média de Avaliações" style="text-align: center;" sortBy="#{prod.mediaAvaliacoes}">
 						<span class="badge badge-warning">
 							<h:outputText value="#{prod.mediaAvaliacoes}">
 								<f:convertNumber type="number" minFractionDigits="1" maxFractionDigits="1" />

@@ -52,6 +52,8 @@ public class ControleCaixaDAO {
 					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
 					System.out.println("  ✅ Contabilizado em SAÍDAS");
 
+				} else if (caixa.getMovimentacao().equals("Abertura de Caixa") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
+					System.out.println("  ⏭️  IGNORADO (controle interno)");
 				}
 
 			}
@@ -104,14 +106,20 @@ public class ControleCaixaDAO {
 				
 				System.out.println("📝 Movimentação: " + caixa.getMovimentacao() + " | Valor: R$ " + String.format("%.2f", caixa.getValor()));
 
+				// Soma APENAS entradas reais (manual e automática)
 				if (caixa.getMovimentacao().equals("Entrada")
-						|| caixa.getMovimentacao().equals("Entrada automática")
-						|| caixa.getMovimentacao().equals("Fechamento de Caixa")) {
+						|| caixa.getMovimentacao().equals("Entrada automática")) {
 					totalEntradas += caixa.getValor();
 					System.out.println("  ✅ Contabilizado em ENTRADAS");
-				} else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
+				} 
+				// Soma APENAS saídas reais (manual e estorno)
+				else if (caixa.getMovimentacao().equals("Saida") || caixa.getMovimentacao().equals("Saída de estorno")) {
 					totalSaidas += Math.abs(caixa.getValor()); // Math.abs porque estorno vem negativo
 					System.out.println("  ✅ Contabilizado em SAÍDAS");
+				}
+				// Ignora: Abertura de Caixa e Fechamento de Caixa
+				else if (caixa.getMovimentacao().equals("Abertura de Caixa") || caixa.getMovimentacao().equals("Fechamento de Caixa")) {
+					System.out.println("  ⏭️  IGNORADO (controle interno)");
 				}
 			}
 			
@@ -131,12 +139,28 @@ public class ControleCaixaDAO {
 	}
 
 	public static List<ControleCaixa> buscarCaixasPaginado(int first, int pageSize, Date dataSelecionada,
-			String tipoValor) {
+			String tipoValor, String sortField, String sortOrder) {
 		List<ControleCaixa> lista = new ArrayList<>();
+		
+		// Mapeamento de campos JSF para colunas do banco
+		String colunaBanco = "con_codigo";
+		if ("id".equals(sortField)) colunaBanco = "con_codigo";
+		else if ("movimentacao".equals(sortField)) colunaBanco = "con_movimentacao";
+		else if ("valor".equals(sortField)) colunaBanco = "con_valor";
+		else if ("horaAtual".equals(sortField)) colunaBanco = "con_hora";
+		else if ("motivo".equals(sortField)) colunaBanco = "con_motivo";
+		
+		// Garante que sortOrder seja apenas ASC ou DESC
+		String ordem = "DESC";
+		if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+			ordem = "ASC";
+		}
+		
 		String sql = "SELECT con_codigo, con_valor, con_movimentacao, "
 				+ "con_hora, con_motivo, con_data FROM controlecaixa  WHERE con_data = ?" + "AND (" + "      ? = '' "
 				+ "   OR con_movimentacao = ? " + "   OR con_movimentacao = 'Abertura de Caixa' "
-				+ "   OR con_movimentacao = 'Fechamento de Caixa'" + ") " + "ORDER BY con_codigo DESC LIMIT ?, ? ";
+				+ "   OR con_movimentacao = 'Fechamento de Caixa'" + ") " 
+				+ "ORDER BY " + colunaBanco + " " + ordem + " LIMIT ?, ? ";
 
 		try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -232,10 +256,13 @@ public class ControleCaixaDAO {
 						double valor = rs2.getDouble("con_valor");
 						String movimentacao = rs2.getString("con_movimentacao");
 
-						if (movimentacao.equals("Entrada")) {
+						// Soma ENTRADAS (manual e automática)
+						if (movimentacao.equals("Entrada") || movimentacao.equals("Entrada automática")) {
 							totalEntradas += valor;
-						} else if (movimentacao.equals("Saida")) {
-							totalSaidas += valor;
+						} 
+						// Soma SAÍDAS (manual e estorno)
+						else if (movimentacao.equals("Saida") || movimentacao.equals("Saída de estorno")) {
+							totalSaidas += Math.abs(valor); // Math.abs porque estorno pode vir negativo
 						}
 					}
 				}

@@ -14,8 +14,13 @@ public class UsuarioDAO {
 
     public Usuario autenticar(String login, String senha) {
         Usuario usuario = null;
-        String sql = "SELECT u.usu_codigo, u.usu_login, u.usu_senha, u.usu_user, u.per_codigo, p.per_nome FROM usuario u " +
-                     "JOIN perfil p ON u.per_codigo = p.per_codigo WHERE u.usu_login = ? AND u.usu_senha = ?";
+        String sql = "SELECT u.usu_codigo, u.usu_login, u.usu_senha, u.usu_user, u.per_codigo, p.per_nome, " +
+                     "c.cli_status, f.fun_status " +
+                     "FROM usuario u " +
+                     "JOIN perfil p ON u.per_codigo = p.per_codigo " +
+                     "LEFT JOIN cliente c ON u.usu_codigo = c.usu_codigo " +
+                     "LEFT JOIN funcionario f ON u.usu_codigo = f.usu_codigo " +
+                     "WHERE u.usu_login = ? AND u.usu_senha = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -25,6 +30,21 @@ public class UsuarioDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
+                    // Verifica se é cliente ou funcionário e se está ativo
+                    String clienteStatus = rs.getString("cli_status");
+                    String funcionarioStatus = rs.getString("fun_status");
+                    
+                    // Se for cliente e estiver inativo
+                    if (clienteStatus != null && !"A".equals(clienteStatus)) {
+                        return null; // Retorna null para indicar usuário inativo
+                    }
+                    
+                    // Se for funcionário e estiver inativo
+                    if (funcionarioStatus != null && !"A".equals(funcionarioStatus)) {
+                        return null; // Retorna null para indicar usuário inativo
+                    }
+                    
+                    // Usuário ativo, cria o objeto
                     usuario = new Usuario();
                     usuario.setId(rs.getLong("usu_codigo"));
                     usuario.setLogin(rs.getString("usu_login"));
@@ -42,6 +62,38 @@ public class UsuarioDAO {
         }
 
         return usuario;
+    }
+    
+    public boolean verificarUsuarioInativo(String login, String senha) {
+        String sql = "SELECT c.cli_status, f.fun_status " +
+                     "FROM usuario u " +
+                     "LEFT JOIN cliente c ON u.usu_codigo = c.usu_codigo " +
+                     "LEFT JOIN funcionario f ON u.usu_codigo = f.usu_codigo " +
+                     "WHERE u.usu_login = ? AND u.usu_senha = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, login);
+            stmt.setString(2, senha);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String clienteStatus = rs.getString("cli_status");
+                    String funcionarioStatus = rs.getString("fun_status");
+                    
+                    // Se for cliente inativo ou funcionário inativo
+                    if ((clienteStatus != null && !"A".equals(clienteStatus)) ||
+                        (funcionarioStatus != null && !"A".equals(funcionarioStatus))) {
+                        return true; // Usuário existe mas está inativo
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false; // Usuário não existe ou credenciais erradas
     }
     
     public boolean loginExiste(String login) throws SQLException {

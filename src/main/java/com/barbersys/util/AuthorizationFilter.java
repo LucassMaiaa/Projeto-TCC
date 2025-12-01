@@ -27,6 +27,7 @@ public class AuthorizationFilter implements Filter {
             requestPath.contains("recuperar_senha.xhtml") ||
             requestPath.contains("validar_codigo_recuperacao.xhtml") ||
             requestPath.contains("validar_codigo_registro.xhtml") ||
+            requestPath.contains("logout.xhtml") ||  // IMPORTANTE: Permite logout
             requestPath.contains("/javax.faces.resource/")) {
             chain.doFilter(request, response);
             return;
@@ -65,9 +66,10 @@ public class AuthorizationFilter implements Filter {
             
             // PERFIL FUNCIONÁRIO (ID = 2)
             else if (perfilId == 2) {
-                // Funcionário pode acessar: agendamento, controle_caixa, configuracoes_funcionario
+                // Funcionário pode acessar: agendamento, controle_caixa, cadastro_clientes, configuracoes_funcionario
                 if (!requestPath.contains("agendamento.xhtml") && 
                     !requestPath.contains("controle_caixa.xhtml") && 
+                    !requestPath.contains("cadastro_clientes.xhtml") && 
                     !requestPath.contains("configuracoes_funcionario.xhtml") &&
                     !requestPath.contains("modal_avaliacao.xhtml")) { // Modal de avaliação usado no agendamento
                     if (!httpResponse.isCommitted()) {

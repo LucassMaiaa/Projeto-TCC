@@ -141,6 +141,10 @@ a {
     left: 14px;
 }
 
+body .ui-datatable thead th .ui-sortable-column-icon.ui-icon-carat-2-n-s {
+    font-size: 12px;
+}
+
 .content-filter:not(.no-filter) .ui-selectonebutton::before{
     content: "";
     display: block;
@@ -1559,7 +1563,8 @@ body .ui-datatable thead th {
     padding: 0 13px 7px !important;
     font-size: 12px;
     border: none !important;
-    font-family: "Barlow"
+    font-family: "Barlow";
+    display: flex;
 }
 
 body .ui-datatable .ui-datatable-data>tr>td {

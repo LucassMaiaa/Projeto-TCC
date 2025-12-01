@@ -202,10 +202,13 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 						value="#{clienteController.lstCliente}" var="clientes"
 						paginator="true" paginatorPosition="bottom" rows="16" lazy="true"
 						emptyMessage="Nenhum dado encontrado">
+						
+						<!-- Card CLICÁVEL - Apenas para ADMIN -->
 						<p:commandLink
 							actionListener="#{clienteController.clienteSelecionado(clientes)}"
 							update="form:dlgCli" process="@this"
-							oncomplete="PF('dlgCli').show()">
+							oncomplete="PF('dlgCli').show()"
+							rendered="#{clienteController.admin}">
 							<div class="card-list #{clientes.status == 'I' ? 'inativo' : 'ativo'}">
 								<div>
 									<label class="title-list">Cliente</label>
@@ -219,6 +222,23 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 								</div>
 							</div>
 						</p:commandLink>
+						
+						<!-- Card NÃO CLICÁVEL - Para FUNCIONÁRIO -->
+						<h:panelGroup rendered="#{!clienteController.admin}">
+							<div class="card-list #{clientes.status == 'I' ? 'inativo' : 'ativo'}" style="cursor: default; opacity: 0.8;">
+								<div>
+									<label class="title-list">Cliente</label>
+									<p:outputLabel styleClass="subtitle-list"
+										value="#{clientes.nome}" />
+								</div>
+								<div>
+									<label class="title-list">CPF</label>
+									<p:outputLabel styleClass="subtitle-list"
+										value="#{clientes.cpf.substring(0,3)}.#{clientes.cpf.substring(3,6)}.#{clientes.cpf.substring(6,9)}-#{clientes.cpf.substring(9,11)}" />
+								</div>
+							</div>
+						</h:panelGroup>
+						
 					</p:dataList>
 				</div>
 
@@ -368,13 +388,13 @@ body .ui-dialog.dialog-validar-email .ui-dialog-content {
 					</div>
 										<div class="col-md-6">
 						<div class="input-combined">
-							<p:outputLabel styleClass="title-input" value="Sexo *" />
+							<p:outputLabel styleClass="title-input" value="Selecionar gênero *" />
 							<p:selectOneMenu styleClass="senha-login"
 								value="#{clienteController.clienteModel.sexo}">
 								<f:selectItem itemLabel="Selecione" itemValue="" />
 								<f:selectItem itemLabel="Masculino" itemValue="M" />
 								<f:selectItem itemLabel="Feminino" itemValue="F" />
-								<f:selectItem itemLabel="Outro" itemValue="O" />
+								<f:selectItem itemLabel="Não definido" itemValue="O" />
 							</p:selectOneMenu>
 						</div>
 					</div>

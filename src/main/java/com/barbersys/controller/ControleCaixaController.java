@@ -72,7 +72,18 @@ public class ControleCaixaController implements Serializable {
 			@Override
 			public List<ControleCaixa> load(int first, int pageSize, Map<String, SortMeta> sortBy,
 					Map<String, FilterMeta> filterBy) {
-				return ControleCaixaDAO.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor);
+				
+				// Extrai o campo e a direção da ordenação
+				String sortField = "id"; // padrão
+				String sortOrder = "DESC"; // padrão
+				
+				if (sortBy != null && !sortBy.isEmpty()) {
+					SortMeta sortMeta = sortBy.values().iterator().next();
+					sortField = sortMeta.getField();
+					sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+				}
+				
+				return ControleCaixaDAO.buscarCaixasPaginado(first, pageSize, dataSelecionada, filtroTipoDeValor, sortField, sortOrder);
 			}
 
 			@Override

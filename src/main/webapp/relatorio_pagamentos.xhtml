@@ -387,31 +387,31 @@ body .ui-datatable .ui-datatable-even>td {
 				lazy="true" 
 				emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Código" style="text-align: center;">
+				<p:column headerText="Código" style="text-align: center;" sortBy="#{pagamento.id}">
 					<h:outputText value="#{relatorioPagamentosController.lstPagamentos.rowIndex + status.index + 1}" />
 				</p:column>
 
-				<p:column headerText="Cliente">
+				<p:column headerText="Cliente" sortBy="#{pagamento.nomeCliente}">
 					<h:outputText value="#{pagamento.nomeCliente}" />
 				</p:column>
 
-				<p:column headerText="Forma de Pagamento">
+				<p:column headerText="Forma de Pagamento" sortBy="#{pagamento.formaPagamento}">
 					<h:outputText value="#{pagamento.formaPagamento != null ? pagamento.formaPagamento : 'Não definido'}" />
 				</p:column>
 
-				<p:column headerText="Valor" style="text-align: right;">
+				<p:column headerText="Valor" style="text-align: right;" sortBy="#{pagamento.valor}">
 					<h:outputText value="#{pagamento.valor}">
 						<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
+				<p:column headerText="Data" style="text-align: center;" sortBy="#{pagamento.data}">
 					<h:outputText value="#{pagamento.data}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Status" style="text-align: center;">
+				<p:column headerText="Status" style="text-align: center;" sortBy="#{pagamento.statusPagamento}">
 					<h:panelGroup rendered="#{pagamento.statusPagamento == 'S'}">
 						<span class="badge badge-success">Pago</span>
 					</h:panelGroup>

@@ -135,4 +135,25 @@ public class NotificacaoDAO {
             stmt.executeUpdate();
         }
     }
+    
+    /**
+     * Deleta fisicamente notificações lidas há mais de 7 dias
+     * Chamado automaticamente quando o sistema inicializa
+     */
+    public void deletarNotificacoesAntigas() {
+        String sql = "DELETE FROM notificacao " +
+                     "WHERE not_lida = 'S' " +
+                     "AND not_data_envio < (NOW() - INTERVAL 7 DAY)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            int deletados = stmt.executeUpdate();
+            System.out.println("🗑️ Limpeza automática: " + deletados + " notificações antigas deletadas (lidas há mais de 7 dias)");
+            
+        } catch (SQLException e) {
+            System.out.println("❌ Erro ao deletar notificações antigas: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

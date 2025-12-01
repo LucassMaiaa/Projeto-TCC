@@ -66,8 +66,106 @@ public class AgendamentoDAO {
 		return total;
 	}
 
+	public static Agendamento buscarPorId(Long agendamentoId) {
+		Agendamento agendamento = null;
+		
+		String sql = "SELECT a.age_codigo, a.age_data, a.age_hora, a.age_status, a.age_pago, " +
+		             "a.age_observacoes, a.age_tipo_cadastro, a.age_sexo, a.age_nome_cliente, " +
+		             "c.cli_codigo, c.cli_nome, c.cli_email, c.cli_telefone, c.cli_cpf, c.cli_sexo, " +
+		             "f.fun_codigo, f.fun_nome, f.fun_telefone, f.fun_cpf, " +
+		             "u.usu_login as fun_email, " +
+		             "p.pag_codigo, p.pag_nome " +
+		             "FROM agendamento a " +
+		             "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " +
+		             "JOIN funcionario f ON a.fun_codigo = f.fun_codigo " +
+		             "LEFT JOIN usuario u ON f.usu_codigo = u.usu_codigo " +
+		             "LEFT JOIN pagamento p ON a.pag_codigo = p.pag_codigo " +
+		             "WHERE a.age_codigo = ?";
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+		     PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setLong(1, agendamentoId);
+			ResultSet rs = ps.executeQuery();
+			
+			if (rs.next()) {
+				agendamento = new Agendamento();
+				agendamento.setId(rs.getLong("age_codigo"));
+				agendamento.setDataCriado(rs.getDate("age_data"));
+				agendamento.setHoraSelecionada(rs.getTime("age_hora") != null ? rs.getTime("age_hora").toLocalTime() : null);
+				agendamento.setStatus(rs.getString("age_status"));
+				agendamento.setPago(rs.getString("age_pago"));
+				agendamento.setObservacoes(rs.getString("age_observacoes"));
+				agendamento.setTipoCadastro(rs.getString("age_tipo_cadastro"));
+				agendamento.setSexo(rs.getString("age_sexo"));
+				agendamento.setNomeClienteAvulso(rs.getString("age_nome_cliente"));
+				
+				// Cliente (pode ser null)
+				if (rs.getLong("cli_codigo") > 0) {
+					Cliente cliente = new Cliente();
+					cliente.setId(rs.getLong("cli_codigo"));
+					cliente.setNome(rs.getString("cli_nome"));
+					cliente.setEmail(rs.getString("cli_email"));
+					cliente.setTelefone(rs.getString("cli_telefone"));
+					cliente.setCpf(rs.getString("cli_cpf"));
+					cliente.setSexo(rs.getString("cli_sexo"));
+					agendamento.setCliente(cliente);
+				}
+				
+				// Funcionário
+				Funcionario funcionario = new Funcionario();
+				funcionario.setId(rs.getLong("fun_codigo"));
+				funcionario.setNome(rs.getString("fun_nome"));
+				funcionario.setTelefone(rs.getString("fun_telefone"));
+				funcionario.setCpf(rs.getString("fun_cpf"));
+				agendamento.setFuncionario(funcionario);
+				
+				// Pagamento (pode ser null)
+				if (rs.getLong("pag_codigo") > 0) {
+					Pagamento pagamento = new Pagamento();
+					pagamento.setId(rs.getLong("pag_codigo"));
+					pagamento.setNome(rs.getString("pag_nome"));
+					agendamento.setPagamento(pagamento);
+				}
+				
+				// Busca os serviços deste agendamento
+				List<Servicos> servicos = new ArrayList<>();
+				String sqlServicos = "SELECT s.ser_codigo, s.ser_nome, s.ser_preco, s.ser_minutos " +
+				                     "FROM servicos s " +
+				                     "JOIN agendamento_servico ags ON s.ser_codigo = ags.ser_codigo " +
+				                     "WHERE ags.age_codigo = ?";
+				
+				try (PreparedStatement psServicos = conn.prepareStatement(sqlServicos)) {
+					psServicos.setLong(1, agendamentoId);
+					ResultSet rsServicos = psServicos.executeQuery();
+					
+					while (rsServicos.next()) {
+						Servicos servico = new Servicos();
+						servico.setId(rsServicos.getLong("ser_codigo"));
+						servico.setNome(rsServicos.getString("ser_nome"));
+						servico.setPreco(rsServicos.getDouble("ser_preco"));
+						servico.setMinutos(rsServicos.getInt("ser_minutos"));
+						servicos.add(servico);
+					}
+				}
+				
+				agendamento.setServicos(servicos);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return agendamento;
+	}
+
 	public static List<Agendamento> buscarAgendamentos(String nomeCliente, String nomeFuncionario, String status,
 			Date dataFiltro, int first, int pageSize) {
+		return buscarAgendamentos(nomeCliente, nomeFuncionario, status, dataFiltro, first, pageSize, null, null);
+	}
+	
+	public static List<Agendamento> buscarAgendamentos(String nomeCliente, String nomeFuncionario, String status,
+			Date dataFiltro, int first, int pageSize, String sortField, String sortOrder) {
 		cancelarAgendamentosAtrasados();
 		Map<Long, Agendamento> mapaAgendamentos = new LinkedHashMap<>();
 
@@ -81,7 +179,8 @@ public class AgendamentoDAO {
 				+ "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
 				+ "a.age_nome_cliente AS nome_cliente_avulso, " + "f.fun_codigo AS funcionario_id, "
 				+ "f.fun_nome AS funcionario_nome, " + "p.pag_codigo AS pagamento_id, "
-				+ "p.pag_nome AS pagamento_nome, " + "p.pag_integra_caixa AS pagamento_integra_caixa "
+				+ "p.pag_nome AS pagamento_nome, " + "p.pag_integra_caixa AS pagamento_integra_caixa, "
+				+ "(SELECT COUNT(*) FROM agendamento_servico WHERE age_codigo = a.age_codigo) AS qtd_servicos "
 				+ "FROM agendamento a " + "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo "
 				+ "JOIN servicos s ON s.ser_codigo = ags.ser_codigo "
 				+ "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo "
@@ -101,7 +200,10 @@ public class AgendamentoDAO {
 		if (dataFiltro != null) {
 			sql.append(" AND a.age_data = ?");
 		}
-		sql.append(" ORDER BY a.age_codigo DESC LIMIT ?, ?");
+		
+		sql.append(" ORDER BY a.age_codigo DESC");
+		
+		sql.append(" LIMIT ?, ?");
 
 		try (Connection conn = DatabaseConnection.getConnection();
 				PreparedStatement ps = conn.prepareStatement(sql.toString())) {
@@ -611,15 +713,19 @@ public class AgendamentoDAO {
 				+ "a.age_status AS agendamento_status, " + "a.age_data AS agendamento_data, "
 				+ "a.age_hora AS agendamento_hora, " + "a.age_tipo_cadastro AS agendamento_tipo, "
 				+ "a.age_nome_cliente AS nome_cliente_avulso, " + "a.age_observacoes AS agendamento_observacoes, "
+				+ "a.age_pago AS agendamento_pago, " + "a.pag_codigo AS pagamento_id, "
 				+ "s.ser_codigo AS servico_id, " + "s.ser_nome AS servico_nome, " 
 				+ "s.ser_preco AS servico_preco, " + "s.ser_minutos AS servico_minutos, "
 				+ "f.fun_codigo AS funcionario_id, " + "f.fun_nome AS funcionario_nome, " 
 				+ "c.cli_codigo AS cliente_id, " + "c.cli_nome AS cliente_nome, "
-				+ "c.cli_observacoes AS cliente_observacoes "
+				+ "c.cli_observacoes AS cliente_observacoes, "
+				+ "p.pag_nome AS pagamento_nome, " + "p.pag_integra_caixa AS pagamento_integra_caixa "
 				+ "FROM agendamento a " + "JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo "
 				+ "JOIN servicos s ON s.ser_codigo = ags.ser_codigo "
 				+ "JOIN funcionario f ON a.fun_codigo = f.fun_codigo "
-				+ "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo " + "WHERE a.cli_codigo = ? AND a.age_status = ? "
+				+ "LEFT JOIN cliente c ON a.cli_codigo = c.cli_codigo "
+				+ "LEFT JOIN pagamento p ON a.pag_codigo = p.pag_codigo "
+				+ "WHERE a.cli_codigo = ? AND a.age_status = ? "
 				+ "ORDER BY a.age_data DESC, a.age_hora DESC LIMIT ?, ?");
 
 		try (Connection conn = DatabaseConnection.getConnection();
@@ -645,6 +751,7 @@ public class AgendamentoDAO {
 					agendamento.setTipoCadastro(rs.getString("agendamento_tipo"));
 					agendamento.setNomeClienteAvulso(rs.getString("nome_cliente_avulso"));
 					agendamento.setObservacoes(rs.getString("agendamento_observacoes"));
+					agendamento.setPago(rs.getString("agendamento_pago"));
 
 					Funcionario funcionario = new Funcionario();
 					funcionario.setId(rs.getLong("funcionario_id"));
@@ -657,6 +764,14 @@ public class AgendamentoDAO {
 						cliente.setNome(rs.getString("cliente_nome"));
 						cliente.setObservacoes(rs.getString("cliente_observacoes"));
 						agendamento.setCliente(cliente);
+					}
+					
+					if (rs.getObject("pagamento_id") != null) {
+						Pagamento pagamento = new Pagamento();
+						pagamento.setId(rs.getLong("pagamento_id"));
+						pagamento.setNome(rs.getString("pagamento_nome"));
+						pagamento.setIntegraCaixa(rs.getBoolean("pagamento_integra_caixa"));
+						agendamento.setPagamento(pagamento);
 					}
 
 					agendamento.setServicos(new ArrayList<>());
@@ -731,7 +846,8 @@ public class AgendamentoDAO {
 	}
 
 	public static List<Agendamento> buscarAgendamentosRelatorioAnalitico(java.util.Date dataInicial,
-			java.util.Date dataFinal, String nomeCliente, Long funcionarioId, String status, int first, int pageSize) {
+			java.util.Date dataFinal, String nomeCliente, Long funcionarioId, String status, int first, int pageSize,
+			String sortField, String sortOrder) {
 
 		List<Agendamento> resultado = new ArrayList<>();
 
@@ -758,7 +874,28 @@ public class AgendamentoDAO {
 			sql.append("AND a.age_status = ? ");
 		}
 
-		sql.append("ORDER BY a.age_data DESC, a.age_hora DESC ");
+		// Mapeamento de campos para ordenação
+		String colunaBanco = "a.age_data";
+		if (sortField != null) {
+			if (sortField.contains("cliente.nome") || sortField.contains("nomeClienteAvulso")) {
+				colunaBanco = "COALESCE(c.cli_nome, a.age_nome_cliente)";
+			} else if ("funcionario.nome".equals(sortField)) {
+				colunaBanco = "f.fun_nome";
+			} else if ("dataCriado".equals(sortField)) {
+				colunaBanco = "a.age_data";
+			} else if ("horaSelecionada".equals(sortField)) {
+				colunaBanco = "a.age_hora";
+			} else if ("status".equals(sortField)) {
+				colunaBanco = "a.age_status";
+			}
+		}
+		
+		String ordem = "DESC";
+		if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+			ordem = "ASC";
+		}
+		
+		sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
 		sql.append("LIMIT ? OFFSET ?");
 
 		try (Connection conn = DatabaseConnection.getConnection();

@@ -29,6 +29,7 @@ public class UsuarioController implements Serializable{
 
     // Método de login
     public String efetuarLogin() {
+        // Primeiro verifica se existe usuário com esse login e senha
         Usuario usuarioAutenticado = usuarioDAO.autenticar(login, senha);
 
         if (usuarioAutenticado != null) {
@@ -61,9 +62,20 @@ public class UsuarioController implements Serializable{
             PrimeFaces.current().ajax().addCallbackParam("redirectUrl", redirectUrl);
             return null; // Não faz navegação servidor-side
         } else {
-            // Marca que o login falhou para exibir SweetAlert2
-            loginFalhou = true;
-            PrimeFaces.current().ajax().addCallbackParam("loginFalhou", true);
+            // Verifica se o problema é usuário inativo
+            boolean usuarioInativo = usuarioDAO.verificarUsuarioInativo(login, senha);
+            
+            if (usuarioInativo) {
+                // Usuário existe mas está inativo
+                loginFalhou = true;
+                PrimeFaces.current().ajax().addCallbackParam("loginFalhou", true);
+                PrimeFaces.current().ajax().addCallbackParam("usuarioInativo", true);
+            } else {
+                // Credenciais inválidas
+                loginFalhou = true;
+                PrimeFaces.current().ajax().addCallbackParam("loginFalhou", true);
+                PrimeFaces.current().ajax().addCallbackParam("usuarioInativo", false);
+            }
             return null;
         }
     }

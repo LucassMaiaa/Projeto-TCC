@@ -52,7 +52,17 @@ public class RelatorioFeedbackController implements Serializable {
             public List<Avaliacao> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
                 Integer notaFiltro = obterNotaFiltro();
-                return AvaliacaoDAO.buscarAvaliacoesPaginado(notaFiltro, funcionarioFiltro, dataInicial, dataFinal, first, pageSize);
+                
+                String sortField = "dataCriacao";
+                String sortOrder = "DESC";
+                
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    SortMeta sortMeta = sortBy.values().iterator().next();
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+                }
+                
+                return AvaliacaoDAO.buscarAvaliacoesPaginado(notaFiltro, funcionarioFiltro, dataInicial, dataFinal, first, pageSize, sortField, sortOrder);
             }
 
             @Override

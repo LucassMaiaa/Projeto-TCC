@@ -78,6 +78,18 @@ public class RegistroController {
                 return;
             }
             
+            // Valida formato do CPF
+            if (!com.barbersys.util.CpfCnpjValidator.validarCPF(clienteModel.getCpf())) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "CPF inválido. Por favor, digite um CPF válido.");
+                return;
+            }
+            
+            // Verifica se o CPF já existe em TODO O SISTEMA (clientes e funcionários)
+            if (ClienteDAO.existeCpfNoSistema(clienteModel.getCpf(), null)) {
+                addMessage(FacesMessage.SEVERITY_ERROR, "Este CPF já está cadastrado no sistema.");
+                return;
+            }
+            
             if (clienteModel.getSexo() == null || clienteModel.getSexo().trim().isEmpty()) {
                 addMessage(FacesMessage.SEVERITY_ERROR, "Sexo é obrigatório");
                 return;

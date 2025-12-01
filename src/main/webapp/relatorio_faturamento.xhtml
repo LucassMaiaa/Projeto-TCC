@@ -345,33 +345,33 @@ body .ui-datatable .ui-datatable-even>td {
 				lazy="true" 
 				emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Cód." style="text-align: center;">
+				<p:column headerText="Cód." style="text-align: center;" sortBy="#{faturamento.id}">
 					<h:outputText value="#{relatorioFaturamentoController.lstFaturamento.rowIndex + status.index + 1}" />
 				</p:column>
 
-				<p:column headerText="Tipo de Serviço">
+				<p:column headerText="Tipo de Serviço" sortBy="#{faturamento.tipoServico}">
 					<h:outputText value="#{faturamento.tipoServico}" />
 				</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
+				<p:column headerText="Data" style="text-align: center;" sortBy="#{faturamento.data}">
 					<h:outputText value="#{faturamento.data}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Quantidade de Serviços" style="text-align: center;">
+				<p:column headerText="Quant. de Serviços" style="text-align: center;" sortBy="#{faturamento.quantidadeServicos}">
 					<span class="badge badge-info">
 						<h:outputText value="#{faturamento.quantidadeServicos}" />
 					</span>
 				</p:column>
 
-				<p:column headerText="Valor Unitário" style="text-align: center;">
+				<p:column headerText="Valor Unitário" style="text-align: center;" sortBy="#{faturamento.valorUnitario}">
 					<h:outputText value="#{faturamento.valorUnitario}">
 						<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Total Faturado" style="text-align: center;">
+				<p:column headerText="Total Faturado" style="text-align: center;" sortBy="#{faturamento.totalFaturado}">
 					<span class="valor-destaque">
 						<h:outputText value="#{faturamento.totalFaturado}">
 							<f:convertNumber type="currency" currencySymbol="R$ " minFractionDigits="2" />

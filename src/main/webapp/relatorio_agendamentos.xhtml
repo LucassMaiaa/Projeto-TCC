@@ -370,29 +370,29 @@ body .ui-datatable .ui-datatable-even>td {
 				lazy="true" 
 				emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Código" style="text-align: center;">
+				<p:column headerText="Código" style="text-align: center;" sortBy="#{agendamento.id}">
 					<h:outputText value="#{relatorioAgendamentosController.lstAgendamentos.rowIndex + status.index + 1}" />
 				</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
+				<p:column headerText="Data" style="text-align: center;" sortBy="#{agendamento.data}">
 					<h:outputText value="#{agendamento.data}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Total de Agendamentos" style="text-align: center;">
+				<p:column headerText="Total de Agendamentos" style="text-align: center;" sortBy="#{agendamento.totalAgendamentos}">
 					<span class="badge badge-info">
 						<h:outputText value="#{agendamento.totalAgendamentos}" />
 					</span>
 				</p:column>
 
-				<p:column headerText="Atendimentos Finalizados" style="text-align: center;">
+				<p:column headerText="Atendimentos Finalizados" style="text-align: center;" sortBy="#{agendamento.finalizados}">
 					<span class="badge badge-success">
 						<h:outputText value="#{agendamento.finalizados}" />
 					</span>
 				</p:column>
 
-				<p:column headerText="Cancelamentos" style="text-align: center;">
+				<p:column headerText="Cancelamentos" style="text-align: center;" sortBy="#{agendamento.cancelados}">
 					<span class="badge badge-danger">
 						<h:outputText value="#{agendamento.cancelados}" />
 					</span>

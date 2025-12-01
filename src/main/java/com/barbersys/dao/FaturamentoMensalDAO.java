@@ -10,7 +10,8 @@ import java.util.List;
 public class FaturamentoMensalDAO {
 
     public List<FaturamentoMensal> buscarFaturamentoPaginado(Date dataInicial, Date dataFinal, 
-                                                              Long servicoFiltro, int first, int pageSize) {
+                                                              Long servicoFiltro, int first, int pageSize,
+                                                              String sortField, String sortOrder) {
         List<FaturamentoMensal> lista = new ArrayList<>();
         StringBuilder sql = new StringBuilder();
         
@@ -37,9 +38,23 @@ public class FaturamentoMensalDAO {
             sql.append("AND s.ser_codigo = ? ");
         }
         
-        sql.append("GROUP BY s.ser_codigo, s.ser_nome, DATE(a.age_data), s.ser_preco ")
-           .append("ORDER BY data DESC, tipo_servico ASC ")
-           .append("LIMIT ? OFFSET ?");
+        sql.append("GROUP BY s.ser_codigo, s.ser_nome, DATE(a.age_data), s.ser_preco ");
+        
+        // Mapeamento de campos para ordenação
+        String colunaBanco = "data";
+        if ("tipoServico".equals(sortField)) colunaBanco = "tipo_servico";
+        else if ("data".equals(sortField)) colunaBanco = "data";
+        else if ("quantidadeServicos".equals(sortField)) colunaBanco = "quantidade_servicos";
+        else if ("valorUnitario".equals(sortField)) colunaBanco = "valor_unitario";
+        else if ("totalFaturado".equals(sortField)) colunaBanco = "total_faturado";
+        
+        String ordem = "DESC";
+        if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+            ordem = "ASC";
+        }
+        
+        sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
+        sql.append("LIMIT ? OFFSET ?");
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {

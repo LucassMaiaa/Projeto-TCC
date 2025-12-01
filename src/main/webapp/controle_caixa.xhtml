@@ -34,7 +34,7 @@
 body .ui-datatable thead tr:not(.ui-datatable-empty-message), body .ui-datatable tbody tr:not(.ui-datatable-empty-message)
 	{
 	display: grid;
-	grid-template-columns: 62px 150px 110px 70px 1fr;
+	    grid-template-columns: 79px 150px 130px 70px 1fr;
 }
 
 body .ui-datatable thead th:first-child:not(.ui-datatable-empty-message),
@@ -168,7 +168,7 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar-thumb:
 							<f:selectItem itemLabel="Todos" itemValue="" />
 							<f:selectItem itemLabel="Entradas" itemValue="Entrada" />
 							<f:selectItem itemLabel="Saídas" itemValue="Saida" />
-							<p:ajax update="@form" process="@this" />
+							<p:ajax update="datatableCaixas" process="@this" />
 						</p:selectOneButton>
 					</div>
 				</div>
@@ -180,29 +180,30 @@ body .ui-dialog:has( .header-modal) .ui-dialog-content::-webkit-scrollbar-thumb:
 			<p:dataTable id="datatableCaixas" rowIndexVar="row"
 				class="data-table-info"
 				value="#{controleCaixaController.lstControleCaixa}" var="caixa"
-				paginator="true" paginatorPosition="bottom" rows="13" lazy="true"
+				paginator="true" paginatorPosition="bottom" rows="13"
+				sortMode="single" lazy="true"
 				emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Código">
+				<p:column headerText="Código" sortBy="#{caixa.id}">
 					<h:outputText value="#{row + 1}" />
 				</p:column>
 
-				<p:column headerText="Movimentação">
+				<p:column headerText="Movimentação" sortBy="#{caixa.movimentacao}">
 					<h:outputText value="#{caixa.movimentacao}" />
 				</p:column>
 
-				<p:column headerText="Valores/Lucros">
+				<p:column headerText="Valores/Lucros" sortBy="#{caixa.valor}">
 					<h:outputText value="#{caixa.valor}">
 						<f:convertNumber type="currency" currencySymbol="R$"
 							locale="pt_BR" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Hora">
+				<p:column headerText="Hora" sortBy="#{caixa.horaAtual}">
 					<h:outputText value="#{caixa.horaAtual.substring(0,5)}" />
 				</p:column>
 
-				<p:column headerText="Motivo">
+				<p:column headerText="Motivo" sortBy="#{caixa.motivo}">
 					<h:outputText value="#{caixa.motivo}" />
 				</p:column>
 

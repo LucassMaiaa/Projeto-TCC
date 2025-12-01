@@ -278,15 +278,29 @@
             //<![CDATA[
             function handleLoginResponse(args) {
                 if (args && args.loginFalhou === true) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Erro de Login',
-                        text: 'Usuário ou senha inválidos!',
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#E74A46',
-                        background: '#fff',
-                        backdrop: true
-                    });
+                    // Verifica se o usuário está inativo
+                    if (args.usuarioInativo === true) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Acesso Negado',
+                            text: 'Seu cadastro foi desativado. Entre em contato com o administrador do sistema.',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#E74A46',
+                            background: '#fff',
+                            backdrop: true
+                        });
+                    } else {
+                        // Credenciais inválidas
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro de Login',
+                            text: 'Usuário ou senha inválidos!',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#E74A46',
+                            background: '#fff',
+                            backdrop: true
+                        });
+                    }
                 } else if (args && args.redirectUrl) {
                     // Login bem-sucedido, redireciona para a página apropriada
                     window.location.href = args.redirectUrl;

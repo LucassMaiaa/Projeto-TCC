@@ -408,27 +408,27 @@ body .ui-datatable .ui-datatable-even>td {
 				lazy="true" 
 				emptyMessage="Nenhum dado encontrado">
 
-				<p:column headerText="Código" style="text-align: center;">
+				<p:column headerText="Código" style="text-align: center;" sortBy="#{avaliacao.id}">
 					<h:outputText value="#{relatorioFeedbackController.lstAvaliacoes.rowIndex + status.index + 1}" />
 				</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
+				<p:column headerText="Data" style="text-align: center;" sortBy="#{avaliacao.dataCriacao}">
 					<h:outputText value="#{avaliacao.dataCriacao}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Funcionário">
+				<p:column headerText="Funcionário" sortBy="#{avaliacao.funcionario.nome}">
 					<h:outputText value="#{avaliacao.funcionario.nome}" />
 				</p:column>
 
-				<p:column headerText="Avaliação" style="text-align: center;">
+				<p:column headerText="Avaliação" style="text-align: center;" sortBy="#{avaliacao.nota}">
 					<span class="rating-badge">
 						<h:outputText value="#{avaliacao.nota}.0" />
 					</span>
 				</p:column>
 
-				<p:column headerText="Comentários">
+				<p:column headerText="Comentários" sortBy="#{avaliacao.comentario}">
 					<h:outputText value="#{avaliacao.comentario}" />
 				</p:column>
 

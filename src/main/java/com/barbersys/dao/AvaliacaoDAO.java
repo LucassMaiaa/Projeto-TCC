@@ -58,7 +58,7 @@ public class AvaliacaoDAO {
         return false;
     }
 
-    public static List<Avaliacao> buscarAvaliacoesPaginado(Integer nota, Long funcionarioId, java.util.Date dataInicial, java.util.Date dataFinal, int first, int pageSize) {
+    public static List<Avaliacao> buscarAvaliacoesPaginado(Integer nota, Long funcionarioId, java.util.Date dataInicial, java.util.Date dataFinal, int first, int pageSize, String sortField, String sortOrder) {
         List<Avaliacao> avaliacoes = new ArrayList<>();
         
         StringBuilder sql = new StringBuilder(
@@ -84,7 +84,19 @@ public class AvaliacaoDAO {
             sql.append("AND DATE(a.ava_data_criacao) <= ? ");
         }
         
-        sql.append("ORDER BY a.ava_data_criacao DESC ");
+        // Mapeamento de campos para ordenação
+        String colunaBanco = "a.ava_data_criacao";
+        if ("dataCriacao".equals(sortField)) colunaBanco = "a.ava_data_criacao";
+        else if ("funcionario.nome".equals(sortField)) colunaBanco = "f.fun_nome";
+        else if ("nota".equals(sortField)) colunaBanco = "a.ava_nota";
+        else if ("comentario".equals(sortField)) colunaBanco = "a.ava_comentario";
+        
+        String ordem = "DESC";
+        if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+            ordem = "ASC";
+        }
+        
+        sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
         sql.append("LIMIT ? OFFSET ?");
         
         try (Connection conn = DatabaseConnection.getConnection();

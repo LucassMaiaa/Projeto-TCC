@@ -9,6 +9,7 @@
 	<title><ui:insert name="title">BarberSys</ui:insert></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/global.css" />
+	<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/css/sweetalert-fix.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -61,11 +62,14 @@
 								              rendered="#{notificacaoController.totalNaoLidas > 0}" />
 							</h:panelGroup>
 						</div>
-
-						<!-- Botão Sair -->
-						<p:commandButton class="btn-sair-header" value="Sair"
-							icon="fa-solid fa-right-from-bracket" 
-							action="#{usuarioController.logout}" />
+						
+						<!-- Botão Sair (Link HTML puro - 100% garantido) -->
+						<a href="#{request.contextPath}/logout.xhtml" 
+						   class="btn-sair-header ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-left"
+						   style="position: relative; z-index: 200; text-decoration: none; display: inline-flex; align-items: center;">
+						    <span class="ui-button-icon-left ui-icon fa-solid fa-right-from-bracket"></span>
+						    <span class="ui-button-text">Sair</span>
+						</a>
 					</div>
 				</div>
 
@@ -293,16 +297,27 @@
 						// IMPORTANTE: O PDF vai fazer SCROLL automático até a página especificada
 						// usando o parâmetro #page=N na URL do PDF
 						// ========================================================================
-						var mapaPaginas = {
-							'dashboard': 1,              // Dashboard abre na página 1 do PDF
-							'agendamento_cliente': 2,    // Agendamento abre na página 2 do PDF
-							'cadastro_clientes': 3,      // Cadastro de Clientes abre na página 3
-							'cadastro_funcionarios': 4,  // Cadastro de Funcionários abre na página 4
-							'cadastro_servicos': 5,      // Cadastro de Serviços abre na página 5
-							'controle_caixa': 6,         // Controle de Caixa abre na página 6
-							'configuracoes': 7,          // Configurações abre na página 7
-							'relatorio': 8               // Relatórios abre na página 8
-							// Adicione mais páginas conforme necessário seguindo o padrão acima
+										var mapaPaginas = {
+							'dashboard': 19,             // Dashboard abre na página 21 do PDF
+							'agendamento': 20,
+							'relatorios': 23,      
+							'relatorio_feedback': 23,
+							'relatorio_agendamentos': 24,
+							'relatorio_analitico_agendamentos': 25,
+							'relatorio_pagamentos': 25,
+							'relatorio_faturamento': 26,
+							'relatorio_produtividade': 27,
+							'cadastros': 28,
+							'cadastro_clientes': 28,
+							'cadastro_funcionario': 29,
+							'cadastro_pagamento': 30,
+							'cadastro_servicos': 31,
+							'cadastro_restricao_data': 31,
+							'controle_caixa': 32, 
+							'configuracoes_admin': 36,
+							'agendamentoCliente': 39,
+							'configuracoes': 37,
+							'configuracoes_funcionario': 37,
 						};
 						
 						// Pega o número da página correspondente (se não encontrar, usa página 1)
@@ -310,7 +325,7 @@
 						
 						// Abre o PDF na página correspondente em nova aba
 						// O parâmetro #page=N faz o PDF dar scroll automático até a página N
-						var urlPDF = '#{request.contextPath}/resources/pdf/manual-ajuda.pdf#page=' + numeroPagina;
+						var urlPDF = '#{request.contextPath}/resources/pdf/ManualDoSistema.pdf#page=' + numeroPagina;
 						window.open(urlPDF, '_blank');
 					}
 				</script>

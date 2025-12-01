@@ -1,0 +1,19 @@
+/* 
+ * Fix para Sweet Alert ficar sempre por cima dos modais do PrimeFaces
+ * Problema: Sweet Alert aparecia atrás dos p:dialog quando em contexto de cadastro de funcionário
+ */
+
+/* Container principal do Sweet Alert - sempre no topo */
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+/* Popup do Sweet Alert */
+.swal2-popup {
+    z-index: 100000 !important;
+}
+
+/* Overlay/backdrop do Sweet Alert */
+.swal2-container.swal2-backdrop-show {
+    z-index: 99999 !important;
+}

@@ -7,7 +7,14 @@ import java.util.*;
 public class DashboardDAO {
     
     /**
-     * Busca o faturamento por mês do ano atual
+     * Busca o faturamento por mês do ano atual COMPLETO
+     * Lógica:
+     * 1. Controle de Caixa:
+     *    - SE tem fechamento: SOMA todos os fechamentos + TUDO depois do último (Abertura + Entradas - Saídas)
+     *    - SE NÃO tem fechamento: (Aberturas + Entradas + Entradas Auto) - (Saídas + Estornos)
+     * 2. Agendamentos pagos com métodos QUE NÃO REGISTRAM NO CAIXA (integraCaixa = 0)
+     * 
+     * Evita duplicação: Agendamentos com pagamento que integra caixa já estão nas "Entradas automáticas"
      */
     public static Map<Integer, Double> buscarFaturamentoPorMes(int ano) {
         Map<Integer, Double> faturamentoPorMes = new LinkedHashMap<>();
@@ -17,29 +24,149 @@ public class DashboardDAO {
             faturamentoPorMes.put(i, 0.0);
         }
         
-        String sql = "SELECT MONTH(a.age_data) as mes, SUM(s.ser_preco) as total " +
-                     "FROM agendamento a " +
-                     "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
-                     "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
-                     "WHERE YEAR(a.age_data) = ? " +
-                     "AND a.age_status = 'F' " +
-                     "AND a.age_pago = 'S' " +
-                     "GROUP BY MONTH(a.age_data) " +
-                     "ORDER BY mes";
+        // PARTE 1: Faturamento do CONTROLE DE CAIXA
+        String sqlCaixa = "SELECT " +
+                          "  MONTH(con_data) as mes, " +
+                          "  DATE(con_data) as dia, " +
+                          "  con_movimentacao, " +
+                          "  con_valor " +
+                          "FROM controlecaixa " +
+                          "WHERE YEAR(con_data) = ? " +
+                          "ORDER BY con_data, con_hora";
         
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sqlCaixa)) {
+            
+            ps.setInt(1, ano);
+            ResultSet rs = ps.executeQuery();
+            
+            // Estrutura para processar dia a dia
+            Map<String, Map<String, Object>> dadosPorDia = new LinkedHashMap<>();
+            
+            // Agrupa movimentações por dia
+            while (rs.next()) {
+                String dia = rs.getString("dia");
+                int mes = rs.getInt("mes");
+                String tipo = rs.getString("con_movimentacao");
+                double valor = rs.getDouble("con_valor");
+                
+                // Inicializa o dia se não existir
+                if (!dadosPorDia.containsKey(dia)) {
+                    Map<String, Object> dadosDia = new HashMap<>();
+                    dadosDia.put("mes", mes);
+                    dadosDia.put("movimentacoes", new ArrayList<Map<String, Object>>());
+                    dadosPorDia.put(dia, dadosDia);
+                }
+                
+                Map<String, Object> dadosDia = dadosPorDia.get(dia);
+                List<Map<String, Object>> movimentacoes = (List<Map<String, Object>>) dadosDia.get("movimentacoes");
+                
+                // Adiciona a movimentação à lista
+                Map<String, Object> mov = new HashMap<>();
+                mov.put("tipo", tipo);
+                mov.put("valor", valor);
+                movimentacoes.add(mov);
+            }
+            
+            // Calcula faturamento de cada dia
+            for (Map.Entry<String, Map<String, Object>> entry : dadosPorDia.entrySet()) {
+                Map<String, Object> dadosDia = entry.getValue();
+                int mes = (int) dadosDia.get("mes");
+                List<Map<String, Object>> movimentacoes = (List<Map<String, Object>>) dadosDia.get("movimentacoes");
+                
+                double faturamentoDia = 0.0;
+                int indexUltimoFechamento = -1;
+                
+                // Procura o índice do ÚLTIMO fechamento do dia (de trás pra frente)
+                for (int i = movimentacoes.size() - 1; i >= 0; i--) {
+                    String tipo = (String) movimentacoes.get(i).get("tipo");
+                    if ("Fechamento de Caixa".equals(tipo)) {
+                        indexUltimoFechamento = i;
+                        break;
+                    }
+                }
+                
+                if (indexUltimoFechamento >= 0) {
+                    // TEM FECHAMENTO: Soma TODOS os fechamentos até o último
+                    for (int i = 0; i <= indexUltimoFechamento; i++) {
+                        Map<String, Object> mov = movimentacoes.get(i);
+                        String tipo = (String) mov.get("tipo");
+                        if ("Fechamento de Caixa".equals(tipo)) {
+                            double valorFechamento = (double) mov.get("valor");
+                            faturamentoDia += valorFechamento;
+                        }
+                    }
+                    
+                    // Soma/subtrai movimentações DEPOIS do último fechamento (INCLUINDO Abertura)
+                    for (int i = indexUltimoFechamento + 1; i < movimentacoes.size(); i++) {
+                        Map<String, Object> mov = movimentacoes.get(i);
+                        String tipo = (String) mov.get("tipo");
+                        double valor = (double) mov.get("valor");
+                        
+                        if ("Abertura de Caixa".equals(tipo) || "Entrada".equals(tipo) || "Entrada automática".equals(tipo)) {
+                            faturamentoDia += valor;
+                        } else if ("Saida".equals(tipo) || "Saída de estorno".equals(tipo)) {
+                            faturamentoDia -= Math.abs(valor);
+                        }
+                    }
+                } else {
+                    // NÃO TEM FECHAMENTO: Calcula manualmente
+                    // (Aberturas + Entradas + Entradas Auto) - (Saídas + Estornos)
+                    for (Map<String, Object> mov : movimentacoes) {
+                        String tipo = (String) mov.get("tipo");
+                        double valor = (double) mov.get("valor");
+                        
+                        if ("Abertura de Caixa".equals(tipo) || "Entrada".equals(tipo) || "Entrada automática".equals(tipo)) {
+                            faturamentoDia += valor;
+                        } else if ("Saida".equals(tipo) || "Saída de estorno".equals(tipo)) {
+                            faturamentoDia -= Math.abs(valor);
+                        }
+                    }
+                }
+                
+                // Soma ao mês correspondente
+                double totalMes = faturamentoPorMes.get(mes);
+                faturamentoPorMes.put(mes, totalMes + faturamentoDia);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Erro ao buscar faturamento do caixa: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        // PARTE 2: Agendamentos pagos com métodos QUE NÃO REGISTRAM NO CAIXA
+        String sqlAgendamentos = "SELECT " +
+                                 "  MONTH(a.age_data) as mes, " +
+                                 "  SUM(s.ser_preco) as total " +
+                                 "FROM agendamento a " +
+                                 "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
+                                 "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
+                                 "INNER JOIN pagamento p ON a.pag_codigo = p.pag_codigo " +
+                                 "WHERE YEAR(a.age_data) = ? " +
+                                 "AND a.age_pago = 'S' " +
+                                 "AND a.age_status != 'I' " +
+                                 "AND (p.pag_integra_caixa = 0 OR p.pag_integra_caixa IS NULL) " +
+                                 "GROUP BY MONTH(a.age_data)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sqlAgendamentos)) {
             
             ps.setInt(1, ano);
             ResultSet rs = ps.executeQuery();
             
             while (rs.next()) {
                 int mes = rs.getInt("mes");
-                double total = rs.getDouble("total");
-                faturamentoPorMes.put(mes, total);
+                double totalAgendamentos = rs.getDouble("total");
+                
+                // Soma ao faturamento do caixa
+                double totalMes = faturamentoPorMes.get(mes);
+                faturamentoPorMes.put(mes, totalMes + totalAgendamentos);
+                
+                System.out.println("✅ Mês " + mes + ": Adicionado R$ " + String.format("%.2f", totalAgendamentos) + " de agendamentos sem integração caixa");
             }
             
         } catch (SQLException e) {
+            System.err.println("❌ Erro ao buscar agendamentos sem integração caixa: " + e.getMessage());
             e.printStackTrace();
         }
         
@@ -59,8 +186,8 @@ public class DashboardDAO {
                      "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
                      "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
                      "WHERE a.age_data >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH) " +
-                     "AND a.age_status = 'F' " +
                      "AND a.age_pago = 'S' " +
+                     "AND a.age_status != 'E' " +
                      "GROUP BY DATE_FORMAT(a.age_data, '%Y-%m') " +
                      "ORDER BY periodo";
         
@@ -82,58 +209,32 @@ public class DashboardDAO {
     }
     
     /**
-     * Busca o total faturado no mês atual
+     * Busca o total faturado no mês atual BASEADO NO CONTROLE DE CAIXA
      */
     public static double buscarFaturamentoMesAtual() {
-        String sql = "SELECT COALESCE(SUM(s.ser_preco), 0) as total " +
-                     "FROM agendamento a " +
-                     "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
-                     "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
-                     "WHERE YEAR(a.age_data) = YEAR(CURDATE()) " +
-                     "AND MONTH(a.age_data) = MONTH(CURDATE()) " +
-                     "AND a.age_status = 'F' " +
-                     "AND a.age_pago = 'S'";
+        Calendar cal = Calendar.getInstance();
+        int mesAtual = cal.get(Calendar.MONTH) + 1;
+        int anoAtual = cal.get(Calendar.YEAR);
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            if (rs.next()) {
-                return rs.getDouble("total");
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return 0.0;
+        Map<Integer, Double> faturamentoPorMes = buscarFaturamentoPorMes(anoAtual);
+        return faturamentoPorMes.getOrDefault(mesAtual, 0.0);
     }
     
     /**
-     * Busca o total faturado no ano atual
+     * Busca o total faturado no ano atual BASEADO NO CONTROLE DE CAIXA
      */
     public static double buscarFaturamentoAnoAtual() {
-        String sql = "SELECT COALESCE(SUM(s.ser_preco), 0) as total " +
-                     "FROM agendamento a " +
-                     "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
-                     "INNER JOIN servicos s ON ags.ser_codigo = s.ser_codigo " +
-                     "WHERE YEAR(a.age_data) = YEAR(CURDATE()) " +
-                     "AND a.age_status = 'F' " +
-                     "AND a.age_pago = 'S'";
+        Calendar cal = Calendar.getInstance();
+        int anoAtual = cal.get(Calendar.YEAR);
         
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            
-            if (rs.next()) {
-                return rs.getDouble("total");
-            }
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
+        Map<Integer, Double> faturamentoPorMes = buscarFaturamentoPorMes(anoAtual);
+        
+        double totalAno = 0.0;
+        for (Double valorMes : faturamentoPorMes.values()) {
+            totalAno += valorMes;
         }
         
-        return 0.0;
+        return totalAno;
     }
     
     /**
@@ -430,6 +531,7 @@ public class DashboardDAO {
                      "FROM agendamento " +
                      "WHERE YEARWEEK(age_data, 1) = YEARWEEK(CURDATE(), 1) " +
                      "AND age_status != 'I' " +
+                     "AND age_status != 'E' " +
                      "GROUP BY DAYOFWEEK(age_data) " +
                      "ORDER BY dia_semana";
         

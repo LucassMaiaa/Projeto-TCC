@@ -13,18 +13,19 @@ public class AgendamentoSinteticoDAO {
             java.util.Date dataInicial, 
             java.util.Date dataFinal, 
             int first, 
-            int pageSize) {
+            int pageSize,
+            String sortField,
+            String sortOrder) {
         
         List<AgendamentoSintetico> resultado = new ArrayList<>();
         
         StringBuilder sql = new StringBuilder(
             "SELECT " +
             "    DATE(a.age_data) as data, " +
-            "    COUNT(DISTINCT a.age_codigo) as total_agendamentos, " +
+            "    COUNT(a.age_codigo) as total_agendamentos, " +
             "    SUM(CASE WHEN a.age_status = 'F' THEN 1 ELSE 0 END) as finalizados, " +
             "    SUM(CASE WHEN a.age_status = 'I' THEN 1 ELSE 0 END) as cancelados " +
             "FROM agendamento a " +
-            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         
@@ -36,7 +37,20 @@ public class AgendamentoSinteticoDAO {
         }
         
         sql.append("GROUP BY DATE(a.age_data) ");
-        sql.append("ORDER BY data DESC ");
+        
+        // Mapeamento de campos para ordenação
+        String colunaBanco = "data";
+        if ("data".equals(sortField)) colunaBanco = "data";
+        else if ("totalAgendamentos".equals(sortField)) colunaBanco = "total_agendamentos";
+        else if ("finalizados".equals(sortField)) colunaBanco = "finalizados";
+        else if ("cancelados".equals(sortField)) colunaBanco = "cancelados";
+        
+        String ordem = "DESC";
+        if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+            ordem = "ASC";
+        }
+        
+        sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
         sql.append("LIMIT ? OFFSET ?");
         
         try (Connection conn = DatabaseConnection.getConnection();
@@ -76,7 +90,6 @@ public class AgendamentoSinteticoDAO {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(DISTINCT DATE(a.age_data)) as total " +
             "FROM agendamento a " +
-            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         
@@ -118,11 +131,10 @@ public class AgendamentoSinteticoDAO {
         StringBuilder sql = new StringBuilder(
             "SELECT " +
             "    DATE(a.age_data) as data, " +
-            "    COUNT(DISTINCT a.age_codigo) as total_agendamentos, " +
+            "    COUNT(a.age_codigo) as total_agendamentos, " +
             "    SUM(CASE WHEN a.age_status = 'F' THEN 1 ELSE 0 END) as finalizados, " +
             "    SUM(CASE WHEN a.age_status = 'I' THEN 1 ELSE 0 END) as cancelados " +
             "FROM agendamento a " +
-            "INNER JOIN agendamento_servico ags ON a.age_codigo = ags.age_codigo " +
             "WHERE 1=1 "
         );
         

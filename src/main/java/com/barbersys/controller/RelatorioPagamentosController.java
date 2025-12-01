@@ -58,8 +58,18 @@ public class RelatorioPagamentosController implements Serializable {
             public List<PagamentoRelatorio> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
                 String status = obterStatusFiltro();
+                
+                String sortField = "data";
+                String sortOrder = "DESC";
+                
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    SortMeta sortMeta = sortBy.values().iterator().next();
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+                }
+                
                 return pagamentoRelatorioDAO.buscarPagamentosPaginado(
-                    dataInicial, dataFinal, nomeClienteFiltro, formaPagamentoFiltro, status, first, pageSize);
+                    dataInicial, dataFinal, nomeClienteFiltro, formaPagamentoFiltro, status, first, pageSize, sortField, sortOrder);
             }
 
             @Override

@@ -1296,7 +1296,7 @@
 									unselectable="false">
 									<f:selectItem itemLabel="mês" itemValue="m" />
 									<f:selectItem itemLabel="ano" itemValue="a" />
-									<p:ajax update="lblFaturado graficoFaturamento graficoAgendamentos lblAgendamentos topFuncionario graficoVisitas" 
+									<p:ajax update="lblFaturado graficoFaturamento graficoAgendamentos lblAgendamentos topFuncionario graficoVisitas lblTopFunc" 
 									        listener="#{homeController.onFiltroChange()}" 
 									        process="@this" 
 									        oncomplete="animarBarrasComTransition(); animarBarrasVisitas();" />
@@ -1445,9 +1445,12 @@
 							<div class="icon-circle">
 								<i class="fa-solid fa-medal"></i>
 							</div>
-							<div class="subtitle-info">
-								<label class="title-info">Top Funcionário</label>
+							<h:panelGroup id="lblTopFunc">
+															<div class="subtitle-info">
+								<label class="title-info">Top Funcionário - #{homeController.dataSelecionada == 'm' ? 'mês' : 'ano'}</label>
 							</div>
+							</h:panelGroup>
+						
 						</div>
 
 						<h:panelGroup id="topFuncionario">
@@ -1470,7 +1473,7 @@
 											<i class="fa-solid fa-scissors"></i>
 										</div>
 										<div>
-											<label class="title-obj">Total de cortes</label> 
+											<label class="title-obj">Total de serviços</label> 
 											<label class="subtitle-obj">#{homeController.topFuncionarioAtendimentos}</label>
 										</div>
 									</div>

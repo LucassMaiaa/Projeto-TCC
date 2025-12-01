@@ -300,10 +300,25 @@ public class ClienteController {
 			return false;
 		}
 		
-		// CPF
+		// CPF - Obrigatório
 		if (clienteModel.getCpf() == null || clienteModel.getCpf().trim().isEmpty()) {
 			FacesContext.getCurrentInstance().addMessage(null, 
 				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Campo CPF é obrigatório", "Erro!"));
+			return false;
+		}
+		
+		// CPF - Validação de formato
+		if (!com.barbersys.util.CpfCnpjValidator.validarCPF(clienteModel.getCpf())) {
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "CPF inválido. Por favor, digite um CPF válido.", "Erro!"));
+			return false;
+		}
+		
+		// CPF - Verifica duplicidade em TODO O SISTEMA (clientes e funcionários)
+		Long clienteIdAtual = ("A".equals(editarModel) && clienteModel.getId() != null) ? clienteModel.getId() : null;
+		if (ClienteDAO.existeCpfNoSistema(clienteModel.getCpf(), clienteIdAtual)) {
+			FacesContext.getCurrentInstance().addMessage(null, 
+				new FacesMessage(FacesMessage.SEVERITY_ERROR, "Este CPF já está cadastrado no sistema.", "Erro!"));
 			return false;
 		}
 		
@@ -426,6 +441,14 @@ public class ClienteController {
 	
 	public void setConfirmarSenha(String confirmarSenha) {
 		this.confirmarSenha = confirmarSenha;
+	}
+	
+	// Método para verificar se o usuário logado é Admin
+	public boolean isAdmin() {
+		Usuario usuarioLogado = (Usuario) FacesContext.getCurrentInstance()
+				.getExternalContext().getSessionMap().get("usuarioLogado");
+		return usuarioLogado != null && usuarioLogado.getPerfil() != null 
+				&& usuarioLogado.getPerfil().getId() == 1L;
 	}
 
 }

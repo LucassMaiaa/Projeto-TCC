@@ -54,9 +54,19 @@ public class RelatorioAnaliticoAgendamentosController implements Serializable {
             @Override
             public List<Agendamento> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
+                
+                String sortField = "dataCriado";
+                String sortOrder = "DESC";
+                
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    SortMeta sortMeta = sortBy.values().iterator().next();
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+                }
+                
                 return AgendamentoDAO.buscarAgendamentosRelatorioAnalitico(
                     dataInicial, dataFinal, nomeClienteFiltro, funcionarioFiltro, 
-                    statusFiltro, first, pageSize);
+                    statusFiltro, first, pageSize, sortField, sortOrder);
             }
 
             @Override

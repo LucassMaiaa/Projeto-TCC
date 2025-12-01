@@ -52,8 +52,18 @@ public class RelatorioFaturamentoController implements Serializable {
             @Override
             public List<FaturamentoMensal> load(int first, int pageSize, Map<String, SortMeta> sortBy,
                     Map<String, FilterMeta> filterBy) {
+                
+                String sortField = "data";
+                String sortOrder = "DESC";
+                
+                if (sortBy != null && !sortBy.isEmpty()) {
+                    SortMeta sortMeta = sortBy.values().iterator().next();
+                    sortField = sortMeta.getField();
+                    sortOrder = sortMeta.getOrder().isAscending() ? "ASC" : "DESC";
+                }
+                
                 return faturamentoDAO.buscarFaturamentoPaginado(
-                    dataInicial, dataFinal, servicoFiltro, first, pageSize);
+                    dataInicial, dataFinal, servicoFiltro, first, pageSize, sortField, sortOrder);
             }
 
             @Override

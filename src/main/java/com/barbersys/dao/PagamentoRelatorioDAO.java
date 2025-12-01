@@ -18,7 +18,9 @@ public class PagamentoRelatorioDAO {
             Long formaPagamentoId,
             String statusPagamento,
             int first, 
-            int pageSize) {
+            int pageSize,
+            String sortField,
+            String sortOrder) {
         
         List<PagamentoRelatorio> pagamentos = new ArrayList<>();
         
@@ -59,7 +61,21 @@ public class PagamentoRelatorioDAO {
         }
         
         sql.append("GROUP BY a.age_codigo, c.cli_nome, a.age_nome_cliente, p.pag_nome, a.age_data, a.age_pago ");
-        sql.append("ORDER BY a.age_data DESC ");
+        
+        // Mapeamento de campos para ordenação
+        String colunaBanco = "a.age_data";
+        if ("nomeCliente".equals(sortField)) colunaBanco = "nome_cliente";
+        else if ("formaPagamento".equals(sortField)) colunaBanco = "forma_pagamento";
+        else if ("valor".equals(sortField)) colunaBanco = "valor_total";
+        else if ("data".equals(sortField)) colunaBanco = "a.age_data";
+        else if ("statusPagamento".equals(sortField)) colunaBanco = "a.age_pago";
+        
+        String ordem = "DESC";
+        if ("1".equals(sortOrder) || "ASC".equalsIgnoreCase(sortOrder)) {
+            ordem = "ASC";
+        }
+        
+        sql.append("ORDER BY ").append(colunaBanco).append(" ").append(ordem).append(" ");
         sql.append("LIMIT ? OFFSET ?");
         
         try (Connection conn = DatabaseConnection.getConnection();

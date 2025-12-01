@@ -458,5 +458,139 @@ public class FuncionarioDAO {
 			return false;
 		}
 	}
+	
+	/**
+	 * Verifica se já existe um funcionário com o CPF/CNPJ informado
+	 * @param cpfCnpj CPF ou CNPJ a ser verificado (com ou sem formatação)
+	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
+	 * @return true se o CPF/CNPJ já existe em outro funcionário
+	 */
+	public static boolean existeCpfCnpj(String cpfCnpj, Long funcionarioIdAtual) {
+		if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) {
+			return false;
+		}
+		
+		// Remove formatação
+		cpfCnpj = cpfCnpj.replaceAll("[^0-9]", "");
+		
+		String sql;
+		if (funcionarioIdAtual == null) {
+			sql = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf_cnpj = ? AND fun_ativo = 'S'";
+		} else {
+			sql = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf_cnpj = ? AND fun_codigo != ? AND fun_ativo = 'S'";
+		}
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, cpfCnpj);
+			if (funcionarioIdAtual != null) {
+				ps.setLong(2, funcionarioIdAtual);
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Verifica se já existe um CPF/CNPJ cadastrado em FUNCIONÁRIOS ou CLIENTES
+	 * @param cpfCnpj CPF ou CNPJ a ser verificado
+	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
+	 * @return true se o CPF/CNPJ já existe no sistema
+	 */
+	public static boolean existeCpfCnpjNoSistema(String cpfCnpj, Long funcionarioIdAtual) {
+		if (cpfCnpj == null || cpfCnpj.trim().isEmpty()) {
+			return false;
+		}
+		
+		// Remove formatação
+		cpfCnpj = cpfCnpj.replaceAll("[^0-9]", "");
+		
+		try (Connection conn = DatabaseConnection.getConnection()) {
+			
+			// Verifica na tabela FUNCIONARIO
+			String sqlFuncionario;
+			if (funcionarioIdAtual == null) {
+				sqlFuncionario = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf = ? AND fun_status = 'A'";
+			} else {
+				sqlFuncionario = "SELECT COUNT(*) FROM funcionario WHERE fun_cpf = ? AND fun_codigo != ? AND fun_status = 'A'";
+			}
+			
+			try (PreparedStatement ps = conn.prepareStatement(sqlFuncionario)) {
+				ps.setString(1, cpfCnpj);
+				if (funcionarioIdAtual != null) {
+					ps.setLong(2, funcionarioIdAtual);
+				}
+				
+				ResultSet rs = ps.executeQuery();
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+			
+			// Verifica na tabela CLIENTE
+			String sqlCliente = "SELECT COUNT(*) FROM cliente WHERE cli_cpf = ? AND cli_status = 'A'";
+			try (PreparedStatement ps = conn.prepareStatement(sqlCliente)) {
+				ps.setString(1, cpfCnpj);
+				
+				ResultSet rs = ps.executeQuery();
+				if (rs.next() && rs.getInt(1) > 0) {
+					return true;
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * Verifica se já existe um funcionário com o Email informado (no usuario)
+	 * @param email Email a ser verificado
+	 * @param funcionarioIdAtual ID do funcionário atual (para edição) ou null (para novo cadastro)
+	 * @return true se o email já existe em outro funcionário
+	 */
+	public static boolean existeEmail(String email, Long funcionarioIdAtual) {
+		if (email == null || email.trim().isEmpty()) {
+			return false;
+		}
+		
+		String sql;
+		if (funcionarioIdAtual == null) {
+			sql = "SELECT COUNT(*) FROM funcionario f " +
+				  "INNER JOIN usuario u ON f.usu_codigo = u.usu_codigo " +
+				  "WHERE LOWER(u.usu_login) = LOWER(?) AND f.fun_ativo = 'S'";
+		} else {
+			sql = "SELECT COUNT(*) FROM funcionario f " +
+				  "INNER JOIN usuario u ON f.usu_codigo = u.usu_codigo " +
+				  "WHERE LOWER(u.usu_login) = LOWER(?) AND f.fun_codigo != ? AND f.fun_ativo = 'S'";
+		}
+		
+		try (Connection conn = DatabaseConnection.getConnection();
+			 PreparedStatement ps = conn.prepareStatement(sql)) {
+			
+			ps.setString(1, email.trim().toLowerCase());
+			if (funcionarioIdAtual != null) {
+				ps.setLong(2, funcionarioIdAtual);
+			}
+			
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 }

@@ -381,7 +381,10 @@ public class AgendamentoClienteController implements Serializable {
 
     public void cancelarMeuAgendamento(Long agendamentoId) {
         try {
-            // Busca o agendamento completo antes de cancelar para obter os dados
+            System.out.println("=== CANCELAMENTO DE AGENDAMENTO (CLIENTE) ===");
+            System.out.println("Agendamento ID: " + agendamentoId);
+            
+            // Busca o agendamento completo antes de cancelar
             Agendamento agendamentoCancelado = null;
             for (Agendamento ag : meusAgendamentos) {
                 if (ag.getId().equals(agendamentoId)) {
@@ -390,41 +393,112 @@ public class AgendamentoClienteController implements Serializable {
                 }
             }
 
-            // Cancela o agendamento no banco
-            AgendamentoDAO.cancelarAgendamento(agendamentoId);
-
-            // Cria notificação de cancelamento para os funcionários
-            if (agendamentoCancelado != null) {
-                String nomeCliente = agendamentoCancelado.getCliente() != null 
-                    ? agendamentoCancelado.getCliente().getNome() 
-                    : agendamentoCancelado.getNomeClienteAvulso();
-                
-                String nomeFuncionario = agendamentoCancelado.getFuncionario() != null 
-                    ? agendamentoCancelado.getFuncionario().getNome() 
-                    : "Funcionário";
-
-                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-                String horaFormatada = agendamentoCancelado.getHoraSelecionada().format(timeFormatter);
-
-                String mensagem = "Agendamento CANCELADO: " + nomeCliente + " às " + horaFormatada 
-                    + " com " + nomeFuncionario;
-
-                com.barbersys.model.Notificacao notificacao = new com.barbersys.model.Notificacao();
-                notificacao.setMensagem(mensagem);
-                notificacao.setDataEnvio(new java.util.Date());
-                notificacao.setAgendamento(agendamentoCancelado);
-                notificacao.setCliente(null); // NULL = notificação para funcionários/admins
-
-                com.barbersys.dao.NotificacaoDAO notificacaoDAO = new com.barbersys.dao.NotificacaoDAO();
-                notificacaoDAO.salvar(notificacao);
+            if (agendamentoCancelado == null) {
+                exibirAlerta("error", "Agendamento não encontrado!");
+                return;
             }
 
-            popularMeusAgendamentos(); // Refresh the list
-            exibirAlerta("success", "Agendamento cancelado com sucesso!");
-            // A atualização da lista é feita pelo update= do p:commandButton no XHTML
+            // Verifica se o agendamento foi pago
+            boolean agendamentoPago = "S".equals(agendamentoCancelado.getPago());
+            System.out.println("Agendamento Pago: " + (agendamentoPago ? "SIM" : "NÃO"));
+
+            if (agendamentoPago) {
+                // CASO 1: Agendamento já foi pago → ESTORNAR
+                System.out.println("🔄 Iniciando processo de ESTORNO...");
+                
+                // Verifica se o pagamento integra com o caixa
+                boolean registrarNoCaixa = false;
+                if (agendamentoCancelado.getPagamento() != null && agendamentoCancelado.getPagamento().getIntegraCaixa()) {
+                    registrarNoCaixa = true;
+                    System.out.println("✅ Pagamento integra com caixa - será registrado estorno");
+                }
+
+                if (registrarNoCaixa) {
+                    // Verifica se o caixa está aberto
+                    Date dataAtual = Date.from(java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+                    List<com.barbersys.model.CaixaData> checkData = com.barbersys.dao.CaixaDataDAO.verificaExisteData(dataAtual);
+
+                    if (checkData.isEmpty() || "I".equals(checkData.get(0).getStatus())) {
+                        System.out.println("❌ Caixa fechado - não é possível estornar agora");
+                        exibirAlerta("error", "O caixa do dia precisa estar aberto para cancelar um agendamento pago. Entre em contato com a barbearia.");
+                        return;
+                    }
+
+                    // Registra estorno no caixa
+                    com.barbersys.model.CaixaData caixaDataModel = checkData.get(0);
+                    String horaAtualFormatada = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
+                    
+                    // Calcula valor total dos serviços
+                    double totalGastoServicos = 0.0;
+                    if (agendamentoCancelado.getServicos() != null) {
+                        for (Servicos servico : agendamentoCancelado.getServicos()) {
+                            totalGastoServicos += servico.getPreco();
+                        }
+                    }
+                    System.out.println("💰 Valor do estorno: R$ " + totalGastoServicos);
+
+                    // Cria movimentação de estorno no caixa
+                    com.barbersys.model.ControleCaixa estornoCaixa = new com.barbersys.model.ControleCaixa();
+                    estornoCaixa.setCaixaData(caixaDataModel);
+                    estornoCaixa.setHoraAtual(horaAtualFormatada);
+                    estornoCaixa.setData(dataAtual);
+                    estornoCaixa.setMovimentacao("Saída de estorno");
+                    estornoCaixa.setValor(-totalGastoServicos);
+                    com.barbersys.dao.ControleCaixaDAO.salvar(estornoCaixa);
+                    System.out.println("✅ Estorno registrado no caixa");
+                }
+
+                // Atualiza agendamento para ESTORNADO
+                AgendamentoDAO.cancelarAgendamento(agendamentoId);
+                AgendamentoDAO.atualizarInformacoesPagamento(
+                    agendamentoId, 
+                    "E",  // E = Estornado
+                    agendamentoCancelado.getPagamento() != null ? agendamentoCancelado.getPagamento().getId() : null
+                );
+                System.out.println("✅ Agendamento marcado como ESTORNADO");
+                
+                exibirAlerta("success", "Agendamento cancelado e valor estornado com sucesso!");
+
+            } else {
+                // CASO 2: Agendamento NÃO foi pago → Cancelamento normal
+                System.out.println("✅ Cancelamento normal (sem pagamento)");
+                AgendamentoDAO.cancelarAgendamento(agendamentoId);
+                exibirAlerta("success", "Agendamento cancelado com sucesso!");
+            }
+
+            // Cria notificação de cancelamento para funcionários/admin
+            String nomeCliente = agendamentoCancelado.getCliente() != null 
+                ? agendamentoCancelado.getCliente().getNome() 
+                : agendamentoCancelado.getNomeClienteAvulso();
+            
+            String nomeFuncionario = agendamentoCancelado.getFuncionario() != null 
+                ? agendamentoCancelado.getFuncionario().getNome() 
+                : "Funcionário";
+
+            java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+            String horaFormatada = agendamentoCancelado.getHoraSelecionada().format(timeFormatter);
+
+            String tipoMensagem = agendamentoPago ? "CANCELADO (ESTORNADO)" : "CANCELADO";
+            String mensagem = "Agendamento " + tipoMensagem + ": " + nomeCliente + " às " + horaFormatada 
+                + " com " + nomeFuncionario;
+
+            com.barbersys.model.Notificacao notificacao = new com.barbersys.model.Notificacao();
+            notificacao.setMensagem(mensagem);
+            notificacao.setDataEnvio(new java.util.Date());
+            notificacao.setAgendamento(agendamentoCancelado);
+            notificacao.setCliente(null); // NULL = notificação para funcionários/admins
+
+            com.barbersys.dao.NotificacaoDAO notificacaoDAO = new com.barbersys.dao.NotificacaoDAO();
+            notificacaoDAO.salvar(notificacao);
+            System.out.println("✅ Notificação enviada para admin/funcionários");
+
+            popularMeusAgendamentos(); // Atualiza a lista
+            System.out.println("=== CANCELAMENTO CONCLUÍDO ===");
+
         } catch (Exception e) {
-            exibirAlerta("error", "Não foi possível cancelar o agendamento.");
+            System.out.println("❌ ERRO ao cancelar agendamento: " + e.getMessage());
             e.printStackTrace();
+            exibirAlerta("error", "Não foi possível cancelar o agendamento. Entre em contato com a barbearia.");
         }
     }
 

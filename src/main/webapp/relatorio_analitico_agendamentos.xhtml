@@ -396,25 +396,25 @@ body .ui-datatable .ui-datatable-even>td {
 					<h:outputText value="#{relatorioAnaliticoAgendamentosController.lstAgendamentos.rowIndex + status.index + 1}" />
 				</p:column>
 
-				<p:column headerText="Cliente">
+				<p:column headerText="Cliente" sortBy="#{agendamento.cliente.nome != null ? agendamento.cliente.nome : agendamento.nomeClienteAvulso}">
 					<h:outputText value="#{agendamento.cliente.nome != null ? agendamento.cliente.nome : agendamento.nomeClienteAvulso}" />
 				</p:column>
 
-				<p:column headerText="Funcionário">
+				<p:column headerText="Funcionário" sortBy="#{agendamento.funcionario.nome}">
 					<h:outputText value="#{agendamento.funcionario.nome}" />
 				</p:column>
 
-				<p:column headerText="Data" style="text-align: center;">
+				<p:column headerText="Data" style="text-align: center;" sortBy="#{agendamento.dataCriado}">
 					<h:outputText value="#{agendamento.dataCriado}">
 						<f:convertDateTime pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
 
-				<p:column headerText="Hora" style="text-align: center;">
+				<p:column headerText="Hora" style="text-align: center;" sortBy="#{agendamento.horaSelecionada}">
 					<h:outputText value="#{agendamento.horaSelecionada}" />
 				</p:column>
 
-				<p:column headerText="Status" style="text-align: center;">
+				<p:column headerText="Status" style="text-align: center;" sortBy="#{agendamento.status}">
 					<span class="#{relatorioAnaliticoAgendamentosController.getStatusClass(agendamento.status)}">
 						<h:outputText value="#{relatorioAnaliticoAgendamentosController.getStatusDescricao(agendamento.status)}" />
 					</span>

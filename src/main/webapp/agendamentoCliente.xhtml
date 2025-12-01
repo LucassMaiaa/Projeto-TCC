@@ -895,7 +895,7 @@
 								<p:outputPanel id="barberSelectorWrapper">
 									<div class="input-combined">
 										<p:outputLabel styleClass="title-input"
-											value="Nome do funcionário" />
+											value="Nome do funcionário *" />
 										<p:selectOneMenu id="barberSelector"
 											value="#{agendamentoClienteController.funcionarioId}"
 											required="true"
@@ -936,7 +936,7 @@
 							<p:outputPanel id="datePickerWrapper" style="margin-bottom: 20px;">
 								<div class="input-combined">
 									<p:outputLabel styleClass="title-input"
-										value="Data do Agendamento" />
+										value="Data do Agendamento *" />
 									<p:datePicker id="datePicker" widgetVar="wvDatePicker"
 										value="#{agendamentoClienteController.dataSelecionada}"
 										showIcon="true" pattern="dd/MM/yyyy"
@@ -1080,7 +1080,7 @@
 								<p:outputPanel id="horarioWrapper" styleClass="total-update">
 									<div class="input-combined">
 										<p:outputLabel styleClass="title-input"
-											value="Selecione o Horário" />
+											value="Selecione o Horário *" />
 										<p:selectOneMenu id="horarioSelector"
 											value="#{agendamentoClienteController.horaSelecionada}"
 											required="true"

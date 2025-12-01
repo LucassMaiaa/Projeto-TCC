@@ -123,7 +123,8 @@ public class AgendamentoController implements Serializable {
 			private static final long serialVersionUID = 1L;
 			@Override
 			public List<Agendamento> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filterBy) {
-				                List<Agendamento> agendamentos = AgendamentoDAO.buscarAgendamentos(nomeClienteFiltro, nomeFuncionarioFiltro, statusSelecionado, dataFiltro, first, pageSize); 				this.setRowCount(count(filterBy));
+				List<Agendamento> agendamentos = AgendamentoDAO.buscarAgendamentos(nomeClienteFiltro, nomeFuncionarioFiltro, statusSelecionado, dataFiltro, first, pageSize);
+				this.setRowCount(count(filterBy));
 				return agendamentos;
 			}
 			@Override
@@ -560,6 +561,9 @@ public class AgendamentoController implements Serializable {
 
 	    calculaValorServicos();
 	    
+	    // Muda o filtro automaticamente para o dia agendado
+	    dataFiltro = dataSelecionada;
+	    
 		exibirAlerta("success", "Agendamento cadastrado com sucesso!");
 		PrimeFaces.current().executeScript("PF('dlgAgendar').hide();");
 		PrimeFaces.current().ajax().update("form");
@@ -673,15 +677,36 @@ public class AgendamentoController implements Serializable {
 		agendamentoModel.setObservacoes(this.observacoes); // Copia observacoes do controller
 		AgendamentoDAO.atualizar(agendamentoModel, servicosSelecionadosIds);
 
-		// Atualiza a lista de serviços no modelo para refletir na tela
-		List<Servicos> servicosAtualizados = new ArrayList<>();
-		for (Long servicoId : servicosSelecionadosIds) {
-			servicosAtualizados.add(ServicosDAO.buscarPorId(servicoId));
+		// Recarrega o agendamento completo do banco para refletir todas as mudanças
+		Agendamento agendamentoRecarregado = AgendamentoDAO.buscarPorId(agendamentoModel.getId());
+		
+		// Verifica se conseguiu recarregar
+		if (agendamentoRecarregado != null) {
+			agendamentoModel = agendamentoRecarregado;
+			
+			// Atualiza o clienteModel também
+			if (agendamentoModel.getCliente() != null) {
+				clienteModel = agendamentoModel.getCliente();
+			} else {
+				clienteModel = new Cliente();
+			}
+			
+			calculaValorServicos();
+		} else {
+			// Se não conseguiu recarregar, atualiza manualmente
+			List<Servicos> servicosAtualizados = new ArrayList<>();
+			for (Long servicoId : servicosSelecionadosIds) {
+				servicosAtualizados.add(ServicosDAO.buscarPorId(servicoId));
+			}
+			agendamentoModel.setServicos(servicosAtualizados);
+			calculaValorServicos();
 		}
-		agendamentoModel.setServicos(servicosAtualizados);
-		calculaValorServicos();
+
+		// Muda o filtro automaticamente para o dia agendado
+		dataFiltro = dataSelecionada;
 
 		exibirAlerta("success", "Agendamento atualizado com sucesso!");
+		PrimeFaces.current().ajax().update("form:sidebarWrapper");
 		PrimeFaces.current().executeScript("PF('dlgAgendar').hide();");
 	}
 
